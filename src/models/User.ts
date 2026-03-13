@@ -1,0 +1,35 @@
+import mongoose from "mongoose";
+
+const userSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: [true, "Please provide a name"],
+        },
+        email: {
+            type: String,
+            required: [true, "Please provide an email"],
+            unique: true,
+            lowercase: true,
+        },
+        contact: {
+            type: String,
+            required: [true, "Please provide a contact number"],
+        },
+        password: {
+            type: String,
+            required: [true, "Please provide a password"],
+            select: false, // Don't return password by default
+        },
+        role: {
+            type: String,
+            enum: ["student", "teacher", "admin"],
+            default: "student",
+        },
+    },
+    { timestamps: true }
+);
+
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+
+export default User;
