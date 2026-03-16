@@ -247,8 +247,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Icon } from "@iconify/react";
-import { coursesData } from "@/data/coursesData";
-import { Toaster } from 'react-hot-toast';
+import { useGetCourseByIdQuery } from "@/redux/api/courseApi";
+import toast, { Toaster } from 'react-hot-toast';
 
 // import VideoPlayer from '@/components/SharedComponent/Course/VideoPlayer';
 import { getImgPath } from '@/utils/image';
@@ -277,8 +277,9 @@ interface Instructor {
   experience?: string;
   rating?: number;
   reviewsCount?: string;
-  bio: string;
-  image: string;
+  bio?: string;
+  avatar?: string;
+  image?: string;
 }
 
 interface CourseType {
@@ -307,66 +308,119 @@ interface CourseType {
   videoUrl: string;
 }
 
+const COUNTRY_CODES = [
+  { code: '+91', country: '🇮🇳', name: 'India' },
+  { code: '+1', country: '🇺🇸', name: 'USA/Canada' },
+  { code: '+44', country: '🇬🇧', name: 'UK' },
+  { code: '+61', country: '🇦🇺', name: 'Australia' },
+  { code: '+971', country: '🇦🇪', name: 'UAE' },
+];
+
 const CourseDetails = ({ slug }: { slug: string }) => {
-  const [course, setCourse] = useState<CourseType | null>(null);
+  const { data: courseData, isLoading } = useGetCourseByIdQuery(slug);
+  const course = courseData as any;
   const [activeAccordion, setActiveAccordion] = useState<number | null>(0);
   const router = useRouter();
+  const downloadPDF = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = "course-syllabus.pdf";
+
+      document.body.appendChild(link);
+      link.click();
+
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+
+    } catch (error) {
+      toast.error("Failed to download syllabus");
+    }
+  };
+
+  // Syllabus Modal State
+  const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: '', email: '', phone: '', countryCode: '+91' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [agreeTnc, setAgreeTnc] = useState(false);
 
   // Helper: check if user is authenticated via the custom cookie-based auth
   const isAuthenticated = () => {
-    return document.cookie.split(";").some((c) => c.trim().startsWith("token="));
+    return typeof document !== "undefined" && document.cookie.split(";").some((c) => c.trim().startsWith("token="));
   };
 
-  const triggerDownload = (filePath: string) => {
-    const link = document.createElement("a");
-    link.href = filePath;
-    link.download = filePath.split("/").pop() || "syllabus.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleDownloadSyllabus = (fileName: string) => {
-    if (isAuthenticated()) {
-      // User is signed in — trigger the download directly
-      triggerDownload(`/syllabus/${fileName}`);
-    } else {
-      // Not signed in — save syllabus path and redirect to signup with returnUrl
-      const currentUrl = window.location.href;
-      sessionStorage.setItem("pendingSyllabusDownload", `/syllabus/${fileName}`);
-      router.push(`/signin?returnUrl=${encodeURIComponent(currentUrl)}`);
+  // Trigger modal or direct download based on authentication
+  const handleDownloadSyllabusClick = () => {
+    if (!course.syllabusPdf) {
+      toast.error("Syllabus PDF is not available for this course.");
+      return;
     }
-  };
-
-  useEffect(() => {
-    if (slug) {
-      const foundCourse = coursesData.find((c) => c.slug === slug);
-      setCourse(foundCourse || (null as any));
-    }
-  }, [slug]);
-
-  // After redirect back from signin, auto-download the pending syllabus once cookie appears
-  useEffect(() => {
-    const pendingDownload = sessionStorage.getItem("pendingSyllabusDownload");
-    if (!pendingDownload) return;
 
     if (isAuthenticated()) {
-      // Already authenticated on mount — download immediately
-      sessionStorage.removeItem("pendingSyllabusDownload");
-      triggerDownload(pendingDownload);
+      downloadPDF(course.syllabusPdf);
+
     } else {
-      // Poll until cookie appears (signin sets cookie via document.cookie)
-      const interval = setInterval(() => {
-        if (isAuthenticated()) {
-          clearInterval(interval);
-          sessionStorage.removeItem("pendingSyllabusDownload");
-          triggerDownload(pendingDownload);
-        }
-      }, 500);
-      return () => clearInterval(interval);
+      setIsSyllabusModalOpen(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
+
+  const handleSyllabusSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agreeTnc) {
+      toast.error("Please agree to our Privacy Policy");
+      return;
+    }
+
+    const getCleanPhone = formData.phone.trim().replace(/\D/g, "");
+    if (getCleanPhone.length !== 10) {
+      toast.error("Phone number must be exactly 10 digits");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: getCleanPhone, // just the 10 digit number to pass backend validation
+          course: course.name,
+          country: formData.countryCode, // Store country code here if available or just append to message
+          message: `[${formData.countryCode}] Requested syllabus download for ${course.name}`,
+          type: "Inquiry Form",
+          source: "Website - Syllabus Download",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit inquiry");
+      }
+
+      toast.success("Details verified! Syllabus download starting...");
+      const pdfUrl = course.syllabusPdf.replace("/upload/", "/upload/fl_attachment/");
+      downloadPDF(pdfUrl);
+      console.log("PDF URL:", course.syllabusPdf);
+      setIsSyllabusModalOpen(false);
+      setFormData({ name: '', email: '', phone: '', countryCode: '+91' });
+      setAgreeTnc(false);
+
+      // Open the syllabus in a new tab to initiate download
+
+
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const toggleAccordion = (index: number) => {
     setActiveAccordion(activeAccordion === index ? null : index);
@@ -381,47 +435,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
     );
   }
 
-  const syllabusMap: Record<string, string> = {
-    "data-science": "1 Data Science.pdf",
-    "salesforce-development": "2 Salesforce Development.pdf",
-    "project-manager": "10 Project Manager (Project Planning).pdf",
-    "ethical-hacking": "11 Ethical Hacking.pdf",
-    "software-testing": "12 Software Testing.pdf",
-    "ui-ux": "13 UI UX.pdf",
-    "api-automation-testing": "14 API Automation Testing.pdf",
-    "chatgpt-for-scrum-masters": "15 ChatGPT for Scrum Masters (AI in Agile & Scrum Practices).pdf",
-    "game-development": "16 Game Development (2D,3D,Game Engines).pdf",
-    "machine-learning": "17 Machine Learning.pdf",
-    "artificial-intelligence": "18 Artificial Intelligence.pdf",
-    "digital-marketing": "19 Digital Marketing (SEO, Social Media).pdf",
-    "network-security": "20 Network Security.pdf",
 
-    "back-end-development": "Back-End Development.pdf",
-    "language-syllabus": "Language Syllabus.pdf",
-    "c-language": "C Language Syllabus.pdf",
-    "cpp-language": "C++ Language Syllabus.pdf",
-    "cloud-computing": "Cloud Computing (AWS Azure).pdf",
-    "data-architecture": "Data Architecture (Data Modeling).pdf",
-    "flutter-development": "Flutter Development.pdf",
-    "front-end-development": "Front-End Development.pdf",
-    "full-stack-web-development": "Full Stack Web Development.pdf",
-    "ios-development": "iOS Development (Swift & Apple).pdf",
-    "java-full-stack": "Java Full Stack Development (Core + Advanced).pdf",
-    "java-programming": "Java Programming (Core Java & OOP).pdf",
-    "kotlin-development": "Kotlin Development.pdf",
-    "mern-stack": "MERN Stack Development.pdf",
-    "mobile-app-development": "Mobile App Development (Android).pdf",
-    "dotnet-development": "NET Development (C#, ASP.NET).pdf",
-    "power-bi": "Power BI.pdf",
-    "python-full-stack": "Python Full Stack Development.pdf",
-    "python-programming": "Python Programming (Core Python).pdf",
-    "react-development": "React Development.pdf",
-    "react-native": "React Native Development.pdf",
-    "rust-programming": "Rust Programming Language.pdf",
-    "sql-data-science": "SQL for Data Science.pdf",
-    "tableau": "Tableau (Data Visualization & Dashboards).pdf",
-    "wordpress-development": "WordPress Development.pdf"
-  };
 
 
   return (
@@ -452,7 +466,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
               {course.name}
             </h1>
             <p className="text-sm md:text-base text-blue-50 mb-5 max-w-lg opacity-90 leading-relaxed">
-              {course.description}
+              {course.shortDescription}
             </p>
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg backdrop-blur-sm border border-white/10">
@@ -467,10 +481,10 @@ const CourseDetails = ({ slug }: { slug: string }) => {
               <div className="absolute inset-0 bg-blue-400 blur-3xl opacity-20 group-hover:opacity-30 transition-opacity rounded-full"></div>
               <div className="relative h-full rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10 bg-black">
                 <video
-                  src={getImgPath("/images/course/WhatsApp Video 2026-02-07 at 1.46.56 PM.mp4")}
+                  src={course.introVideo || getImgPath("/images/course/WhatsApp Video 2026-02-07 at 1.46.56 PM.mp4")}
                   controls
                   className="w-full h-full object-cover"
-                  poster={course.detailsImage || course.image}
+                  poster={course.thumbnail || course.detailsImage || course.image}
                 >
                   Your browser does not support the video tag.
                 </video>
@@ -489,7 +503,8 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             </div>
             <div>
               <p className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Duration</p>
-              <p className="text-xs md:text-sm font-bold dark:text-white">{course.duration || '8 Weeks'}</p>
+              <p className="text-xs md:text-sm font-bold dark:text-white">
+                {/* {course.duration ? `${course.duration} Days` : '8 Weeks'}  */} 6 Months</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -498,7 +513,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             </div>
             <div>
               <p className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Skill Level</p>
-              <p className="text-xs md:text-sm font-bold dark:text-white">{course.level || 'Beginner'}</p>
+              <p className="text-xs md:text-sm font-bold dark:text-white">{course.level || course.experience || 'Beginner'}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -507,7 +522,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             </div>
             <div>
               <p className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Learning Mode</p>
-              <p className="text-xs md:text-sm font-bold dark:text-white">{course.mode || 'Self-Paced'}</p>
+              <p className="text-xs md:text-sm font-bold dark:text-white">{course.mode || 'Professional'}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -541,9 +556,10 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             <section className="space-y-3">
               <h2 className="text-xl font-bold text-[#2B4278] dark:text-white">Course Overview</h2>
               <div className="prose prose-blue dark:prose-invert max-w-none">
-                <p className="text-base leading-relaxed text-gray-600 dark:text-gray-400 text-justify">
-                  {course.overview}
-                </p>
+                <div
+                  className="text-base leading-relaxed text-gray-600 dark:text-gray-400 text-justify"
+                  dangerouslySetInnerHTML={{ __html: course.overview || course.shortDescription || course.description }}
+                />
               </div>
             </section>
 
@@ -551,7 +567,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             <section className="space-y-4 -mt-24">
               <h2 className="text-xl font-bold text-[#2B4278] dark:text-white">Course Curriculum</h2>
               <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
-                {course.curriculum.map((item, index) => (
+                {(course.curriculum || (course.syllabus || [])).map((item: any, index: number) => (
                   <div key={index} className={`group bg-white dark:bg-gray-900 border ${activeAccordion === index ? 'border-[#01A0E2] ring-1 ring-[#01A0E2]/20' : 'border-gray-100 dark:border-gray-800'} rounded-xl overflow-hidden transition-all duration-300 shadow-sm`}>
                     <div
                       className="p-3 md:p-4 flex items-center justify-between cursor-pointer"
@@ -563,9 +579,9 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                         </div>
                         <div>
                           <p className="text-[9px] uppercase font-bold tracking-widest text-[#01A0E2] mb-0.5">Module {index + 1}</p>
-                          <h3 className={`text-sm font-bold dark:text-white ${activeAccordion === index ? 'text-[#01A0E2]' : 'group-hover:text-[#2B4278]'} transition-colors`}>{item.title}</h3>
+                          <h3 className={`text-sm font-bold dark:text-white ${activeAccordion === index ? 'text-[#01A0E2]' : 'group-hover:text-[#2B4278]'} transition-colors`}>{item.title || item.name}</h3>
                           {activeAccordion !== index && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{item.topics}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{item.topics || item.description}</p>
                           )}
                         </div>
                       </div>
@@ -579,7 +595,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                     <div className={`transition-all duration-300 ease-in-out ${activeAccordion === index ? 'max-h-[500px] opacity-100 border-t border-gray-100 dark:border-gray-800' : 'max-h-0 opacity-0 overflow-hidden'}`}>
                       <div className="p-3 md:p-5 bg-[#01A0E2]/5 dark:bg-[#01A0E2]/10">
                         <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                          {item.topics}
+                          {item.topics || item.description}
                         </p>
                       </div>
                     </div>
@@ -589,7 +605,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             </section>
 
             {/* What You'll Learn */}
-            {course.whatYouLearn && course.whatYouLearn.length > 0 && (
+            {(course.whatYouLearn || course.benefits) && (
               <section className="p-2 md:p-4 lg:p-6">
                 <div className="relative z-10">
                   <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#2B4278] dark:text-white flex items-center gap-4 -mt-10">
@@ -603,13 +619,13 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                   </h2>
 
                   <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
-                    {course.whatYouLearn.map((item, idx) => (
+                    {(course.whatYouLearn || course.benefits || []).map((item: any, idx: number) => (
                       <div key={idx} className="flex items-start gap-4 group/item">
                         <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-green-50 dark:bg-green-900/20 shadow-sm border border-green-100 dark:border-green-900/30 flex items-center justify-center group-hover/item:bg-[#01A0E2]/10 group-hover/item:border-[#01A0E2]/20 transition-all transform group-hover/item:scale-110">
                           <Icon icon="solar:check-circle-bold-duotone" className="text-green-600 dark:text-green-400 w-5 h-5 group-hover/item:text-[#01A0E2]" />
                         </div>
                         <div className="space-y-1">
-                          <p className="text-[15px] md:text-sm text-gray-700 dark:text-gray-300 font-semibold leading-snug group-hover/item:text-[#2B4278] dark:group-hover/item:text-white transition-colors">{item}</p>
+                          <p className="text-[15px] md:text-sm text-gray-700 dark:text-gray-300 font-semibold leading-snug group-hover/item:text-[#2B4278] dark:group-hover/item:text-white transition-colors">{typeof item === 'string' ? item : item.title || item.name}</p>
                           <div className="w-0 group-hover/item:w-full h-0.5 bg-gradient-to-r from-[#01A0E2] to-transparent transition-all duration-500 opacity-50" />
                         </div>
                       </div>
@@ -772,7 +788,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                     </h3>
                     <div className="flex items-center gap-4">
                       <div className="relative w-16 h-16 rounded-xl overflow-hidden shadow-md ring-2 ring-white dark:ring-gray-800 shrink-0">
-                        <Image src={course.instructor.image} alt={course.instructor.name} fill className="object-cover" unoptimized />
+                        <Image src={course.instructor.avatar || course.instructor.image || "/images/avatar-placeholder.png"} alt={course.instructor.name || "Instructor"} fill className="object-cover" unoptimized />
                       </div>
                       <div>
                         <h4 className="text-sm font-extrabold dark:text-white">{course.instructor.name}</h4>
@@ -789,16 +805,16 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                         <span className="text-[10px] font-bold dark:text-gray-300">{course.instructor.experience} Exp.</span>
                       </div>
                       <p className="text-[11px] text-gray-600 dark:text-gray-400 leading-relaxed italic line-clamp-3">
-                        "{course.instructor.bio}"
+                        "Expert instructor with hands-on experience, focused on delivering clear and practical knowledge."
                       </p>
                     </div>
                     <div className="pt-3 border-t border-gray-100 dark:border-gray-800 flex justify-between">
                       <div className="text-left">
-                        <p className="text-sm font-black text-blue-600">5k+</p>
+                        <p className="text-sm font-black text-blue-600">320+</p>
                         <p className="text-[8px] uppercase font-bold tracking-widest text-gray-400">Students</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-black text-blue-600">{course.instructor.reviewsCount}+</p>
+                        <p className="text-sm font-black text-blue-600">45+</p>
                         <p className="text-[8px] uppercase font-bold tracking-widest text-gray-400">Reviews</p>
                       </div>
                     </div>
@@ -830,9 +846,9 @@ const CourseDetails = ({ slug }: { slug: string }) => {
               >
                 Enroll Today
               </button>
-              {syllabusMap[slug] ? (
+              {course.syllabusPdf ? (
                 <button
-                  onClick={() => handleDownloadSyllabus(syllabusMap[slug])}
+                  onClick={handleDownloadSyllabusClick}
                   className="px-6 py-3 bg-transparent border-2 border-white/20 text-white font-bold rounded-xl hover:bg-white/5 transition-all w-full sm:w-auto text-sm md:text-base text-center flex items-center justify-center gap-2"
                 >
                   <Icon icon="solar:file-download-bold" width="18" />
@@ -848,6 +864,113 @@ const CourseDetails = ({ slug }: { slug: string }) => {
           </div>
         </div>
       </section>
+
+      {/* Syllabus Download Modal */}
+      {isSyllabusModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-[500px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="p-6 md:p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white text-center flex-1 ml-6">
+                  Course Syllabus
+                </h3>
+                <button
+                  onClick={() => setIsSyllabusModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1"
+                >
+                  <Icon icon="mdi:close" width="24" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSyllabusSubmit} className="space-y-4">
+                <div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-[#01A0E2]/50 outline-none transition-all placeholder:text-gray-400 font-medium"
+                  />
+                </div>
+
+                <div>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Email Address"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-[#01A0E2]/50 outline-none transition-all placeholder:text-gray-400 font-medium"
+                  />
+                </div>
+
+                <div className="flex w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden focus-within:ring-2 focus-within:ring-[#01A0E2]/50 transition-all">
+                  <div className="relative border-r border-gray-200 dark:border-gray-700 shrink-0">
+                    <select
+                      value={formData.countryCode}
+                      onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
+                      className="appearance-none bg-transparent pl-4 pr-8 py-3 outline-none cursor-pointer text-base w-full h-full font-medium min-w-[70px]"
+                    >
+                      {COUNTRY_CODES.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.country}
+                        </option>
+                      ))}
+                    </select>
+                    <Icon icon="solar:alt-arrow-down-linear" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="16" />
+                  </div>
+                  <div className="shrink-0 flex items-center justify-center px-3 bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 font-semibold border-r border-gray-200 dark:border-gray-700">
+                    {formData.countryCode}
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Mobile Number"
+                    value={formData.phone}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setFormData({ ...formData, phone: val });
+                    }}
+                    maxLength={10}
+                    className="w-full px-4 py-3 bg-transparent outline-none font-medium placeholder:text-gray-400"
+                  />
+                </div>
+
+                <div className="flex items-start gap-3 pt-2">
+                  <div className="flex items-center h-6">
+                    <input
+                      id="agreeTnc"
+                      type="checkbox"
+                      checked={agreeTnc}
+                      onChange={(e) => setAgreeTnc(e.target.checked)}
+                      className="w-5 h-5 rounded border-gray-300 text-[#01A0E2] focus:ring-[#01A0E2] cursor-pointer"
+                    />
+                  </div>
+                  <label htmlFor="agreeTnc" className="text-sm text-gray-700 dark:text-gray-300 leading-snug cursor-pointer">
+                    By providing your contact details, you agree to our{' '}
+                    <span className="text-[#01A0E2] hover:underline">Privacy Policy</span>
+                  </label>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-[#0F9D58] hover:bg-[#0b7a44] text-white font-bold rounded-xl shadow-lg shadow-[#0F9D58]/30 transition-all disabled:opacity-70 flex items-center justify-center gap-2 text-lg active:scale-[0.98]"
+                  >
+                    {isSubmitting ? (
+                      <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      "Download Syllabus"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Toaster position="bottom-right" />
     </div>

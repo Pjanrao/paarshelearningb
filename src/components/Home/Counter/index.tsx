@@ -1,27 +1,19 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import CourseCard from '@/components/SharedComponent/Course/CourseCard'
 import { motion } from 'framer-motion'
 import { useRouter } from "next/navigation";
-
-// Course categories
-const courseData = [
-  { id: 1, name: 'Java Full Stack Development', image: '/images/course/javafull.jpeg', slug: 'java-full-stack', rating: 4.8, description: 'Master both frontend and backend technologies.', duration: '4 Months' },
-  { id: 2, name: 'MERN Stack Development', image: '/images/course/mern.jpeg', slug: 'mern-stack', rating: 4.7, description: 'Build modern apps with MongoDB, Express, React, and Node.', duration: '4 Months' },
-  { id: 4, name: 'Data Science', image: '/images/course/datascience.jpeg', slug: 'data-science-full', rating: 4.6, description: 'Analyze data and derive insights using top tools.', duration: '5 Months' },
-  { id: 5, name: 'Artificial Intelligence', image: '/images/course/Artificial.jpeg', slug: 'ai-essentials', rating: 4.8, description: 'Explore the future with AI and machine learning.', duration: '6 Months' },
-  { id: 6, name: 'Machine Learning', image: '/images/course/ml.jpeg', slug: 'machine-learning-advanced', rating: 4.7, description: 'Build intelligent systems that learn from data.', duration: '4 Months' },
-  { id: 8, name: 'Cloud Computing (AWS)', image: '/images/course/cloud.jpeg', slug: 'cloud-computing', rating: 4.5, description: 'Master the leading cloud services platform.', duration: '3 Months' },
-]
+import { useGetCoursesQuery } from "@/redux/api/courseApi";
 
 interface CounterProps {
   isColorMode: boolean
 }
 
 const Counter: React.FC<CounterProps> = ({ isColorMode }) => {
-  const [activeCategory, setActiveCategory] = useState<number | null>(0)
   const router = useRouter();
+  const { data, isLoading } = useGetCoursesQuery({ limit: 6, sort: "date_desc" });
+  const courses = data?.courses || [];
 
   return (
     <section className={isColorMode ? 'bg-section' : 'bg-white'}>
@@ -74,15 +66,21 @@ const Counter: React.FC<CounterProps> = ({ isColorMode }) => {
             {/* RIGHT SIDE COURSE SLIDER */}
             <div className="lg:w-2/3 flex items-center">
               <div className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory w-full scrollbar-hide">
-                {courseData.map(course => (
-                  <motion.div
-                    key={course.id}
-                    className="snap-start min-w-[280px] max-w-[280px]"
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <CourseCard course={course} />
-                  </motion.div>
-                ))}
+                {isLoading ? (
+                  <div className="flex justify-center items-center w-full min-h-[200px]">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2C4276]"></div>
+                  </div>
+                ) : (
+                  courses.map(course => (
+                    <motion.div
+                      key={course._id}
+                      className="snap-start min-w-[280px] max-w-[280px]"
+                      whileHover={{ scale: 1.05 }}
+                    >
+                      <CourseCard course={course as any} />
+                    </motion.div>
+                  ))
+                )}
               </div>
             </div>
 

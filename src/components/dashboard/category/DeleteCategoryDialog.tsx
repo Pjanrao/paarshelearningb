@@ -37,7 +37,7 @@ export default function DeleteCategoryDialog({
 
   return (
     <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="max-w-md bg-white dark:bg-gray-900">
 
         {/* HEADER */}
         <AlertDialogHeader className="flex flex-col items-center text-center gap-3">

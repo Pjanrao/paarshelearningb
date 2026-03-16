@@ -82,11 +82,17 @@ export const courseApi = api.injectEndpoints({
       invalidatesTags: ["Courses"],
     }),
 
+    getCourseById: builder.query<Course, string>({
+      query: (id) => `/courses/${id}`,
+      providesTags: (result, error, id) => [{ type: "Courses", id }],
+    }),
+
   }),
 });
 
 export const {
   useGetCoursesQuery,
+  useGetCourseByIdQuery,
   useCreateCourseMutation,
   useUpdateCourseMutation,
   useDeleteCourseMutation,

@@ -37,7 +37,7 @@ export default function CourseManagement() {
 
   const { data, isLoading } = useGetCoursesQuery({
     page,
-    limit: 10,
+    limit: 5,
     search,
     category,
     sort,
@@ -137,10 +137,10 @@ export default function CourseManagement() {
         </div></div>
 
       {/* TABLE */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-md overflow-auto max-h-[calc(100vh-250px)]">
         <table className="w-full text-sm">
 
-          <thead className="bg-gray-50 border-b text-gray-600 uppercase text-xs sticky top-0">
+          <thead className="bg-gray-50 border-b text-gray-600 uppercase text-xs sticky top-0 z-10">
             <tr>
               <th className="p-4 text-left">ID</th>
               <th className="p-4 text-left">Course</th>
@@ -168,7 +168,7 @@ export default function CourseManagement() {
                   key={course._id}
                   className="border-t hover:bg-gray-50 transition"
                 >
-                  <td className="p-4">{(page - 1) * 10 + index + 1}</td>
+                  <td className="p-4">{(page - 1) * 5 + index + 1}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
 
@@ -176,10 +176,10 @@ export default function CourseManagement() {
                         <img
                           src={course.thumbnail}
                           alt={course.name}
-                          className="w-10 h-10 rounded-full object-cover"
+                          className="w-8 h-8 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white font-bold uppercase">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white font-bold uppercase">
                           {course.name.charAt(0)}
                         </div>
                       )}
@@ -232,7 +232,7 @@ export default function CourseManagement() {
                     {new Date(course.createdAt).toLocaleDateString()}
                   </td>
                   <td className="p-4">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
 
                       <button
                         onClick={() => {
@@ -276,8 +276,8 @@ export default function CourseManagement() {
       <div className="px-6 py-4 border-t bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Left Side Info */}
         <p className="text-sm text-gray-600">
-          Showing {(page - 1) * 10 + 1} to{" "}
-          {Math.min(page * 10, data?.total || page * 10)} of{" "}
+          Showing {(page - 1) * 5 + 1} to{" "}
+          {Math.min(page * 5, data?.total || page * 5)} of{" "}
           {data?.total || 0}
         </p>
 
@@ -289,8 +289,8 @@ export default function CourseManagement() {
             disabled={page === 1}
             onClick={() => setPage((prev) => prev - 1)}
             className={`px-4 py-2 rounded-lg text-sm border transition ${page === 1
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100"
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100"
               }`}
           >
             Previous
@@ -302,8 +302,8 @@ export default function CourseManagement() {
               key={p}
               onClick={() => setPage(p)}
               className={`w-10 h-10 rounded-lg text-sm font-medium transition ${page === p
-                  ? "bg-blue-900 text-white shadow-md"
-                  : "bg-white border hover:bg-gray-100"
+                ? "bg-blue-900 text-white shadow-md"
+                : "bg-white border hover:bg-gray-100"
                 }`}
             >
               {p}
@@ -315,8 +315,8 @@ export default function CourseManagement() {
             disabled={page === totalPages}
             onClick={() => setPage((prev) => prev + 1)}
             className={`px-4 py-2 rounded-lg text-sm border transition ${page === totalPages
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100"
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100"
               }`}
           >
             Next

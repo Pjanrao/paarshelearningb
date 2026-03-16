@@ -4,6 +4,16 @@ import { useState, useEffect } from "react";
 import { Eye, Pencil, Trash2, Plus, Search, Loader2, X, Star } from "lucide-react";
 import DeleteCourseDialog from "@/components/dashboard/courses/DeleteCourseDialog";
 
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+
 interface Teacher {
     _id: string;
     name: string;
@@ -49,7 +59,8 @@ export default function TeachersPage() {
     const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
     const [formLoading, setFormLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [deleteId, setDeleteId] = useState<{ id: string, name: string } | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const [formData, setFormData] = useState<TeacherFormData>({
         name: "",
@@ -152,22 +163,25 @@ export default function TeachersPage() {
         }
     };
 
-    const handleDeleteTeacher = async (id: string, name: string) => {
-        if (confirm(`Are you sure you want to delete teacher ${name}?`)) {
-            try {
-                const response = await fetch(`/api/teachers/${id}`, {
-                    method: "DELETE",
-                });
+    const handleDeleteTeacher = async () => {
+        if (!deleteId) return;
+        setDeleteLoading(true);
+        try {
+            const response = await fetch(`/api/teachers/${deleteId.id}`, {
+                method: "DELETE",
+            });
 
-                if (response.ok) {
-                    fetchTeachers();
-                } else {
-                    alert("Failed to delete teacher");
-                }
-            } catch (error) {
-                console.error("Error deleting teacher:", error);
+            if (response.ok) {
+                fetchTeachers();
+                setDeleteId(null);
+            } else {
                 alert("Failed to delete teacher");
             }
+        } catch (error) {
+            console.error("Error deleting teacher:", error);
+            alert("Failed to delete teacher");
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -373,7 +387,7 @@ export default function TeachersPage() {
                                                 <div className="flex items-center gap-2">
                                                     <button onClick={() => openViewModal(teacher)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="View Details"><Eye size={18} /></button>
                                                     <button onClick={() => openEditModal(teacher)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Teacher"><Pencil size={18} /></button>
-                                                    <button onClick={() => handleDeleteTeacher(teacher._id, teacher.name)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Teacher"><Trash2 size={18} /></button>
+                                                    <button onClick={() => setDeleteId({ id: teacher._id, name: teacher.name })} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Teacher"><Trash2 size={18} /></button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -615,6 +629,35 @@ export default function TeachersPage() {
                     </div>
                 </div>
             )}
+
+            <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+                <AlertDialogContent className="max-w-md bg-white dark:bg-gray-900">
+                    <AlertDialogHeader className="flex flex-col items-center text-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+                            <Trash2 className="text-red-600" size={22} />
+                        </div>
+                        <AlertDialogTitle className="text-lg font-semibold text-gray-900">
+                            Delete Teacher
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-sm text-gray-500 leading-relaxed">
+                            Are you sure you want to delete <span className="font-bold text-gray-800">{deleteId?.name}</span>? This action cannot be undone and will permanently delete the teacher from the system.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex justify-center gap-3 mt-4">
+                        <Button variant="outline" onClick={() => setDeleteId(null)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={handleDeleteTeacher}
+                            disabled={deleteLoading}
+                            className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-60"
+                        >
+                            {deleteLoading && <Loader2 className="animate-spin mr-2" size={16} />}
+                            Delete
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

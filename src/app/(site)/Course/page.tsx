@@ -1,43 +1,26 @@
 "use client";
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Icon } from '@iconify/react';
 import CourseCard from '@/components/SharedComponent/Course/CourseCard';
-import { coursesData } from '@/data/coursesData';
-
-const categories = [
-  "All Courses",
-  "Programming Language",
-  "Web & Software Development",
-  "Mobile Application Development",
-  "Data, Analytics & Intelligence",
-  "Artificial Intelligence & Machine Learning",
-  "Cloud & DevOps",
-  "Cyber Security",
-  "Software Testing & QA",
-  "Design & User Experience",
-  "Marketing & CRM Platforms",
-  "Project Management",
-];
+import { useGetCoursesQuery } from "@/redux/api/courseApi";
+import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
 
 const CoursePage = () => {
-  const [activeCategory, setActiveCategory] = useState("All Courses");
+  const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
 
-  const filteredCourses = useMemo(() => {
-    return coursesData.filter(course => {
-      const query = searchQuery.toLowerCase();
-      const matchesSearch =
-        course.name.toLowerCase().includes(query) ||
-        course.description.toLowerCase().includes(query) ||
-        course.category.toLowerCase().includes(query) ||
-        (course.shortDesc && course.shortDesc.toLowerCase().includes(query));
+  const { data: categoryData } = useGetCategoriesQuery();
+  const categories = categoryData || [];
 
-      const matchesCategory = activeCategory === "All Courses" ||
-        course.category === activeCategory;
+  const { data, isLoading } = useGetCoursesQuery({
+    page,
+    limit: 100,
+    search: searchQuery,
+    category: activeCategory === "all" ? "" : activeCategory,
+  });
 
-      return matchesSearch && matchesCategory;
-    });
-  }, [searchQuery, activeCategory]);
+  const courses = data?.courses || [];
 
   return (
     <div className="bg-gray-50 dark:bg-darkmode min-h-screen pb-20 pt-20 md:pt-24 -mt-6">
@@ -69,9 +52,7 @@ const CoursePage = () => {
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
-                if (e.target.value.trim() !== "") {
-                  setActiveCategory("All Courses");
-                }
+                setPage(1);
               }}
             />
             {searchQuery && (
@@ -91,18 +72,35 @@ const CoursePage = () => {
       <section className="container mx-auto max-w-7xl px-4 -mt-24 relative z-20">
         <div className="bg-white dark:bg-gray-900 p-2 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 backdrop-blur-md">
           <div className="flex items-center gap-2 overflow-x-auto py-1 px-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {categories.map((cat) => (
+            <button
+              onClick={() => {
+                setActiveCategory("all");
+                setPage(1);
+              }}
+              className={`
+                  whitespace-nowrap px-6 py-3 rounded-xl font-bold transition-all duration-300
+                  ${activeCategory === "all"
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                  : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600'}
+                `}
+            >
+              All Courses
+            </button>
+            {categories.map((cat: any) => (
               <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
+                key={cat._id}
+                onClick={() => {
+                  setActiveCategory(cat._id);
+                  setPage(1);
+                }}
                 className={`
                   whitespace-nowrap px-6 py-3 rounded-xl font-bold transition-all duration-300
-                  ${activeCategory === cat
+                  ${activeCategory === cat._id
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-600'}
                 `}
               >
-                {cat}
+                {cat.name}
               </button>
             ))}
           </div>
@@ -111,10 +109,14 @@ const CoursePage = () => {
 
       {/* Courses Grid */}
       <section className="container mx-auto max-w-7xl px-4 -mt-20 pb-20">
-        {filteredCourses.length > 0 ? (
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        ) : courses.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {filteredCourses.map((course) => (
-              <CourseCard key={course.id} course={course as any} />
+            {courses.map((course: any) => (
+              <CourseCard key={course._id} course={course} />
             ))}
           </div>
         ) : (

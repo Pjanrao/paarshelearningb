@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Teachers from "@/models/Teachers";
+import cloudinary from "@/lib/cloudinary";
 
 export async function GET(req: Request) {
   try {
@@ -41,6 +42,14 @@ export async function POST(req: Request) {
   try {
     await connectDB();
     const body = await req.json();
+
+    if (body.avatar && body.avatar.startsWith("data:image")) {
+      const uploadResponse = await cloudinary.uploader.upload(body.avatar, {
+        folder: "teachers",
+      });
+      body.avatar = uploadResponse.secure_url;
+    }
+
     const teacher = await Teachers.create(body);
     return NextResponse.json(teacher, { status: 201 });
   } catch (error: any) {
