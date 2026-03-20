@@ -13,7 +13,8 @@ import "./api/reportsApi";
 import "./api/placementApi";
 import "./api/courseApi";
 import "./api/categoryApi";
-import "./api/subcategoryApi";  
+import "./api/subcategoryApi";
+import "./api/paymentApi";
 
 
 export const store = configureStore({

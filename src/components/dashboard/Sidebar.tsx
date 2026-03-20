@@ -19,6 +19,7 @@ import {
   ChevronDown,
   PanelLeftClose,
   PanelLeftOpen,
+  Video,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 // import Image from "next/image";
@@ -46,6 +47,13 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
       ]
     },
 
+    {
+      name: "Meetings",
+      icon: Video,
+      path: "/admin/meetings",
+
+    },
+
     { name: "Inquiries", path: "/admin/inquiries", icon: MessageSquare },
     {
       name: "Entrance Exam",
@@ -59,6 +67,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
       ],
     },
     { name: "Students", path: "/admin/students", icon: GraduationCap },
+    { name: "Payments", path: "/admin/payments", icon: CreditCard },
     { name: "Teachers", path: "/admin/teachers", icon: Users },
     // { name: "Group Consent", path: "/admin/group-management", icon: ClipboardCheck },
     { name: "Blogs", path: "/admin/blogs", icon: FileText },

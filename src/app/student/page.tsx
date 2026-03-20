@@ -58,6 +58,9 @@ export default function StudentDashboard() {
                     <Link href="#" className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition-colors">
                         <Award size={20} /> Certificates
                     </Link>
+                    <Link href="/admin/meetings" className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition-colors">
+                        <BookOpen size={20} /> Meetings
+                    </Link>
                     <Link href="#" className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition-colors">
                         <Settings size={20} /> Settings
                     </Link>
