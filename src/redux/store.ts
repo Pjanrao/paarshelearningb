@@ -15,6 +15,9 @@ import "./api/courseApi";
 import "./api/categoryApi";
 import "./api/subcategoryApi";
 import "./api/paymentApi";
+import "./api/meetingApi";
+import "./api/batchApi";
+
 
 
 export const store = configureStore({

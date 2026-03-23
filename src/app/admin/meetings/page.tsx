@@ -14,17 +14,30 @@ import {
 import CreateMeetingModal from "@/components/dashboard/meetings/CreateMeetingModal";
 import ViewMeetingModal from "@/components/dashboard/meetings/ViewMeetingModal";
 import EditMeetingModal from "@/components/dashboard/meetings/EditMeetingModal";
+import DeleteMeetingModal from "@/components/dashboard/meetings/DeleteMeetingModal";
+import { useGetMeetingsQuery, useDeleteMeetingMutation } from "@/redux/api/meetingApi";
 
 export default function MeetingManagement() {
+
+    const [deleteId, setDeleteId] = useState<string | null>(null);
     const [search, setSearch] = useState("");
     const [platform, setPlatform] = useState("");
     const [open, setOpen] = useState(false);
-    const [meetings, setMeetings] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
+
     const [editOpen, setEditOpen] = useState(false);
 
     const [viewOpen, setViewOpen] = useState(false);
     const [viewMeeting, setViewMeeting] = useState<any>(null);
+
+    const {
+        data: meetings = [],
+        isLoading: loading,
+        isError,
+    } = useGetMeetingsQuery("");
+
+
+
+    const [deleteMeeting] = useDeleteMeetingMutation();
 
     // ✅ STATUS LOGIC (UPDATED)
     const getStatus = (meeting: any) => {
@@ -46,24 +59,12 @@ export default function MeetingManagement() {
             default:
                 return "bg-green-100 text-green-600";
         }
+
+
     };
 
-    const fetchMeetings = async () => {
-        try {
-            setLoading(true);
-            const res = await fetch("/api/meetings");
-            const data = await res.json();
-            setMeetings(data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
-    useEffect(() => {
-        fetchMeetings();
-    }, []);
+
 
     return (
         <div className="bg-gray-50 h-full">
@@ -147,6 +148,25 @@ export default function MeetingManagement() {
                             meetings.map((meeting: any, index: number) => {
                                 const status = getStatus(meeting);
 
+                                const start = new Date(meeting.startTime).toLocaleTimeString(undefined, {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                });
+
+                                const end = new Date(meeting.endTime).toLocaleTimeString(undefined, {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                    hour12: true,
+                                });
+
+                                const date = new Date(meeting.startTime).toLocaleDateString(undefined, {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                });
+
+
                                 return (
                                     <tr
                                         key={meeting._id}
@@ -167,7 +187,15 @@ export default function MeetingManagement() {
 
                                         {/* Date */}
                                         <td className="px-6 py-5 text-gray-700">
-                                            {new Date(meeting.meetingDate).toLocaleString()}
+
+
+                                            <div>{date}</div>
+
+                                            {/* TIME */}
+                                            <div className="text-xs text-gray-500">
+                                                {start} - {end}
+                                            </div>
+
                                         </td>
 
                                         {/* Platform */}
@@ -215,7 +243,7 @@ export default function MeetingManagement() {
                                                 </button>
 
                                                 {/* Delete */}
-                                                <button className="w-9 h-9 flex items-center justify-center rounded-full bg-red-50 text-red-600 hover:bg-red-100">
+                                                <button onClick={() => setDeleteId(meeting._id)} className="w-9 h-9 flex items-center justify-center rounded-full bg-red-50 text-red-600 hover:bg-red-100">
                                                     <Trash2 size={18} />
                                                 </button>
 
@@ -255,7 +283,6 @@ export default function MeetingManagement() {
                 <CreateMeetingModal
                     onClose={() => {
                         setOpen(false);
-                        fetchMeetings();
                     }}
                 />
             )}
@@ -271,9 +298,16 @@ export default function MeetingManagement() {
                 <EditMeetingModal
                     meeting={viewMeeting}
                     onClose={() => setEditOpen(false)}
-                    onUpdate={fetchMeetings}   // refresh after update
                 />
             )}
+
+            <DeleteMeetingModal
+                deleteId={deleteId}
+                setDeleteId={setDeleteId}
+                onDelete={async (id) => {
+                    await deleteMeeting(id).unwrap(); // ✅ auto refresh
+                }}
+            />
         </div>
     );
 }

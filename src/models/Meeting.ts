@@ -9,6 +9,12 @@ const meetingSchema = new mongoose.Schema(
             default: "Zoom",
         },
 
+        batch: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Batch",
+            required: false,
+        },
+
         teacher: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Teacher",
@@ -28,6 +34,15 @@ const meetingSchema = new mongoose.Schema(
 
         meetingDate: { type: Date, required: true },
         duration: Number,
+
+        startTime: {
+            type: Date,
+            required: true,
+        },
+        endTime: {
+            type: Date,
+            required: true,
+        },
 
         status: {
             type: String,

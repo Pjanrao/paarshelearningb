@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Icon } from "@iconify/react";
 import { useGetCoursesQuery } from "@/redux/api/courseApi";
 import { useGetTeachersQuery } from "@/redux/api/teachersApi";
+import { useCreateMeetingMutation } from "@/redux/api/meetingApi";
+import { useGetBatchesQuery } from "@/redux/api/batchApi";
 
 export default function CreateMeetingModal({ onClose }: any) {
     const [form, setForm] = useState({
@@ -15,8 +17,11 @@ export default function CreateMeetingModal({ onClose }: any) {
         endTime: "",
         platform: "Zoom",
         duration: 60,
-        course: "",   // ✅ NEW
+        course: "",
+        batch: "",
     });
+
+    const [createMeeting, { isLoading }] = useCreateMeetingMutation();
     const [openStart, setOpenStart] = useState(false);
     const [openEnd, setOpenEnd] = useState(false);
     const [openPlatform, setOpenPlatform] = useState(false);
@@ -26,25 +31,16 @@ export default function CreateMeetingModal({ onClose }: any) {
     const instructors = instructorData?.teachers || [];
     const [openInstructor, setOpenInstructor] = useState(false);
 
-    const convertToISO = (date: string, time: string) => {
-        const [hourMin, period] = time.split(" ");
-        let [hour, min] = hourMin.split(":").map(Number);
-
-        if (period === "PM" && hour !== 12) hour += 12;
-        if (period === "AM" && hour === 12) hour = 0;
-
-        const d = new Date(date);
-        d.setHours(hour);
-        d.setMinutes(min);
-
-        return d.toISOString();
-    };
-
     const { data: courseData } = useGetCoursesQuery({
         page: 1,
         limit: 100,
     });
     const courses = courseData?.courses || [];
+    const [openBatch, setOpenBatch] = useState(false);
+
+    const { data: batchData = [] } = useGetBatchesQuery(form.course, {
+        skip: !form.course, // only call when course selected
+    });
 
 
 
@@ -95,27 +91,17 @@ export default function CreateMeetingModal({ onClose }: any) {
 
     const handleSubmit = async () => {
         try {
-            const startTimeISO = convertToISO(form.date, form.startTime);
-            const res = await fetch("/api/meetings", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    ...form,
-                    startTimeISO,
-                }),
-            });
+            await createMeeting({
+                ...form,
+            }).unwrap();
 
-            const data = await res.json();
+            onClose(); // ✅ this will auto refresh table
 
-            console.log("Created meeting:", data);
-
-            onClose();
         } catch (err) {
             console.error(err);
         }
     };
+
     const labelClass = "text-sm font-semibold text-gray-700 mb-1 block";
 
 
@@ -192,6 +178,7 @@ export default function CreateMeetingModal({ onClose }: any) {
                                     onClick={() => {
                                         closeAllDropdowns();
                                         setOpenCourse(true);
+                                        setForm({ ...form, batch: "" });
                                     }}
                                     className="w-full border border-gray-200 rounded-lg h-10 px-3 text-sm flex items-center justify-between cursor-pointer"
                                 >
@@ -220,6 +207,49 @@ export default function CreateMeetingModal({ onClose }: any) {
                                                 {course.name}
                                             </div>
                                         ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="relative">
+                                <label className={labelClass}>Batch*</label>
+
+                                {/* Trigger */}
+                                <div
+                                    onClick={() => {
+                                        if (!form.course) return alert("Select course first");
+                                        closeAllDropdowns();
+                                        setOpenBatch(true);
+                                    }}
+                                    className="w-full border border-gray-200 rounded-lg h-10 px-3 text-sm flex items-center justify-between cursor-pointer"
+                                >
+                                    {form.batch
+                                        ? batchData.find((b: any) => b._id === form.batch)?.name
+                                        : "Select Batch"}
+                                    <Icon icon="mdi:chevron-down" />
+                                </div>
+
+                                {/* Dropdown */}
+                                {openBatch && (
+                                    <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                        {batchData.length === 0 ? (
+                                            <div className="p-2 text-gray-400 text-sm">
+                                                No batches found
+                                            </div>
+                                        ) : (
+                                            batchData.map((b: any) => (
+                                                <div
+                                                    key={b._id}
+                                                    onClick={() => {
+                                                        setForm({ ...form, batch: b._id });
+                                                        setOpenBatch(false);
+                                                    }}
+                                                    className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer"
+                                                >
+                                                    {b.name}
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
                                 )}
                             </div>

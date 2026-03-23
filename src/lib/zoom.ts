@@ -33,7 +33,7 @@ export const createZoomMeeting = async (data: {
             duration: data.duration,
             timezone: "Asia/Kolkata",
             settings: {
-                join_before_host: true,
+                join_before_host: false,
                 approval_type: 0,
             },
         },

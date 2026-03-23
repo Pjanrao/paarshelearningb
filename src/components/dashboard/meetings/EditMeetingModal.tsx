@@ -4,8 +4,24 @@ import { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { useGetCoursesQuery } from "@/redux/api/courseApi";
 import { useGetTeachersQuery } from "@/redux/api/teachersApi";
+import { useUpdateMeetingMutation } from "@/redux/api/meetingApi";
+
 
 export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
+
+    console.log("🔥 MEETING PROP:", meeting);
+
+    useEffect(() => {
+        console.log("🚀 useEffect triggered");
+
+        if (meeting) {
+            console.log("✅ meeting exists");
+        } else {
+            console.log("❌ meeting is NULL");
+        }
+    }, [meeting]);
+
+    const [updateMeeting, { isLoading }] = useUpdateMeetingMutation();
 
     const [form, setForm] = useState<any>({
         title: "",
@@ -23,6 +39,8 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
     const formatTime = (isoString: string) => {
         if (!isoString) return "";
 
+        console.log("ISO:", isoString);
+
         const date = new Date(isoString);
 
         let hours = date.getHours();
@@ -31,9 +49,18 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
         const ampm = hours >= 12 ? "PM" : "AM";
         hours = hours % 12 || 12;
 
-        const mins = minutes === 0 ? "00" : minutes;
+        const mins =
+            minutes === 0
+                ? "00"
+                : minutes === 30
+                    ? "30"
+                    : minutes.toString().padStart(2, "0");
 
-        return `${hours}:${mins} ${ampm}`;
+        const formatted = `${hours}:${mins} ${ampm}`;
+
+        console.log("Formatted Time:", formatted);
+
+        return formatted;
     };
 
     const [openInstructor, setOpenInstructor] = useState(false);
@@ -51,9 +78,33 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
     });
     const courses = courseData?.courses || [];
 
+    const convertToISO = (date: string, time: string) => {
+        if (!date || !time) return "";
+
+        const [hourMin, period] = time.trim().split(" ");
+        let [hour, min] = hourMin.split(":").map(Number);
+
+        if (period === "PM" && hour !== 12) hour += 12;
+        if (period === "AM" && hour === 12) hour = 0;
+
+        const iso = `${date}T${hour.toString().padStart(2, "0")}:${min
+            .toString()
+            .padStart(2, "0")}:00`;
+
+        return new Date(iso).toISOString();
+    };
+
     // ✅ PREFILL DATA (FIXED)
     useEffect(() => {
         if (meeting) {
+            console.log("👉 FULL MEETING:", meeting);
+
+            const start = formatTime(meeting.startTimeISO || meeting.startTime);
+            const end = formatTime(meeting.endTimeISO || meeting.endTime);
+
+            console.log("👉 Converted start:", start);
+            console.log("👉 Converted end:", end);
+
             setForm({
                 title: meeting.title || "",
                 teacher: meeting.teacher?._id || meeting.teacher || "",
@@ -61,8 +112,8 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
                 date: meeting.meetingDate
                     ? new Date(meeting.meetingDate).toISOString().split("T")[0]
                     : "",
-                startTime: formatTime(meeting.startTime),
-                endTime: formatTime(meeting.endTime),
+                startTime: start,
+                endTime: end,
                 platform: meeting.platform || "Zoom",
                 duration: meeting.duration || 60,
                 course: meeting.course?._id || meeting.course || "",
@@ -90,18 +141,24 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
     // ✅ UPDATE API
     const handleUpdate = async () => {
         try {
-            await fetch(`/api/meetings/${meeting._id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
+            await updateMeeting({
+                id: meeting._id,
+                data: {
+                    ...form,
+                    startTime: convertToISO(form.date, form.startTime),
+                    endTime: convertToISO(form.date, form.endTime),
                 },
-                body: JSON.stringify(form),
-            });
+            }).unwrap();
 
-            onUpdate();
-            onClose();
+            onClose(); // ✅ auto refresh
+
         } catch (err) {
-            console.error(err);
+            console.error("UPDATE ERROR:", err);
+
+            if (err && typeof err === "object") {
+                console.error("Error data:", (err as any).data);
+                console.error("Error message:", (err as any).error);
+            }
         }
     };
 
@@ -171,11 +228,15 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
 
                         <div
                             onClick={() => setOpenCourse(!openCourse)}
-                            className="border h-10 px-3 rounded-lg flex items-center justify-between cursor-pointer"
+                            className="border h-10 px-3 rounded-lg flex items-center justify-between cursor-pointer overflow-hidden"
                         >
-                            {form.course
-                                ? courses.find((c: any) => c._id === form.course)?.name
-                                : "Select Course"}
+                            <div className="truncate max-w-[220px]" title={
+                                courses.find((c: any) => c._id === form.course)?.name
+                            }>
+                                {form.course
+                                    ? courses.find((c: any) => c._id === form.course)?.name
+                                    : "Select Course"}
+                            </div>
                             <Icon icon="mdi:chevron-down" />
                         </div>
 
@@ -188,8 +249,10 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
                                             setForm({ ...form, course: c._id });
                                             setOpenCourse(false);
                                         }}
-                                        className="p-2 hover:bg-blue-50 cursor-pointer"
+                                        title={c.name}
+                                        className="p-2 hover:bg-blue-50 cursor-pointer truncate"
                                     >
+
                                         {c.name}
                                     </div>
                                 ))}

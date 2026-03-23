@@ -1,36 +1,87 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { api } from "../api";
 
-export const meetingApi = createApi({
-    reducerPath: "meetingApi",
-    baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
+interface Meeting {
+    _id: string;
+    title: string;
+    description: string;
+    meetingDate: string;
+    startTime: string;
+    endTime: string;
+    platform: string;
+    duration: number;
+    meetingLink?: string;
+    teacher?: string | {
+        _id: string;
+        name: string;
+    };
+
+    course?: string | {
+        _id: string;
+        name: string;
+    };
+}
+
+export const meetingApi = api.injectEndpoints({
+    overrideExisting: true,
+
     endpoints: (builder) => ({
 
-        getMeetings: builder.query({
-            query: (courseId) => `/meetings?courseId=${courseId || ""}`,
+        // ✅ GET ALL
+        getMeetings: builder.query<Meeting[], string | void>({
+            query: (courseId) => ({
+                url: "/meetings",
+                params: courseId ? { courseId } : {},
+            }),
+
+            // ✅ ADD THIS (VERY IMPORTANT)
+            transformResponse: (response: any) => {
+                console.log("API RESPONSE:", response); // debug
+                return response.meetings || response;
+            },
+
+            providesTags: ["Meetings"],
         }),
 
-        createMeeting: builder.mutation({
+        // ✅ CREATE
+        createMeeting: builder.mutation<Meeting, Partial<Meeting>>({
             query: (data) => ({
                 url: "/meetings",
                 method: "POST",
                 body: data,
             }),
+            invalidatesTags: ["Meetings"],
         }),
 
-        updateMeeting: builder.mutation({
-            query: ({ id, ...data }) => ({
+        // ✅ UPDATE
+        updateMeeting: builder.mutation<
+            Meeting,
+            { id: string; data: Partial<Meeting> }
+        >({
+            query: ({ id, data }) => ({
                 url: `/meetings/${id}`,
                 method: "PUT",
                 body: data,
             }),
+            invalidatesTags: ["Meetings"],
         }),
 
-        deleteMeeting: builder.mutation({
+        // ✅ DELETE
+        deleteMeeting: builder.mutation<{ success: boolean }, string>({
             query: (id) => ({
                 url: `/meetings/${id}`,
                 method: "DELETE",
             }),
+            invalidatesTags: ["Meetings"], // 🔥 auto refresh
         }),
+
+        // ✅ GET BY ID (optional but useful)
+        getMeetingById: builder.query<Meeting, string>({
+            query: (id) => `/meetings/${id}`,
+            providesTags: (result, error, id) => [
+                { type: "Meetings", id },
+            ],
+        }),
+
     }),
 });
 
@@ -39,4 +90,5 @@ export const {
     useCreateMeetingMutation,
     useUpdateMeetingMutation,
     useDeleteMeetingMutation,
+    useGetMeetingByIdQuery,
 } = meetingApi;

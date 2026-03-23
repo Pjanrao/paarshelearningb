@@ -25,14 +25,28 @@ export interface Course {
   mode?: string;
 }
 
+const generateSlug = (text: string) => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "") // remove special chars
+    .replace(/\s+/g, "-")         // replace spaces with -
+    .replace(/-+/g, "-");         // remove duplicate -
+};
+
+
 const CourseCard = ({ course }: { course: Course }) => {
   const { name, galleryImage, image, thumbnail, slug, description, shortDescription, duration, level, mode, rating, fee } = course;
   const courseImage = galleryImage || image || thumbnail || "/images/course/default.jpeg";
+
+
+  const generatedSlug = slug || generateSlug(name);
+
   return (
     <div className="group bg-white dark:bg-darkmode rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-800">
       {/* Course Image */}
       <div className="relative aspect-[16/9] overflow-hidden">
-        <Link href={`/Course/${slug || course._id}`} className="block w-full h-full">
+        <Link href={`/Course/${generatedSlug}`} className="block w-full h-full">
           <Image
             src={courseImage}
             alt={name}
@@ -48,7 +62,7 @@ const CourseCard = ({ course }: { course: Course }) => {
       <div className="p-3 sm:p-4 flex flex-col flex-1">
         <h3 className="mb-1">
           <Link
-            href={`/Course/${slug || course._id}`}
+            href={`/Course/${generatedSlug}`}
             className="font-bold text-gray-900 group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 text-sm sm:text-base leading-tight transition-colors line-clamp-1"
           >
             {name}
@@ -81,7 +95,7 @@ const CourseCard = ({ course }: { course: Course }) => {
           </div>
 
           <Link
-            href={`/Course/${slug || course._id}`}
+            href={`/Course/${generatedSlug}`}
             className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[9px] sm:text-[10px] rounded-lg transition-all shadow-md shadow-blue-200 dark:shadow-none hover:translate-y-[-2px] whitespace-nowrap"
           >
             Details

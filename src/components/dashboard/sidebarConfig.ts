@@ -6,6 +6,7 @@ export const sidebarConfig = {
     { name: "Entrance Exam", path: "/admin/entrance" },
     { name: "Students", path: "/admin/students" },
     { name: "Teachers", path: "/admin/teachers" },
+    { name: "Batches", path: "/admin/batches" },
     // { name: "Consent", path: "/admin/concent" },
     { name: "Blogs", path: "/admin/blogs" },
     { name: "Placement", path: "/admin/placement" },

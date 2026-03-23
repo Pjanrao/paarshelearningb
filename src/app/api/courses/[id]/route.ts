@@ -4,6 +4,15 @@ import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 export const dynamic = "force-dynamic";
 
+const generateSlug = (text: string) => {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+};
+
 // GET SINGLE COURSE
 export async function GET(
   req: Request,
@@ -23,11 +32,18 @@ export async function GET(
         .populate("category")
         .populate("subcategory")
         .populate("instructor");
-    } else {
-      course = await Course.findOne({ slug: id })
+    }
+
+    // ✅ 2. If not found → match slug from name
+    if (!course) {
+      const courses = await Course.find()
         .populate("category")
         .populate("subcategory")
         .populate("instructor");
+
+      course = courses.find(
+        (c: any) => generateSlug(c.name) === id
+      );
     }
 
     if (!course) {

@@ -32,6 +32,7 @@ interface GetCoursesParams {
   search?: string;
   category?: string;
   sort?: string;
+  status?: string;
 }
 
 export const courseApi = api.injectEndpoints({
