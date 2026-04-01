@@ -53,13 +53,14 @@ export default function LoginPage() {
       toast.success("Login successful!");
 
       // Update Redux and localStorage (Admin Panel Support)
-      dispatch(setAuth({ 
-        token: data.token, 
-        role: data.role, 
-        user: { name: data.name, email: data.email }
+      dispatch(setAuth({
+        token: data.token,
+        role: data.role,
+        user: { name: data.name, email: data.email, contact: data.contact, image: data.image }
       }));
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
+      localStorage.setItem("user", JSON.stringify({ name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
 
       // Cookies for Middleware/SSR
       document.cookie = `token=${data.token}; path=/; Max-Age=86400`;

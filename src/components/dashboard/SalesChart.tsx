@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useId } from "react";
+import { useId } from "react";
 import {
   BarChart,
   Bar,
@@ -12,55 +12,88 @@ import {
   Cell,
 } from "recharts";
 
-const data = [
-  { salesDay: "D1", sales: 2 },
-  { salesDay: "D5", sales: 1 },
-  { salesDay: "D10", sales: 3 },
-  { salesDay: "D15", sales: 2 },
-  { salesDay: "D20", sales: 4 },
-];
+import { useGetDashboardStatsQuery } from "@/redux/api/dashboardApi";
+
+// ✅ Type (best practice)
+type SalesDataType = {
+  salesDay: string;
+  sales: number;
+};
 
 export default function SalesChart() {
-  const [mounted, setMounted] = useState(false);
   const chartId = useId();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []); 
+  const { data, isLoading, isError } = useGetDashboardStatsQuery();
 
-  if (!mounted) return <div className="w-full h-[300px] animate-pulse bg-gray-50 rounded-xl" />;
+  // ✅ Loading
+  if (isLoading) {
+    return (
+      <div className="w-full h-[300px] animate-pulse bg-gray-50 rounded-xl" />
+    );
+  }
+
+  // ❗ Error handling
+  if (isError) {
+    return (
+      <div className="w-full h-[300px] flex items-center justify-center text-red-500">
+        Failed to load sales data
+      </div>
+    );
+  }
+
+  // ✅ Typed data
+  const chartData: SalesDataType[] = data?.salesData || [];
+
+  // ❗ Empty data handling
+  if (chartData.length === 0) {
+    return (
+      <div className="w-full h-[300px] flex items-center justify-center text-gray-400">
+        No sales data available
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-[300px]">
       <ResponsiveContainer width="100%" height="100%" id={`${chartId}-resp`}>
-        <BarChart data={data} id={`${chartId}-bar`}>
+        <BarChart data={chartData} id={`${chartId}-bar`}>
+
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+
           <XAxis
             dataKey="salesDay"
             axisLine={false}
             tickLine={false}
             tick={{ fill: "#6B7280", fontSize: 12 }}
           />
+
           <YAxis
             axisLine={false}
             tickLine={false}
             tick={{ fill: "#6B7280", fontSize: 12 }}
           />
+
           <Tooltip
             cursor={{ fill: "#F3F4F6" }}
-            contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)" }}
+            contentStyle={{
+              borderRadius: "12px",
+              border: "none",
+              boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+            }}
           />
+
           <Bar
             dataKey="sales"
             name="Sales"
             fill="#3b82f6"
             radius={[6, 6, 0, 0]}
-            animationDuration={1500}
+            animationDuration={1200}
           >
-            {data.map((entry, index) => (
-              <Cell key={`cell-sales-${index}`} />
+            {chartData.map((_, index: number) => (
+              <Cell key={`cell-${index}`} />
             ))}
           </Bar>
+
         </BarChart>
       </ResponsiveContainer>
     </div>

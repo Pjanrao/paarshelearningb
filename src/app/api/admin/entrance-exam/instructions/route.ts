@@ -36,12 +36,10 @@ export const GET = authMiddleware(async function (request: Request) {
             );
         }
 
-        const sessionResult = await TestSessionModel.findById(sessionId)
+        const session = await TestSessionModel.findById(sessionId)
             .populate("college", "name")
             .lean()
-            .exec();
-
-        const session = Array.isArray(sessionResult) ? sessionResult[0] : sessionResult;
+            .exec() as any;
 
         if (!session || !["pending", "active"].includes(session.status)) {
             return NextResponse.json(
@@ -76,7 +74,7 @@ export const GET = authMiddleware(async function (request: Request) {
             message: "Test instructions fetched successfully",
             data: {
                 session: {
-                    sessionId: session._id,
+                    sessionId: session._id.toString(),
                     status: session.status,
                     duration: session.duration,
                 },

@@ -29,24 +29,43 @@ export default function MeetingManagement() {
     const [viewOpen, setViewOpen] = useState(false);
     const [viewMeeting, setViewMeeting] = useState<any>(null);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
     const {
         data: meetings = [],
         isLoading: loading,
         isError,
     } = useGetMeetingsQuery("");
 
+    const totalPages = Math.ceil(meetings.length / itemsPerPage);
 
+    const paginatedMeetings = meetings.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const [deleteMeeting] = useDeleteMeetingMutation();
 
     // ✅ STATUS LOGIC (UPDATED)
+    // const getStatus = (meeting: any) => {
+    //     if (meeting.status === "cancelled") return "Cancelled";
+
+    //     const now = new Date();
+    //     const meetingDate = new Date(meeting.meetingDate);
+
+    //     if (meetingDate < now) return "Past";
+    //     return "Upcoming";
+    // };
     const getStatus = (meeting: any) => {
         if (meeting.status === "cancelled") return "Cancelled";
 
         const now = new Date();
-        const meetingDate = new Date(meeting.meetingDate);
 
-        if (meetingDate < now) return "Past";
+        // ✅ use startTime instead of meetingDate
+        const meetingDateTime = new Date(meeting.startTime);
+
+        if (meetingDateTime < now) return "Past";
         return "Upcoming";
     };
 
@@ -145,7 +164,7 @@ export default function MeetingManagement() {
                                 </td>
                             </tr>
                         ) : (
-                            meetings.map((meeting: any, index: number) => {
+                            paginatedMeetings.map((meeting: any, index: number) => {
                                 const status = getStatus(meeting);
 
                                 const start = new Date(meeting.startTime).toLocaleTimeString(undefined, {
@@ -173,7 +192,7 @@ export default function MeetingManagement() {
                                         className="border-t hover:bg-gray-50 transition"
                                     >
                                         {/* ID */}
-                                        <td className="px-6 py-5">{index + 1}</td>
+                                        <td className="px-6 py-5">{(currentPage - 1) * itemsPerPage + index + 1}</td>
 
                                         {/* Title */}
                                         <td className="px-6 py-5 font-semibold text-gray-900">
@@ -264,17 +283,36 @@ export default function MeetingManagement() {
                 </p>
 
                 <div className="flex gap-2">
-                    <button className="px-4 py-2 border rounded-lg text-sm">
+
+                    <button
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage((prev) => prev - 1)}
+                        className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50"
+                    >
                         Previous
                     </button>
 
-                    <button className="w-10 h-10 bg-blue-900 text-white rounded-lg">
-                        1
-                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setCurrentPage(i + 1)}
+                            className={`w-10 h-10 rounded-lg ${currentPage === i + 1
+                                    ? "bg-blue-900 text-white"
+                                    : "border"
+                                }`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
 
-                    <button className="px-4 py-2 border rounded-lg text-sm">
+                    <button
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage((prev) => prev + 1)}
+                        className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50"
+                    >
                         Next
                     </button>
+
                 </div>
             </div>
 

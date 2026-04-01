@@ -60,7 +60,7 @@
 //             <div>
 //               <p className='text-sm font-normal text-grey max-w-56'>
 //                 Need help?{' '}
-//                 <Link href='/contact' className='text-primary hover:text-blue-700'>
+//                 <Link href='/contact-us' className='text-primary hover:text-blue-700'>
 //                   Contact our experts
 //                 </Link>{' '}
 //                 Tell us about your project
@@ -122,15 +122,15 @@ const Hero = () => {
             </span>
           </h1>
 
-          <p className='text-slate-600 dark:text-slate-300 text-lg font-normal max-w-md mb-8 leading-relaxed'>
-            Education is door for future & Paarsh E-Learning is the key to brighten your future
+          <p className='text-slate-600 dark:text-slate-300 text-lg font-normal max-w-xl mb-8 leading-relaxed'>
+            Paarsh eLearning is a leading institute in Nashik offering industry-focused programming language training with real-time projects and placement support.
           </p>
 
-          <div className='flex flex-col sm:flex-row items-start sm:items-center gap-8'>
+          <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
             <Link
               href='/Course'
               className='py-4 px-10 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/20 hover:bg-primary/90 hover:-translate-y-1 transition-all duration-300'>
-              Explore more
+              Enroll Now
             </Link>
           </div>
 
@@ -141,7 +141,7 @@ const Hero = () => {
                 <div key={i} className='w-12 h-12 rounded-full border-4 border-white overflow-hidden shadow-sm'>
                   <Image
                     src={getImgPath(`/images/hero/hero-profile-${i}.jpg`)}
-                    alt='user'
+                    alt='Learn SEO with practical projects'
                     width={60}
                     height={60}
 
@@ -151,7 +151,7 @@ const Hero = () => {
             </div>
             <p className='text-sm font-normal text-grey max-w-56'>
               Need help?<br />
-              <Link href='/contact' className='text-primary hover:text-blue-700'>
+              <Link href='/contact-us' className='text-primary hover:text-blue-700'>
                 Contact our experts<br />
               </Link>
               Tell us about your project
@@ -177,8 +177,8 @@ const Hero = () => {
             <div className="relative z-10 p-2 md:p-3 rounded-[40px] md:rounded-[60px] bg-white/30 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] overflow-hidden animate-float">
               <div className="relative overflow-hidden rounded-[30px] md:rounded-[50px] aspect-[4/3]">
                 <Image
-                  src={getImgPath('/images/hero/elearn.png')}
-                  alt='Educational Portal'
+                  src={getImgPath('/images/hero/digital-marketing-course.png')}
+                  alt='Advanced digital marketing training in Nashik'
                   fill
                   priority
                   quality={100}

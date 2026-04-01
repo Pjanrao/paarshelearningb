@@ -91,6 +91,11 @@ export default function CourseFormModal({
   const [activeWhyJoin, setActiveWhyJoin] = useState<number | null>(0);
   const [activeBenefit, setActiveBenefit] = useState<number | null>(0);
   const [activeTestimonial, setActiveTestimonial] = useState<number | null>(0);
+  const filteredSubcategories = subcategories.filter(
+    (sub: any) =>
+      sub.category === form.category ||
+      sub.category?._id === form.category
+  );
 
 
 
@@ -171,8 +176,10 @@ export default function CourseFormModal({
         introVideo: "",
         syllabus: [{ title: "", description: "" }],
         benefits: [{ title: "", description: "" }],
-        whyJoin: [{ title: "", description: "" }],
-        testimonials: [{ studentName: "", review: "" }],
+        // whyJoin: [{ title: "", description: "" }],
+        whyJoin: [],
+        //testimonials: [{ studentName: "", review: "" }],
+        testimonials: [],
       });
 
       setFiles({});
@@ -208,13 +215,16 @@ export default function CourseFormModal({
           ? editing.benefits
           : [{ title: "", description: "" }],
 
-        whyJoin: editing.whyJoin?.length
-          ? editing.whyJoin
-          : [{ title: "", description: "" }],
+        // whyJoin: editing.whyJoin?.length
+        //   ? editing.whyJoin
+        //   : [{ title: "", description: "" }],
 
-        testimonials: editing.testimonials?.length
-          ? editing.testimonials
-          : [{ studentName: "", review: "" }],
+        // testimonials: editing.testimonials?.length
+        //   ? editing.testimonials
+        //   : [{ studentName: "", review: "" }],
+        whyJoin: editing.whyJoin || [],
+        testimonials: editing.testimonials || [],
+
         syllabusPdf: editing.syllabusPdf || "",
         thumbnail: editing.thumbnail || "",
         introVideo: editing.introVideo || "",
@@ -283,16 +293,16 @@ export default function CourseFormModal({
       });
     }
 
-    if (!form.whyJoin || form.whyJoin.length === 0) {
-      newErrors.whyJoin = "At least one Why Join point is required";
-    } else {
-      form.whyJoin.forEach((item: any) => {
-        if (!item.title.trim() || !item.description.trim()) {
-          newErrors.whyJoin =
-            "All Why Join title and description fields are required";
-        }
-      });
-    }
+    // if (!form.whyJoin || form.whyJoin.length === 0) {
+    //   newErrors.whyJoin = "At least one Why Join point is required";
+    // } else {
+    //   form.whyJoin.forEach((item: any) => {
+    //     if (!item.title.trim() || !item.description.trim()) {
+    //       newErrors.whyJoin =
+    //         "All Why Join title and description fields are required";
+    //     }
+    //   });
+    // }
 
     // Syllabus validation
     if (!form.syllabus || form.syllabus.length === 0) {
@@ -471,7 +481,7 @@ export default function CourseFormModal({
               <Select
                 value={form.category}
                 onValueChange={(value) =>
-                  setForm({ ...form, category: value })
+                  setForm({ ...form, category: value, subcategory: "", })
                 }
               >
                 <SelectTrigger
@@ -531,7 +541,7 @@ export default function CourseFormModal({
               <Select
                 value={form.subcategory}
                 onValueChange={(value) =>
-                  setForm({ ...form, subcategory: value })
+                  setForm({ ...form, subcategory: value, })
                 }
               >
                 <SelectTrigger
@@ -566,7 +576,7 @@ export default function CourseFormModal({
         z-100
       "
                 >
-                  {subcategories.map((sub: any) => (
+                  {filteredSubcategories.map((sub: any) => (
                     <SelectItem
                       key={sub._id}
                       value={sub._id}
@@ -1091,7 +1101,7 @@ export default function CourseFormModal({
             {/* Duration */}
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">
-                Course Duration (in days)
+                Course Duration (in Months)
               </label>
 
               <Input
@@ -1655,159 +1665,6 @@ export default function CourseFormModal({
                 <p className="text-xs text-red-600 mt-1">{errors.syllabus}</p>
               )}
             </div>
-            <div className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm space-y-5">
-
-              <h3 className="text-sm font-semibold text-gray-800">
-                Why Join This Program
-              </h3>
-
-              {form.whyJoin?.map((item: any, index: number) => {
-                const isOpen = activeWhyJoin === index;
-                const showActions = form.whyJoin.length > 1;
-
-                return (
-                  <div
-                    key={index}
-                    className="border border-gray-200 rounded-lg bg-gray-50 overflow-hidden transition hover:border-blue-300"
-                  >
-
-                    {/* COLLAPSED HEADER */}
-                    {!isOpen && (
-                      <div className="flex items-center justify-between px-4 py-2.5 hover:bg-blue-50/40 transition">
-
-                        <div
-                          className="cursor-pointer font-medium text-sm text-gray-700"
-                          onClick={() => setActiveWhyJoin(index)}
-                        >
-                          {item.title || "Click to add title"}
-                        </div>
-
-                        {showActions && (
-                          <div className="flex items-center gap-4 text-xs">
-                            <button
-                              type="button"
-                              onClick={() => setActiveWhyJoin(index)}
-                              className="text-blue-700 hover:text-blue-900 transition"
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const updated = form.whyJoin.filter(
-                                  (_: any, i: number) => i !== index
-                                );
-                                setForm({ ...form, whyJoin: updated });
-
-                                if (activeWhyJoin === index) {
-                                  setActiveWhyJoin(null);
-                                } else if (activeWhyJoin !== null && activeWhyJoin > index) {
-                                  setActiveWhyJoin(activeWhyJoin - 1);
-                                }
-                              }}
-                              className="text-red-600 hover:text-red-700 transition"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* EXPANDED CONTENT */}
-                    {isOpen && (
-                      <div className="p-4 space-y-3 bg-white">
-
-                        <Input
-                          placeholder="Title"
-                          className="
-                h-8 text-sm border border-gray-300 bg-white
-                hover:border-blue-600 hover:bg-blue-50/30
-                focus:outline-none focus:ring-0 focus:ring-offset-0
-                focus-visible:ring-0 focus-visible:ring-offset-0
-                focus-visible:outline-none focus:border-blue-900
-                transition
-              "
-                          value={item.title}
-                          onChange={(e) => {
-                            const updated = [...form.whyJoin];
-
-                            updated[index] = {
-                              ...updated[index],
-                              title: e.target.value,
-                            };
-
-                            setForm((prev: any) => ({
-                              ...prev,
-                              whyJoin: updated,
-                            }));
-                          }}
-                        />
-
-                        <Textarea
-                          placeholder="Short Description"
-                          rows={3}
-                          className="
-                text-sm border border-gray-300 bg-white
-                hover:border-blue-600 hover:bg-blue-50/30
-                focus:outline-none focus:ring-0 focus:ring-offset-0
-                focus-visible:ring-0 focus-visible:ring-offset-0
-                focus-visible:outline-none focus:border-blue-900
-                transition
-              "
-                          value={item.description}
-                          onChange={(e) => {
-                            const updated = [...form.whyJoin];
-
-                            updated[index] = {
-                              ...updated[index],
-                              description: e.target.value,
-                            };
-
-                            setForm((prev: any) => ({
-                              ...prev,
-                              whyJoin: updated,
-                            }));
-                          }}
-                        />
-
-                      </div>
-                    )}
-
-                  </div>
-                );
-              })}
-
-              {/* ADD BUTTON */}
-              <button
-                type="button"
-                disabled={form.whyJoin.length >= 6}
-                onClick={() => {
-                  if (form.whyJoin.length >= 6) return;
-
-                  const newItems = [
-                    ...form.whyJoin,
-                    { title: "", description: "" },
-                  ];
-
-                  setForm({ ...form, whyJoin: newItems });
-                  setActiveWhyJoin(newItems.length - 1);
-                }}
-                className={`text-sm font-semibold transition ${form.whyJoin.length >= 6
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-blue-900 hover:text-blue-950"
-                  }`}
-              >
-                + Add Why Join (Max 6)
-              </button>
-              {errors.whyJoin && (
-                <p className="text-xs text-red-600 mt-1">{errors.whyJoin}</p>
-              )}
-            </div>
-
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
             <div className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm space-y-5">
 
@@ -1949,8 +1806,8 @@ export default function CourseFormModal({
                   setActiveBenefit(newItems.length - 1);
                 }}
                 className={`text-sm font-semibold transition ${form.benefits.length >= 4
-                    ? "text-gray-400 cursor-not-allowed"
-                    : "text-blue-900 hover:text-blue-950"
+                  ? "text-gray-400 cursor-not-allowed"
+                  : "text-blue-900 hover:text-blue-950"
                   }`}
               >
                 + Add Benefit (Max 4)
@@ -1960,152 +1817,7 @@ export default function CourseFormModal({
               )}
             </div>
 
-            <div className="border border-gray-200 rounded-xl p-5 bg-white shadow-sm space-y-5">
 
-              <h3 className="text-sm font-semibold text-gray-800">
-                Testimonials
-              </h3>
-
-              {form.testimonials.map((item: any, index: number) => {
-                const isOpen = activeTestimonial === index;
-                const showActions = form.testimonials.length > 1;
-
-                return (
-                  <div
-                    key={index}
-                    className="border border-gray-200 rounded-lg bg-gray-50 overflow-hidden transition hover:border-blue-300"
-                  >
-
-                    {/* COLLAPSED HEADER */}
-                    {!isOpen && (
-                      <div className="flex items-center justify-between px-4 py-2.5 hover:bg-blue-50/40 transition">
-
-                        <div
-                          className="cursor-pointer font-medium text-sm text-gray-700"
-                          onClick={() => setActiveTestimonial(index)}
-                        >
-                          {item.studentName || "Click to add student name"}
-                        </div>
-
-                        {showActions && (
-                          <div className="flex items-center gap-4 text-xs">
-                            <button
-                              type="button"
-                              onClick={() => setActiveTestimonial(index)}
-                              className="text-blue-700 hover:text-blue-900 transition"
-                            >
-                              Edit
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const updated = form.testimonials.filter(
-                                  (_: any, i: number) => i !== index
-                                );
-                                setForm({ ...form, testimonials: updated });
-
-                                if (activeTestimonial === index) {
-                                  setActiveTestimonial(null);
-                                } else if (activeTestimonial! > index) {
-                                  setActiveTestimonial(activeTestimonial! - 1);
-                                }
-                              }}
-                              className="text-red-600 hover:text-red-700 transition"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* EXPANDED CONTENT */}
-                    {isOpen && (
-                      <div className="p-4 space-y-3 bg-white">
-
-                        <Input
-                          placeholder="Student Name"
-                          className="
-                h-8 text-sm border border-gray-300 bg-white
-                hover:border-blue-600 hover:bg-blue-50/30
-                focus:outline-none focus:ring-0 focus:ring-offset-0
-                focus-visible:ring-0 focus-visible:ring-offset-0
-                focus-visible:outline-none focus:border-blue-900
-                transition
-              "
-                          value={item.studentName}
-                          onChange={(e) => {
-                            const updated = [...form.testimonials];
-
-                            updated[index] = {
-                              ...updated[index],
-                              studentName: e.target.value,
-                            };
-
-                            setForm((prev: any) => ({
-                              ...prev,
-                              testimonials: updated,
-                            }));
-                          }}
-                        />
-
-                        <Textarea
-                          placeholder="Review"
-                          rows={3}
-                          className="
-                text-sm border border-gray-300 bg-white
-                hover:border-blue-600 hover:bg-blue-50/30
-                focus:outline-none focus:ring-0 focus:ring-offset-0
-                focus-visible:ring-0 focus-visible:ring-offset-0
-                focus-visible:outline-none focus:border-blue-900
-                transition
-              "
-                          value={item.review}
-                          onChange={(e) => {
-                            const updated = [...form.testimonials];
-
-                            updated[index] = {
-                              ...updated[index],
-                              review: e.target.value,
-                            };
-
-                            setForm((prev: any) => ({
-                              ...prev,
-                              testimonials: updated,
-                            }));
-                          }}
-                        />
-
-                      </div>
-                    )}
-
-                  </div>
-                );
-              })}
-
-              {/* ADD BUTTON */}
-              <button
-                type="button"
-                onClick={() => {
-                  const newItems = [
-                    ...form.testimonials,
-                    { studentName: "", review: "" },
-                  ];
-
-                  setForm({ ...form, testimonials: newItems });
-                  setActiveTestimonial(newItems.length - 1);
-                }}
-                className="
-      text-sm font-semibold text-blue-900
-      hover:text-blue-950
-      transition
-    "
-              >
-                + Add Testimonial
-              </button>
-
-            </div>
           </div>
           {/* ===== SUBMIT ===== */}
           <div className="flex justify-end items-center gap-6 pt-6 border-t">

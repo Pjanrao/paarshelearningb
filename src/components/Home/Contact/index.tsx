@@ -397,7 +397,7 @@ const Contactform = () => {
                     disabled={isSubmitting}
                     className='w-full bg-primary hover:bg-blue-700 text-white py-3 rounded-lg font-bold disabled:opacity-50'
                     type='submit'>
-                    {isSubmitting ? "Sending..." : "Submit Inquiry"}
+                    {isSubmitting ? "Sending..." : "Get Free Consultation"}
                   </button>
                 </div>
               </form>

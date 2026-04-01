@@ -25,33 +25,48 @@ export default function AddInstallmentModal({ payment, close }: any) {
         }
 
         try {
-
             setLoading(true);
 
             let receiptUrl = "";
 
-            // upload receipt file if exists
+            // ✅ SAFE UPLOAD (FIXED)
             if (file) {
 
-                const formData = new FormData();
-                formData.append("file", file);
+                try {
+                    const formData = new FormData();
+                    formData.append("file", file);
 
-                const res = await fetch("/api/upload", {
-                    method: "POST",
-                    body: formData
-                });
+                    const res = await fetch("/api/upload", {
+                        method: "POST",
+                        body: formData
+                    });
 
-                const data = await res.json();
-                receiptUrl = data.url;
+                    const text = await res.text();
 
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch {
+                        data = null;
+                    }
+
+                    if (res.ok && data?.url) {
+                        receiptUrl = data.url;
+                    }
+
+                } catch (err) {
+                    console.error("Upload failed:", err);
+                    // ❗ DO NOT STOP FLOW
+                }
             }
 
+            // ✅ ALWAYS SAVE INSTALLMENT
             await addInstallment({
                 paymentId: payment._id,
                 amount: Number(amount),
                 paymentMode,
                 receipt: receiptUrl
-            });
+            }).unwrap();
 
             close();
 
@@ -61,7 +76,6 @@ export default function AddInstallmentModal({ payment, close }: any) {
         }
 
         setLoading(false);
-
     };
 
     return (

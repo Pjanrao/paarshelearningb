@@ -68,7 +68,7 @@ export default function SubcategoryViewModal({
             </div>
 
             {/* Status */}
-            <div>
+            {/* <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
                 Status
               </p>
@@ -83,11 +83,11 @@ export default function SubcategoryViewModal({
               >
                 {subcategory.isActive ? "Active" : "Inactive"}
               </span>
-            </div>
+            </div> */}
 
             {/* Created */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1 pt-2">
                 Created On
               </p>
 

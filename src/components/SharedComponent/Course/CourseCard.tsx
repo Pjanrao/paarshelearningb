@@ -13,6 +13,7 @@ export interface Course {
   thumbnail?: string;
   galleryImage?: string;
   detailsImage?: string;
+  featured?: boolean;
   slug: string;
   description?: string;
   shortDescription?: string;
@@ -23,6 +24,7 @@ export interface Course {
   duration?: any;
   level?: string;
   mode?: string;
+  difficulty?: string;
 }
 
 const generateSlug = (text: string) => {
@@ -36,7 +38,7 @@ const generateSlug = (text: string) => {
 
 
 const CourseCard = ({ course }: { course: Course }) => {
-  const { name, galleryImage, image, thumbnail, slug, description, shortDescription, duration, level, mode, rating, fee } = course;
+  const { name, galleryImage, image, thumbnail, slug, description, shortDescription, duration, level, mode, rating, fee, difficulty } = course;
   const courseImage = galleryImage || image || thumbnail || "/images/course/default.jpeg";
 
 
@@ -77,10 +79,10 @@ const CourseCard = ({ course }: { course: Course }) => {
         <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-medium text-gray-600 dark:text-gray-400 mb-3 border-t border-gray-50 dark:border-gray-800 pt-2">
           <div className="flex items-center gap-1">
             <Icon icon="solar:clock-circle-linear" className="w-3 h-3 text-blue-600" />
-            <span>{duration ? `${duration} Days` : "8 Weeks"}</span>
+            <span>{duration ? `${duration} Months` : "6 Months"}</span>
           </div>
           <span className="hidden xs:inline text-gray-300">|</span>
-          <span className="hidden xs:inline">{level || "Beginner"}</span>
+          <span className="hidden xs:inline">{difficulty || "Beginner"}</span>
         </div>
 
         {/* Footer: Rating & Button */}

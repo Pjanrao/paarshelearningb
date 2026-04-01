@@ -13,9 +13,17 @@ function AuthHydrate({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = Cookies.get("token") || localStorage.getItem("token");
     const role = Cookies.get("role") || localStorage.getItem("role") as any;
-    
+    const userStr = localStorage.getItem("user");
+    let user = null;
+
+    try {
+      if (userStr) user = JSON.parse(userStr);
+    } catch (e) {
+      console.error("Failed to parse user from localStorage", e);
+    }
+
     if (token && role) {
-      dispatch(setAuth({ token, role }));
+      dispatch(setAuth({ token, role, user }));
     }
     setIsHydrated(true);
   }, [dispatch]);

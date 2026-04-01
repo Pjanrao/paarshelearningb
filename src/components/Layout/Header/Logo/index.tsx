@@ -8,7 +8,7 @@ const Logo: React.FC = () => {
     <Link href="/">
       <Image
         src={getImgPath("/images/logo/logo-wide.webp")}
-        alt="logo"
+        alt="Paarsh eLearning digital marketing training institute"
         width={180}
         height={72}
         style={{ width: '180px', height: 'auto' }}
@@ -17,7 +17,7 @@ const Logo: React.FC = () => {
       />
       <Image
         src={getImgPath("/images/logo/logo-wide.webp")}
-        alt="logo"
+        alt="Paarsh eLearning digital marketing training institute"
         width={180}
         height={72}
         style={{ width: '180px', height: 'auto' }}

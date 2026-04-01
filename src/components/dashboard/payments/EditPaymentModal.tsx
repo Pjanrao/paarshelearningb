@@ -2,20 +2,28 @@
 
 import { useState } from "react";
 import { X } from "lucide-react";
+import { useUpdatePaymentMutation } from "@/redux/api/paymentApi";
+import { toast } from "sonner";
+
 
 interface Installment {
     amount: number;
     paymentMode: string;
     date: string;
     receipt?: string;
+    file?: File | null;
+
 }
 
 export default function EditPaymentModal({ payment, close }: any) {
+    const [updatePayment] = useUpdatePaymentMutation();
 
     const [firstAmount, setFirstAmount] = useState(payment?.paidAmount || 0);
     const [firstMode, setFirstMode] = useState(payment?.paymentMode || "Cash");
     const [firstReceipt, setFirstReceipt] = useState<File | null>(null);
-
+    const [firstPreview, setFirstPreview] = useState<string | null>(
+        payment?.receipt || null
+    );
     const [installments, setInstallments] = useState<Installment[]>(
         payment?.installments || []
     );
@@ -36,28 +44,70 @@ export default function EditPaymentModal({ payment, close }: any) {
         setInstallments(updated);
     };
 
+
     const handleSubmit = async () => {
 
-        const formData = new FormData();
+        try {
 
-        formData.append("paidAmount", String(firstAmount));
-        formData.append("paymentMode", firstMode);
+            const formData = new FormData();
 
-        if (firstReceipt) {
-            formData.append("receipt", firstReceipt);
+            formData.append("paidAmount", String(firstAmount));
+            formData.append("paymentMode", firstMode);
+
+            // ✅ ALWAYS APPEND FILE PROPERLY
+            if (firstReceipt instanceof File) {
+                formData.append("receipt", firstReceipt);
+            } else {
+                formData.append("receipt", ""); // important
+            }
+            const cleanInstallments = installments.map((inst) => ({
+                amount: inst.amount,
+                paymentMode: inst.paymentMode,
+                date: inst.date,
+                receipt: inst.receipt || null
+            }));
+
+            formData.append("installments", JSON.stringify(cleanInstallments));
+
+            installments.forEach((inst, index) => {
+                if (inst.file) {
+                    formData.append(`installment_receipt_${index}`, inst.file);
+                }
+            });
+
+            const promise = updatePayment({
+                id: payment._id,
+                data: formData
+            }).unwrap(); // ✅ only here
+
+            toast.promise(promise, {
+                loading: "Updating payment...",
+                success: "Payment updated successfully ✅",
+                error: "Update failed ❌",
+            });
+
+            await promise;
+            close();
+
+            // ✅ refresh latest data
+            window.location.reload();
+
+        } catch (error: any) {
+
+            console.error("UPDATE ERROR FULL:", error);
+
+            const message =
+                error?.data?.error ||
+                error?.data?.message ||
+                error?.error ||
+                error?.message ||
+                "Something went wrong ❌";
+
+            if (message !== "Rejected") {
+                toast.error(message);
+            }
         }
-
-        formData.append("installments", JSON.stringify(installments));
-
-        await fetch(`/api/payments/${payment._id}`, {
-            method: "PUT",
-            body: formData
-        });
-
-        close();
-        window.location.reload();
     };
-
     return (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
@@ -162,7 +212,6 @@ export default function EditPaymentModal({ payment, close }: any) {
                                 >
                                     <option>Cash</option>
                                     <option>Online</option>
-                                    <option>UPI</option>
                                 </select>
                             </div>
 
@@ -174,9 +223,9 @@ export default function EditPaymentModal({ payment, close }: any) {
 
                             <div className="px-3 pb-3 flex items-center gap-3">
 
-                                {payment?.receipt && (
+                                {(firstPreview || payment?.receipt) && (
                                     <a
-                                        href={payment.receipt}
+                                        href={firstPreview || payment.receipt}
                                         target="_blank"
                                         className="text-blue-600 underline text-sm"
                                     >
@@ -186,12 +235,23 @@ export default function EditPaymentModal({ payment, close }: any) {
 
                                 <input
                                     type="file"
-                                    onChange={(e) =>
-                                        setFirstReceipt(e.target.files?.[0] || null)
-                                    }
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0] || null;
+                                        setFirstReceipt(file);
+
+                                        if (file) {
+                                            setFirstPreview(URL.createObjectURL(file)); // ✅ preview
+                                        }
+                                    }}
                                     className="border p-2 rounded w-full"
                                 />
-
+                                {firstPreview && (
+                                    <img
+                                        src={firstPreview}
+                                        alt="receipt preview"
+                                        className="h-20 mt-2 rounded border"
+                                    />
+                                )}
                             </div>
 
                         )}
@@ -251,7 +311,6 @@ export default function EditPaymentModal({ payment, close }: any) {
                                             >
                                                 <option>Cash</option>
                                                 <option>Online</option>
-                                                <option>UPI</option>
                                             </select>
                                         </div>
 
@@ -283,11 +342,30 @@ export default function EditPaymentModal({ payment, close }: any) {
                                                         View Receipt
                                                     </a>
                                                 )}
-
                                                 <input
                                                     type="file"
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0] || null;
+
+                                                        updateInstallment(index, "file", file);
+
+                                                        if (file) {
+                                                            updateInstallment(
+                                                                index,
+                                                                "receipt",
+                                                                URL.createObjectURL(file)
+                                                            );
+                                                        }
+                                                    }}
                                                     className="border p-2 rounded w-full"
                                                 />
+                                                {inst.receipt && (
+                                                    <img
+                                                        src={inst.receipt}
+                                                        alt="installment preview"
+                                                        className="h-20 mt-2 rounded border"
+                                                    />
+                                                )}
 
                                             </div>
 

@@ -9,7 +9,7 @@ const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
 
     // List of routes where Header and Footer should be hidden
-    const authRoutes = ["/signin", "/signup", "/forgot-password", "/reset-password", "/student", "/admin", "/teacher"];
+    const authRoutes = ["/signin", "/signup", "/forgot-password", "/reset-password", "/student", "/admin", "/teacher", "/entrance-exam"];
 
     const isAuthRoute = authRoutes.some(route =>
         pathname === route ||

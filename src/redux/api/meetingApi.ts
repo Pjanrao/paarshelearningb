@@ -36,8 +36,8 @@ export const meetingApi = api.injectEndpoints({
             // ✅ ADD THIS (VERY IMPORTANT)
             transformResponse: (response: any) => {
                 console.log("API RESPONSE:", response); // debug
-                return response.meetings || response;
-            },
+               return Array.isArray(response) ? response : response.meetings || [];
+},
 
             providesTags: ["Meetings"],
         }),
@@ -82,6 +82,12 @@ export const meetingApi = api.injectEndpoints({
             ],
         }),
 
+        // ✅ GET STUDENT MEETINGS
+        getStudentMeetings: builder.query<{ meetings: Meeting[] }, void>({
+            query: () => "/student/meetings",
+            providesTags: ["Meetings"],
+        }),
+
     }),
 });
 
@@ -91,4 +97,5 @@ export const {
     useUpdateMeetingMutation,
     useDeleteMeetingMutation,
     useGetMeetingByIdQuery,
+    useGetStudentMeetingsQuery,
 } = meetingApi;

@@ -306,6 +306,7 @@ interface CourseType {
   instructor?: Instructor;
   curriculum: CurriculumItem[];
   videoUrl: string;
+  difficulty?: string;
 }
 
 const COUNTRY_CODES = [
@@ -504,7 +505,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             <div>
               <p className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Duration</p>
               <p className="text-xs md:text-sm font-bold dark:text-white">
-                {/* {course.duration ? `${course.duration} Days` : '8 Weeks'}  */} 6 Months</p>
+                {course.duration ? `${course.duration} Months` : '6 Months'} </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -513,7 +514,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             </div>
             <div>
               <p className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">Skill Level</p>
-              <p className="text-xs md:text-sm font-bold dark:text-white">{course.level || course.experience || 'Beginner'}</p>
+              <p className="text-xs md:text-sm font-bold dark:text-white">{course.difficulty || 'Beginner'}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -625,7 +626,19 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                           <Icon icon="solar:check-circle-bold-duotone" className="text-green-600 dark:text-green-400 w-5 h-5 group-hover/item:text-[#01A0E2]" />
                         </div>
                         <div className="space-y-1">
-                          <p className="text-[15px] md:text-sm text-gray-700 dark:text-gray-300 font-semibold leading-snug group-hover/item:text-[#2B4278] dark:group-hover/item:text-white transition-colors">{typeof item === 'string' ? item : item.title || item.name}</p>
+                          {/* TITLE */}
+                          <p className="text-[15px] md:text-sm font-semibold text-gray-800 dark:text-gray-200 leading-snug group-hover/item:text-[#2B4278] dark:group-hover/item:text-white transition-colors">
+                            {typeof item === 'string' ? item : item.title || item.name}
+                          </p>
+
+                          {/* DESCRIPTION */}
+                          {typeof item !== "string" && item.description && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                              {item.description}
+                            </p>
+                          )}
+
+                          {/* HOVER LINE */}
                           <div className="w-0 group-hover/item:w-full h-0.5 bg-gradient-to-r from-[#01A0E2] to-transparent transition-all duration-500 opacity-50" />
                         </div>
                       </div>

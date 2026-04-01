@@ -247,7 +247,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           </div>
 
           {/* WHY JOIN */}
-          <div>
+          {/* <div>
 
             <h3 className="text-lg font-semibold mb-4">
               Why Join This Program
@@ -272,7 +272,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
 
             </div>
 
-          </div>
+          </div> */}
 
           {/* BENEFITS */}
           <div>
@@ -303,7 +303,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           </div>
 
           {/* TESTIMONIALS */}
-          <div>
+          {/* <div>
 
             <h3 className="text-lg font-semibold mb-4">
               Student Testimonials
@@ -328,7 +328,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
 
             </div>
 
-          </div>
+          </div> */}
 
         </div>
 

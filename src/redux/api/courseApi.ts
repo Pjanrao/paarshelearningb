@@ -7,6 +7,7 @@ interface Course {
   duration: number;
   fee: number;
   status: string;
+  featured?: boolean;
   thumbnail?: string;
   createdAt: string;
   category?: {
@@ -33,6 +34,7 @@ interface GetCoursesParams {
   category?: string;
   sort?: string;
   status?: string;
+  featured?: boolean;
 }
 
 export const courseApi = api.injectEndpoints({
@@ -47,9 +49,10 @@ export const courseApi = api.injectEndpoints({
         search = "",
         category = "",
         sort = "",
+        featured,
       }) => ({
         url: "/courses",
-        params: { page, limit, search, category, sort },
+        params: { page, limit, search, category, sort, featured },
       }),
       providesTags: ["Courses"],
     }),

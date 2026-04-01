@@ -1,6 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
 import { api } from "./api";
+import { dashboardApi } from "./api/dashboardApi"; // ✅ IMPORTANT
+
+// keep your side-effect imports
 import "./api/inquiryApi";
 import "./api/collegeApi";
 import "./api/studentApi";
@@ -18,17 +21,23 @@ import "./api/paymentApi";
 import "./api/meetingApi";
 import "./api/batchApi";
 
-
-
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+
+    // ✅ main api
     [api.reducerPath]: api.reducer,
+
+    // ✅ dashboard api
+    [dashboardApi.reducerPath]: dashboardApi.reducer,
   },
+
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }).concat(api.middleware),
+    })
+      .concat(api.middleware)
+      .concat(dashboardApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

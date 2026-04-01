@@ -4,7 +4,7 @@ import type { RootState } from "./store";
 export const api = createApi({
 
   reducerPath: "api",
-  tagTypes: ["Colleges", "Tests", "Questions", "Students", "Sessions", "Inquiry", "College", "Student", "EntranceTests", "Auth", "StudentLog", "Teachers", "Blogs", "Testimonials", "Reports", "Placements", "Courses", "Category", "Subcategory", "Payments", "Batch", "Meetings"],
+  tagTypes: ["Colleges", "Tests", "Questions", "Students", "Sessions", "Inquiry", "College", "Student", "EntranceTests", "Auth", "StudentLog", "Teachers", "Blogs", "Testimonials", "Reports", "Placements", "Courses", "Category", "Subcategory", "Payments", "Batch", "Meetings", "Videos", "Dashboard"],
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
     prepareHeaders: (headers, { getState }) => {
@@ -134,38 +134,45 @@ export const api = createApi({
       }),
       invalidatesTags: ["Sessions"],
     }),
-    createEntranceTestSession: builder.mutation<any, any>({
-      query: (data) => ({
+    createEntranceTestSession: builder.mutation<any, { studentId: string; testId: string; collegeId: string; batchName: string; token?: string }>({
+      query: ({ token, ...data }) => ({
         url: "/admin/entrance-exam/session",
         method: "POST",
         body: data,
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
       }),
       invalidatesTags: ["Sessions"],
     }),
-    getEntranceTestInstruction: builder.query<any, { sessionId: string | null; testId: string | null; collegeId: string | null }>({
-      query: ({ sessionId, testId, collegeId }) =>
-        `/admin/entrance-exam/instructions?sessionId=${sessionId}&testId=${testId}&collegeId=${collegeId}`,
+    getEntranceTestInstruction: builder.query<any, { sessionId: string | null; testId: string | null; collegeId: string | null; token?: string }>({
+      query: ({ sessionId, testId, collegeId, token }) => ({
+        url: `/admin/entrance-exam/instructions?sessionId=${sessionId}&testId=${testId}&collegeId=${collegeId}`,
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
+      }),
+      transformResponse: (response: any) => response.data,
     }),
-    startEntranceTestSession: builder.mutation<any, any>({
-      query: (data) => ({
+    startEntranceTestSession: builder.mutation<any, { sessionId: string; testId: string; collegeId: string; token?: string }>({
+      query: ({ token, ...data }) => ({
         url: "/admin/entrance-exam/start",
         method: "POST",
         body: data,
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
       }),
       invalidatesTags: ["Sessions"],
     }),
-    saveEntranceAnswer: builder.mutation<any, { sessionId: string; questionId: string; selectedAnswer: number }>({
-      query: ({ sessionId, ...data }) => ({
+    saveEntranceAnswer: builder.mutation<any, { sessionId: string; questionId: string; selectedAnswer: number; token?: string }>({
+      query: ({ sessionId, token, ...data }) => ({
         url: `/admin/entrance-exam/session/${sessionId}/answer`,
         method: "PATCH",
         body: data,
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
       }),
     }),
-    submitEntranceTest: builder.mutation<any, { sessionId: string | null; answers: any[] }>({
-      query: ({ sessionId, ...data }) => ({
+    submitEntranceTest: builder.mutation<any, { sessionId: string | null; answers: any[]; token?: string }>({
+      query: ({ sessionId, token, ...data }) => ({
         url: `/admin/entrance-exam/session/${sessionId}/submit`,
         method: "POST",
         body: data,
+        headers: token ? { "Authorization": `Bearer ${token}` } : {},
       }),
       invalidatesTags: ["Sessions"],
     }),

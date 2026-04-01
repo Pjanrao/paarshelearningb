@@ -46,27 +46,7 @@ import React, { useEffect } from "react";
 
 const Index = () => {
 
-    useEffect(() => {
-        const counters = document.querySelectorAll<HTMLElement>(".counter");
-        const speed = 400;
-
-        counters.forEach((counter) => {
-            let current = 0;
-            const target = Number(counter.dataset.target);
-
-            const updateCounter = () => {
-                const increment = Math.ceil(target / speed);
-                if (current < target) {
-                    current += increment;
-                    counter.innerText = current.toString();
-                    setTimeout(updateCounter, 20);
-                } else {
-                    counter.innerText = target.toString();
-                }
-            };
-            updateCounter();
-        });
-    }, []);
+    // Removed counter effect for static social proof values
 
     return (
         <section className="py-8 lg:py-16 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed" style={{ backgroundImage: "url('/images/achievements/achievements.png')" }}>
@@ -115,10 +95,10 @@ const Index = () => {
                     text-center">
 
                     {[
-                        { target: 1280, label: "Happy Students" },
-                        { target: 920, label: "Approved Courses" },
-                        { target: 1250, label: "Certified Students" },
-                        { target: 1200, label: "Activity Reporting" },
+                        { value: "4.8/5", label: "Rated by Students" },
+                        { value: "500+", label: "Student Reviews" },
+                        { value: "100+", label: "Students Trained" },
+                        { value: "100%", label: "Placement Assistance Available" },
                     ].map((item, index) => (
                         <div
                             key={index}
@@ -132,14 +112,13 @@ const Index = () => {
                             "
                         >
                             <h3 className="
-                                counter
                                 text-3xl
                                 sm:text-4xl
                                 lg:text-5xl
                                 font-black
                                 text-white
-                            " data-target={item.target}>
-                                0
+                            ">
+                                {item.value}
                             </h3>
 
                             <div className="h-1.5 w-12 sm:w-16 bg-white mx-auto my-6 rounded-full opacity-60"></div>

@@ -76,7 +76,7 @@ export async function POST(request: Request) {
             user: { ...safeUser, role: "entrance_student", collegeName: college.name },
             student_access_token: accessToken,
             student_refresh_token: refreshToken,
-            studentId: student._id,
+            studentId: student._id.toString(),
             redirectTo: `/entrance-exam?testId=${testId}&collegeId=${collegeId}`,
         });
     } catch (error: unknown) {

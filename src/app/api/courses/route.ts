@@ -28,6 +28,7 @@ export async function GET(req: Request) {
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category") || "";
     const sort = searchParams.get("sort") || "";
+    const featured = searchParams.get("featured");
 
     const query: any = {};
 
@@ -37,6 +38,10 @@ export async function GET(req: Request) {
         { name: { $regex: search, $options: "i" } },
         { shortDescription: { $regex: search, $options: "i" } },
       ];
+    }
+
+    if (featured === "true") {
+      query.featured = true;
     }
 
     // 📂 Filter by category
@@ -73,6 +78,7 @@ export async function GET(req: Request) {
     return NextResponse.json(
       { message: "Failed to fetch courses", error: error.message },
       { status: 500 }
+
     );
   }
 }

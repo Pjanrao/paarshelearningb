@@ -3,6 +3,7 @@ import { NextResponse, NextRequest } from "next/server";
 
 export const authMiddleware = (handler: (request: NextRequest, ...args: any[]) => any, allowedRoles: string[] = []) => {
     return async (request: NextRequest, ...args: any[]) => {
+        console.log(`AUTH_DEBUG: Middleware reached for ${request.nextUrl.pathname}`);
         try {
             // 1. Check for token in cookies or headers
             // const token = request.cookies.get("entrance_token")?.value;

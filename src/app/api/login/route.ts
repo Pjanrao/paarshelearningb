@@ -61,6 +61,8 @@ export async function POST(req: Request) {
             role: user.role,
             name: user.name,
             email: user.email,
+            contact: user.contact,
+            image: user.image || "",
         });
     } catch (error: any) {
         console.error("Login error:", error);
@@ -70,3 +72,5 @@ export async function POST(req: Request) {
         );
     }
 }
+
+

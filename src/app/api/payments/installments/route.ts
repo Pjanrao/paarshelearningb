@@ -9,6 +9,7 @@ export async function POST(req: Request) {
         await connectDB();
 
         const { paymentId, amount, paymentMode, receipt } = await req.json();
+        console.log("RECEIPT RECEIVED:", receipt);
 
         if (!paymentId || !amount) {
             return NextResponse.json(

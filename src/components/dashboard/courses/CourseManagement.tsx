@@ -13,8 +13,9 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import CourseFormModal from "@/components/dashboard/courses/CourseFormModal";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil, Trash2, Video as VideoIcon } from "lucide-react";
 import CourseViewModal from "@/components/dashboard/courses/CourseViewModal";
+import ManageVideosModal from "@/components/dashboard/courses/ManageVideosModal";
 import { useDeleteCourseMutation } from "@/redux/api/courseApi";
 import { toast } from "sonner";
 import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
@@ -49,6 +50,8 @@ export default function CourseManagement() {
   const [viewOpen, setViewOpen] = useState(false);
   const [viewCourse, setViewCourse] = useState<any>(null);
   const [deleteCourse] = useDeleteCourseMutation();
+  const [videosOpen, setVideosOpen] = useState(false);
+  const [videoCourse, setVideoCourse] = useState<any>(null);
 
 
 
@@ -208,7 +211,7 @@ export default function CourseManagement() {
                   </td>
 
                   <td className="p-4">
-                    {course.duration} Days
+                    {course.duration} Months
                   </td>
 
                   <td className="p-4 font-semibold">
@@ -240,8 +243,20 @@ export default function CourseManagement() {
                           setViewOpen(true);
                         }}
                         className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                        title="View Course"
                       >
                         <Eye size={18} />
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setVideoCourse(course);
+                          setVideosOpen(true);
+                        }}
+                        className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition"
+                        title="Manage Videos"
+                      >
+                        <VideoIcon size={18} />
                       </button>
 
                       <button
@@ -250,6 +265,7 @@ export default function CourseManagement() {
                           setOpen(true);
                         }}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                        title="Edit Course"
                       >
                         <Pencil size={18} />
                       </button>
@@ -339,6 +355,12 @@ export default function CourseManagement() {
       <DeleteCourseDialog
         deleteId={deleteId}
         setDeleteId={setDeleteId}
+      />
+
+      <ManageVideosModal
+        open={videosOpen}
+        setOpen={setVideosOpen}
+        course={videoCourse}
       />
     </div>
   );

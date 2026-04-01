@@ -6,6 +6,7 @@ import { useGetCoursesQuery } from "@/redux/api/courseApi";
 import { useGetTeachersQuery } from "@/redux/api/teachersApi";
 import { useCreateMeetingMutation } from "@/redux/api/meetingApi";
 import { useGetBatchesQuery } from "@/redux/api/batchApi";
+import { toast } from "sonner";
 
 export default function CreateMeetingModal({ onClose }: any) {
     const [form, setForm] = useState({
@@ -43,19 +44,38 @@ export default function CreateMeetingModal({ onClose }: any) {
     });
 
 
+const generateTimeOptions = (): string[] => {
+    const times: string[] = [];
+    const now = new Date();
 
-    const generateTimeOptions = () => {
-        const times = [];
-        for (let h = 0; h < 24; h++) {
-            for (let m of [0, 30]) {
-                const hour = h % 12 || 12;
-                const ampm = h < 12 ? "AM" : "PM";
-                const minute = m === 0 ? "00" : "30";
-                times.push(`${hour}:${minute} ${ampm}`);
+    for (let h = 0; h < 24; h++) {
+        for (let m of [0, 30]) {
+
+            const date = new Date();
+            date.setHours(h);
+            date.setMinutes(m);
+
+            // ✅ If selected date is today → block past time
+            if (form.date) {
+                const selectedDate = new Date(form.date);
+                const today = new Date();
+
+                const isToday =
+                    selectedDate.toDateString() === today.toDateString();
+
+                if (isToday && date < now) continue; // ❌ skip past time
             }
+
+            const hour = h % 12 || 12;
+            const ampm = h < 12 ? "AM" : "PM";
+            const minute = m === 0 ? "00" : "30";
+
+            times.push(`${hour}:${minute} ${ampm}`);
         }
-        return times;
-    };
+    }
+
+    return times;
+};
 
     const addOneHour = (time: string) => {
         const [hourMin, period] = time.split(" ");
@@ -88,7 +108,32 @@ export default function CreateMeetingModal({ onClose }: any) {
     };
 
     const timeOptions = generateTimeOptions();
+const now = new Date();
 
+// convert time string → proper Date
+const convertToDate = (date: string, time: string) => {
+    if (!date || !time) return null;
+
+    const [hourMin, period] = time.split(" ");
+    let [hour, min] = hourMin.split(":").map(Number);
+
+    if (period === "PM" && hour !== 12) hour += 12;
+    if (period === "AM" && hour === 12) hour = 0;
+
+    const d = new Date(date);
+    d.setHours(hour);
+    d.setMinutes(min);
+    d.setSeconds(0);
+
+    return d;
+};
+
+const selected = convertToDate(form.date, form.startTime);
+
+if (selected && selected < now) {
+toast.error("Cannot select past date/time");
+    return;
+}
     const handleSubmit = async () => {
         try {
             await createMeeting({
@@ -270,10 +315,11 @@ export default function CreateMeetingModal({ onClose }: any) {
                             <div>
                                 <label className={labelClass}>Date*</label>
                                 <input
-                                    type="date"
-                                    className="border px-3 py-2 rounded-lg w-full text-sm"
-                                    onChange={(e) => setForm({ ...form, date: e.target.value })}
-                                />
+    type="date"
+    min={new Date().toLocaleDateString("en-CA")}
+    className="border px-3 py-2 rounded-lg w-full text-sm"
+    onChange={(e) => setForm({ ...form, date: e.target.value })}
+/>
                             </div>
 
                             {/* Platform */}

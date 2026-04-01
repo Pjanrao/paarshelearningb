@@ -50,10 +50,10 @@ export default function BlogPostPage() {
 
     // Estimate reading time
     const readingTime = post?.content
-        ? Math.max(1, Math.ceil(post.content.split(/\s+/).length / 200))
+        ? Math.max(5, Math.ceil(post.content.split(/\s+/).length / 200))
         : 5;
 
-    if (loading) {
+    if (loading) { 
         return (
             <div className="bg-[#F8FAFC] min-h-screen pt-24">
                 <div className="container mx-auto px-4 max-w-4xl">

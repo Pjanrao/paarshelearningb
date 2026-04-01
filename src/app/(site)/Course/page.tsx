@@ -37,7 +37,7 @@ const CoursePage = () => {
             Our Courses
           </h1>
           <p className="text-blue-900/70 text-lg md:text-lg mb-10 opacity-90 max-w-2xl mx-auto font-medium">
-            Industry-oriented courses designed to build real-world skills and propel your career forward.
+            Our Digital Marketing Course in Nashik is designed for students, job seekers, and entrepreneurs. Learn SEO, social media marketing, content marketing, and paid advertising with hands-on experience and live projects.
           </p>
 
           {/* Search Bar */}
@@ -71,7 +71,7 @@ const CoursePage = () => {
       {/* Categories & Filter Tabs */}
       <section className="container mx-auto max-w-7xl px-4 -mt-24 relative z-20">
         <div className="bg-white dark:bg-gray-900 p-2 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 backdrop-blur-md">
-          <div className="flex items-center gap-2 overflow-x-auto py-1 px-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="flex items-center gap-2 overflow-x-auto py-1 px-1 no-scrollbar">
             <button
               onClick={() => {
                 setActiveCategory("all");

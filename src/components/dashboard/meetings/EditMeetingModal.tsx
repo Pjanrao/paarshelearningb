@@ -5,6 +5,8 @@ import { Icon } from "@iconify/react";
 import { useGetCoursesQuery } from "@/redux/api/courseApi";
 import { useGetTeachersQuery } from "@/redux/api/teachersApi";
 import { useUpdateMeetingMutation } from "@/redux/api/meetingApi";
+import { useGetBatchesQuery } from "@/redux/api/batchApi";
+import { toast } from "sonner";
 
 
 export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
@@ -22,6 +24,7 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
     }, [meeting]);
 
     const [updateMeeting, { isLoading }] = useUpdateMeetingMutation();
+    const [openBatch, setOpenBatch] = useState(false);
 
     const [form, setForm] = useState<any>({
         title: "",
@@ -32,6 +35,7 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
         endTime: "",
         platform: "Zoom",
         duration: 60,
+        batch: "",
         course: "",
         meetingLink: "",
     });
@@ -93,11 +97,15 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
 
         return new Date(iso).toISOString();
     };
+    const { data: batchData = [] } = useGetBatchesQuery(form.course, {
+        skip: !form.course, // don't call if no course selected
+    });
 
     // ✅ PREFILL DATA (FIXED)
     useEffect(() => {
         if (meeting) {
             console.log("👉 FULL MEETING:", meeting);
+
 
             const start = formatTime(meeting.startTimeISO || meeting.startTime);
             const end = formatTime(meeting.endTimeISO || meeting.endTime);
@@ -109,6 +117,7 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
                 title: meeting.title || "",
                 teacher: meeting.teacher?._id || meeting.teacher || "",
                 description: meeting.description || "",
+                batch: meeting.batch?._id || meeting.batch || "",
                 date: meeting.meetingDate
                     ? new Date(meeting.meetingDate).toISOString().split("T")[0]
                     : "",
@@ -123,19 +132,60 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
     }, [meeting]);
 
     // ⏰ TIME OPTIONS
-    const generateTimeOptions = () => {
-        const times = [];
-        for (let h = 0; h < 24; h++) {
-            for (let m of [0, 30]) {
-                const hour = h % 12 || 12;
-                const ampm = h < 12 ? "AM" : "PM";
-                const minute = m === 0 ? "00" : "30";
-                times.push(`${hour}:${minute} ${ampm}`);
-            }
-        }
-        return times;
-    };
+//   const generateTimeOptions = (): string[] => {
+//     const times: string[] = [];
 
+//     for (let h = 0; h < 24; h++) {
+//         for (let m of [0, 30]) {
+//             const hour = h % 12 || 12;
+//             const ampm = h < 12 ? "AM" : "PM";
+//             const minute = m === 0 ? "00" : "30";
+
+//             times.push(`${hour}:${minute} ${ampm}`);
+//         }
+//     }
+
+//     return times;
+// };
+const generateTimeOptions = (): string[] => {
+    const times: string[] = [];
+    const now = new Date();
+
+    const selectedDate = form.date ? new Date(form.date) : null;
+    const today = new Date();
+
+    const isToday =
+        selectedDate &&
+        selectedDate.toDateString() === today.toDateString();
+
+    const isPastDate =
+        selectedDate &&
+        selectedDate < new Date(today.toDateString());
+
+    for (let h = 0; h < 24; h++) {
+        for (let m of [0, 30]) {
+
+            const slot = new Date();
+            slot.setHours(h);
+            slot.setMinutes(m);
+            slot.setSeconds(0);
+
+            // ✅ ONLY restrict for TODAY
+            if (isToday && slot < now) continue;
+
+            // ✅ allow all for past date
+            // ✅ allow all for future date
+
+            const hour = h % 12 || 12;
+            const ampm = h < 12 ? "AM" : "PM";
+            const minute = m === 0 ? "00" : "30";
+
+            times.push(`${hour}:${minute} ${ampm}`);
+        }
+    }
+
+    return times;
+};
     const timeOptions = generateTimeOptions();
 
     // ✅ UPDATE API
@@ -145,8 +195,10 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
                 id: meeting._id,
                 data: {
                     ...form,
-                    startTime: convertToISO(form.date, form.startTime),
-                    endTime: convertToISO(form.date, form.endTime),
+                    // startTime: convertToISO(form.date, form.startTime),
+                    // endTime: convertToISO(form.date, form.endTime),
+                    startTime: form.startTime,
+endTime: form.endTime,
                 },
             }).unwrap();
 
@@ -246,7 +298,7 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
                                     <div
                                         key={c._id}
                                         onClick={() => {
-                                            setForm({ ...form, course: c._id });
+                                            setForm({ ...form, course: c._id, batch: "", });
                                             setOpenCourse(false);
                                         }}
                                         title={c.name}
@@ -260,15 +312,58 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
                         )}
                     </div>
 
+                    {/* Batch */}
+                    <div className="relative">
+                        <label className={labelClass}>Batch*</label>
+
+                        <div
+                            onClick={() => {
+                                if (!form.course) return toast.error("Select course first");
+                                setOpenBatch(!openBatch);
+                            }}
+                            className="border h-10 px-3 rounded-lg flex items-center justify-between cursor-pointer"
+                        >
+                            {form.batch
+                                ? batchData.find((b: any) => b._id === form.batch)?.name
+                                : "Select Batch"}
+                            <Icon icon="mdi:chevron-down" />
+                        </div>
+
+                        {openBatch && (
+                            <div className="absolute z-50 bg-white border rounded-lg mt-1 w-full max-h-40 overflow-y-auto">
+                                {batchData.length === 0 ? (
+                                    <div className="p-2 text-gray-400 text-sm">
+                                        No batches found
+                                    </div>
+                                ) : (
+                                    batchData.map((b: any) => (
+                                        <div
+                                            key={b._id}
+                                            onClick={() => {
+                                                setForm({ ...form, batch: b._id });
+                                                setOpenBatch(false);
+                                            }}
+                                            className="p-2 hover:bg-blue-50 cursor-pointer"
+                                        >
+                                            {b.name}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Date */}
                     <div>
                         <label className={labelClass}>Date*</label>
-                        <input
-                            type="date"
-                            value={form.date}
-                            onChange={(e) => setForm({ ...form, date: e.target.value })}
-                            className="border px-3 py-2 rounded-lg w-full"
-                        />
+                       <input
+    type="date"
+    value={form.date}
+    min={new Date().toLocaleDateString("en-CA")}   // ✅ ADD THIS
+    onChange={(e) => setForm({ ...form, date: e.target.value })}
+    className="border px-3 py-2 rounded-lg w-full"
+/>
+
                     </div>
 
                     {/* Platform */}

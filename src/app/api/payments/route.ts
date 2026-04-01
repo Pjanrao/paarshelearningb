@@ -4,32 +4,46 @@ import Payment from "@/models/Payment";
 import User from "@/models/User";
 import Course from "@/models/Course";
 
-// export async function GET() {
-//   try {
-//     await connectDB();
 
-//     const payments = await Payment.find({})
-//       .populate({
-//         path: "studentId",
-//         model: User,
-//         select: "name email contact",
-//       })
-//       .populate({
-//         path: "courseId",
-//         model: Course,
-//         select: "name fee",
-//       })
-//       .sort({ createdAt: -1 })
-//       .lean();
 
-//     return NextResponse.json(payments ?? []);
+// export async function GET(req: Request) {
+//     try {
+//         await connectDB();
 
-//   } catch (error) {
-//     console.error("PAYMENT FETCH ERROR:", error);
-//     return NextResponse.json([], { status: 200 });
-//   }
+//         const { searchParams } = new URL(req.url);
+
+//         const courseId = searchParams.get("courseId");
+
+//         // ✅ CONDITIONALLY APPLY FILTER
+//         const filter: any = {};
+
+//         if (courseId) {
+//             filter.courseId = courseId;
+//         }
+
+//         const payments = await Payment.find(filter)
+//             .populate({
+//                 path: "studentId",
+//                 model: User,
+//                 select: "name email contact",
+//             })
+//             .populate({
+//                 path: "courseId",
+//                 model: Course,
+//                 select: "name fee",
+//             })
+//             .sort({ createdAt: -1 })
+//             .lean();
+
+//         return NextResponse.json(payments ?? []);
+
+//     } catch (error) {
+//         console.error("PAYMENT FETCH ERROR:", error);
+
+//         // keep your original behavior (don’t break UI)
+//         return NextResponse.json([], { status: 200 });
+//     }
 // }
-
 export async function GET(req: Request) {
     try {
         await connectDB();
@@ -37,12 +51,17 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
 
         const courseId = searchParams.get("courseId");
+        const studentId = searchParams.get("studentId"); // ✅ ADD THIS
 
-        // ✅ CONDITIONALLY APPLY FILTER
         const filter: any = {};
 
+        // ✅ FIX: apply both filters properly
         if (courseId) {
             filter.courseId = courseId;
+        }
+
+        if (studentId) {
+            filter.studentId = studentId;
         }
 
         const payments = await Payment.find(filter)
@@ -63,8 +82,6 @@ export async function GET(req: Request) {
 
     } catch (error) {
         console.error("PAYMENT FETCH ERROR:", error);
-
-        // keep your original behavior (don’t break UI)
         return NextResponse.json([], { status: 200 });
     }
 }
@@ -190,4 +207,4 @@ export async function POST(req: Request) {
 //   }
 // }
 
-// 
+//

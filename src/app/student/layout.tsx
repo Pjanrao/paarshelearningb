@@ -14,7 +14,13 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { logout as logoutAction } from "@/redux/authSlice";
+import Cookies from "js-cookie";
+import { signOut } from "next-auth/react";
+import ProfileDropdown from "@/components/dashboard/ProfileDropdown";
 
 export default function StudentLayout({
     children,
@@ -22,6 +28,37 @@ export default function StudentLayout({
     children: React.ReactNode;
 }) {
     const pathname = usePathname();
+    const router = useRouter();
+    const dispatch = useDispatch();
+    const user = useSelector((state: RootState) => state.auth.user);
+
+    const handleLogout = async () => {
+        try {
+            // Priority 1: Clear Server-side Cookies
+            await fetch("/api/auth/logout", { method: "POST" });
+
+            // Priority 2: NextAuth SignOut (clears session cookies)
+            await signOut({ redirect: false });
+
+            // Priority 3: Bulletproof client-side clearing
+            Cookies.remove("token", { path: '/' });
+            Cookies.remove("role", { path: '/' });
+            document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
+            // LocalStorage and Redux
+            localStorage.removeItem("token");
+            localStorage.removeItem("role");
+            localStorage.removeItem("user");
+            dispatch(logoutAction());
+
+            // Use hard redirect to ensure cookies are strictly updated in the next request
+            window.location.href = "/signin";
+        } catch (error) {
+            console.error("Logout error:", error);
+            window.location.href = "/signin";
+        }
+    };
 
     const menuItems = [
         { icon: LayoutDashboard, label: "Dashboard", href: "/student" },
@@ -64,7 +101,7 @@ export default function StudentLayout({
                             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                         </button>
                         <div className="h-8 w-px bg-gray-100 mx-2 hidden sm:block"></div>
-                        <span className="text-gray-900 font-bold hidden sm:inline">Welcome back, Student!</span>
+                        <ProfileDropdown />
                     </div>
                 </div>
             </header>
@@ -97,8 +134,13 @@ export default function StudentLayout({
                                 <UserIcon size={20} />
                             </div>
                             <div>
-                                <p className="font-bold text-sm">Student Account</p>
-                                <Link href="/signin" className="text-xs text-blue-300 hover:text-white transition-colors">Sign Out</Link>
+                                <p className="font-bold text-sm truncate max-w-[120px]">{user?.name || "Student Account"}</p>
+                                <button
+                                    onClick={handleLogout}
+                                    className="text-xs text-blue-300 hover:text-white transition-colors cursor-pointer"
+                                >
+                                    Sign Out
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function PUT(req: Request, context: any) {
     await connectDB();
 
-    const { id } = await context.params;
+const { id } = context.params;
     const body = await req.json();
 
     // 🔥 CONVERT TIME (ADD THIS)

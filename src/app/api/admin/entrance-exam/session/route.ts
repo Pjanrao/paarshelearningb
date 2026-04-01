@@ -9,7 +9,13 @@ import { authMiddleware } from "@/middlewares/auth";
 
 export const POST = authMiddleware(async function (request: Request) {
     try {
-        await _db();
+        try {
+            await _db();
+        } catch (dbError) {
+            console.error("SESSION_DEBUG: DB Connection failed", dbError);
+            return NextResponse.json({ success: false, error: "Database connection failed" }, { status: 500 });
+        }
+
         const payload = await request.json();
         console.log("SESSION_DEBUG: Handler reached");
         console.log("SESSION_DEBUG: Auth Header:", request.headers.get("authorization"));
@@ -17,26 +23,36 @@ export const POST = authMiddleware(async function (request: Request) {
         const { studentId, testId, collegeId, batchName } = payload;
 
         if (!studentId || !testId || !collegeId) {
-            console.log("Session creation failed: Missing core identification fields", { studentId, testId, collegeId });
+            console.error("SESSION_DEBUG: Missing required fields", { studentId, testId, collegeId });
             return NextResponse.json(
-                { success: false, error: "Student ID, test ID, and college ID are required" },
+                { success: false, error: `Missing fields: ${[!studentId && 'studentId', !testId && 'testId', !collegeId && 'collegeId'].filter(Boolean).join(', ')}` },
                 { status: 400 }
             );
         }
 
-        const college = await CollegeModel.findById(collegeId);
+        console.log("SESSION_DEBUG: Finding college", collegeId);
+        const college = await CollegeModel.findById(collegeId).catch(err => {
+            console.error("SESSION_DEBUG: CollegeModel.findById error", err);
+            return null;
+        });
+        console.log("SESSION_DEBUG: College found result:", !!college);
         if (!college) {
             return NextResponse.json(
-                { success: false, error: "College not found" },
+                { success: false, error: "College not found. Please verify the collegeId." },
                 { status: 400 }
             );
         }
 
-        const test = await TestModel.findOne({ testId, college: collegeId });
+        console.log("SESSION_DEBUG: Finding test", { testId, collegeId });
+        const test = await TestModel.findOne({ testId, college: collegeId }).catch(err => {
+            console.error("SESSION_DEBUG: TestModel.findOne error", err);
+            return null;
+        });
+        console.log("SESSION_DEBUG: Test found result:", !!test);
         if (!test) {
             console.log("Session creation failed: Test not found for these IDs", { testId, collegeId });
             return NextResponse.json(
-                { success: false, error: "Exam details not found for this college." },
+                { success: false, error: `Exam details (ID: ${testId}) not found for this college.` },
                 { status: 400 }
             );
         }
@@ -117,14 +133,18 @@ export const POST = authMiddleware(async function (request: Request) {
             }
         }
 
-        const student = await StudentModel.findById(studentId);
+        const student = await StudentModel.findById(studentId).catch(err => {
+            console.error("SESSION_DEBUG: StudentModel.findById error", err);
+            return null;
+        });
         if (!student) {
-            console.log("Session 403: Student not found", { studentId });
+            console.error("SESSION_DEBUG: Student not found", { studentId });
             return NextResponse.json(
-                { success: false, error: "Student account not found." },
+                { success: false, error: `Student account (ID: ${studentId}) not found.` },
                 { status: 403 }
             );
         }
+        console.log("SESSION_DEBUG: Student found:", student.email);
 
         if (student.college.toString() !== collegeId) {
             console.log("Session 403: Student/College mismatch", {
@@ -170,15 +190,17 @@ export const POST = authMiddleware(async function (request: Request) {
 
         const questions = await QuestionModel.aggregate([
             { $match: { isActive: true } },
-            { $sample: { size: test.testSettings.questionsPerTest } },
+            { $sample: { size: test.testSettings.questionsPerTest || 50 } },
         ]);
 
         if (!questions || questions.length === 0) {
+            console.error("SESSION_DEBUG: No active questions found");
             return NextResponse.json(
                 { success: false, error: "No active questions available" },
                 { status: 400 }
             );
         }
+        console.log("SESSION_DEBUG: Questions sampled:", questions.length);
 
         const session = new TestSessionModel({
             student: studentId,
@@ -205,7 +227,7 @@ export const POST = authMiddleware(async function (request: Request) {
             success: true,
             message: "Test session created successfully",
             data: {
-                sessionId: session._id,
+                sessionId: session._id.toString(),
             },
         });
     } catch (error: unknown) {

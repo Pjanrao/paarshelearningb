@@ -12,6 +12,7 @@ export const POST = authMiddleware(async function (request: Request) {
         const { sessionId, testId, collegeId } = await request.json();
 
         if (!sessionId || !testId || !collegeId) {
+            console.error("START_DEBUG: Missing fields", { sessionId, testId, collegeId });
             return NextResponse.json(
                 { success: false, error: "Session ID, test ID, and college ID are required" },
                 { status: 400 }
@@ -41,11 +42,13 @@ export const POST = authMiddleware(async function (request: Request) {
         });
 
         if (!session || session.status !== "pending") {
+            console.error("START_DEBUG: Invalid session status", { status: session?.status });
             return NextResponse.json(
                 { success: false, error: "Invalid or already started test session" },
                 { status: 400 }
             );
         }
+        console.log("START_DEBUG: Session found and pending, starting now.");
 
         session.status = "active";
         session.startTime = new Date();
@@ -67,7 +70,7 @@ export const POST = authMiddleware(async function (request: Request) {
             message: "Test session started successfully",
             data: {
                 session: {
-                    sessionId: session._id,
+                    sessionId: session._id.toString(),
                     startTime: session.startTime,
                     duration: session.duration,
                     status: session.status,

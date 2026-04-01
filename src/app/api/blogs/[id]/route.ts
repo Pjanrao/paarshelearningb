@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db";
 import Blog from "@/models/Blog";
 import { NextResponse } from "next/server";
 
+// ✅ GET SINGLE BLOG
 export async function GET(
     req: Request,
     { params }: { params: Promise<{ id: string }> }
@@ -9,6 +10,7 @@ export async function GET(
     try {
         await connectDB();
         const { id } = await params;
+
         const blog = await Blog.findById(id);
 
         if (!blog) {
@@ -16,15 +18,13 @@ export async function GET(
         }
 
         return NextResponse.json({ blog }, { status: 200 });
+
     } catch (error: any) {
-        console.error("❌ Error fetching blog:", error);
-        return NextResponse.json(
-            { message: "Failed to fetch blog", error: error.message },
-            { status: 500 }
-        );
+        return NextResponse.json({ message: "Failed to fetch blog" }, { status: 500 });
     }
 }
 
+// ✅ UPDATE BLOG
 export async function PUT(
     req: Request,
     { params }: { params: Promise<{ id: string }> }
@@ -47,15 +47,13 @@ export async function PUT(
             { message: "Blog updated successfully", blog },
             { status: 200 }
         );
+
     } catch (error: any) {
-        console.error("❌ Error updating blog:", error);
-        return NextResponse.json(
-            { message: "Failed to update blog", error: error.message },
-            { status: 500 }
-        );
+        return NextResponse.json({ message: "Failed to update blog" }, { status: 500 });
     }
 }
 
+// ✅ DELETE BLOG
 export async function DELETE(
     req: Request,
     { params }: { params: Promise<{ id: string }> }
@@ -63,6 +61,7 @@ export async function DELETE(
     try {
         await connectDB();
         const { id } = await params;
+
         const blog = await Blog.findByIdAndDelete(id);
 
         if (!blog) {
@@ -73,11 +72,8 @@ export async function DELETE(
             { message: "Blog deleted successfully" },
             { status: 200 }
         );
+
     } catch (error: any) {
-        console.error("❌ Error deleting blog:", error);
-        return NextResponse.json(
-            { message: "Failed to delete blog", error: error.message },
-            { status: 500 }
-        );
+        return NextResponse.json({ message: "Failed to delete blog" }, { status: 500 });
     }
 }

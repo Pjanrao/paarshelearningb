@@ -75,7 +75,7 @@ export default function ViewPaymentModal({ payment, close }: any) {
                                 ₹{payment.remainingAmount}
                             </div>
 
-                            <div className="p-2 border-b font-medium text-gray-500">
+                            {/* <div className="p-2 border-b font-medium text-gray-500">
                                 Payment Mode
                             </div>
                             <div className="p-2 border-b">
@@ -89,11 +89,11 @@ export default function ViewPaymentModal({ payment, close }: any) {
                                 {payment.createdAt
                                     ? new Date(payment.createdAt).toLocaleString()
                                     : "-"}
-                            </div>
+                            </div> 
 
                             {/* RECEIPT VIEW */}
 
-                            {payment.paymentMode === "Online" && payment.receipt && (
+                            {/* {payment.paymentMode === "Online" && payment.receipt && (
 
                                 <>
                                     <div className="p-2 font-medium text-gray-500">
@@ -111,7 +111,7 @@ export default function ViewPaymentModal({ payment, close }: any) {
                                     </div>
                                 </>
 
-                            )}
+                            )} */}
 
                         </div>
 
@@ -278,43 +278,3 @@ export default function ViewPaymentModal({ payment, close }: any) {
         </div>
     );
 }
-// "use client";
-
-// export default function ViewPaymentModal({ payment, close }: any) {
-//   return (
-//     <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
-
-//       <div className="bg-white p-6 rounded-xl w-[500px] relative">
-
-//         <button
-//           onClick={close}
-//           className="absolute top-3 right-3 text-gray-500"
-//         >
-//           ✕
-//         </button>
-
-//         <h2 className="text-xl font-semibold mb-4">
-//           Payment Details
-//         </h2>
-
-//         <div className="space-y-2 text-sm">
-
-//           <p><b>Student:</b> {payment.studentId?.name}</p>
-//           <p><b>Course:</b> {payment.courseId?.name}</p>
-//           <p><b>Total Fee:</b> ₹{payment.totalAmount}</p>
-//           <p><b>Paid:</b> ₹{payment.paidAmount}</p>
-//           <p><b>Remaining:</b> ₹{payment.remainingAmount}</p>
-//           <p><b>Mode:</b> {payment.paymentMode}</p>
-
-//           <p>
-//             <b>Date:</b>{" "}
-//             {new Date(payment.createdAt).toLocaleDateString()}
-//           </p>
-
-//         </div>
-
-//       </div>
-
-//     </div>
-//   );
-// }
