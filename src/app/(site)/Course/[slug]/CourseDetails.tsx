@@ -307,6 +307,8 @@ interface CourseType {
   curriculum: CurriculumItem[];
   videoUrl: string;
   difficulty?: string;
+  popularTags?: string[];
+  languages?: string[];
 }
 
 const COUNTRY_CODES = [
@@ -469,6 +471,19 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             <p className="text-sm md:text-base text-blue-50 mb-5 max-w-lg opacity-90 leading-relaxed">
               {course.shortDescription}
             </p>
+            {/* ✅ TAGS */}
+            {course.popularTags && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {course.popularTags.map((tag: string, index: number) => (
+                  <span
+                    key={index}
+                    className="bg-white/20 text-white text-xs px-3 py-1 rounded-full backdrop-blur-md border border-white/10"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="flex flex-wrap gap-3">
               <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg backdrop-blur-sm border border-white/10">
                 <Icon icon="solar:user-bold" className="text-yellow-400 w-4 h-4" />
@@ -497,7 +512,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
       {/* Meta Info Bar */}
       <div className="container mx-auto max-w-7xl px-4 -mt-6 relative z-20">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-3 md:p-5 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 border border-gray-100 dark:border-gray-800">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-3 md:p-5 grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 border border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600">
               <Icon icon="solar:clock-circle-bold" className="w-4 h-4 md:w-5 md:h-5" />
@@ -526,6 +541,22 @@ const CourseDetails = ({ slug }: { slug: string }) => {
               <p className="text-xs md:text-sm font-bold dark:text-white">{course.mode || 'Professional'}</p>
             </div>
           </div>
+          {/* ✅ Languages */}
+          {course.languages && (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center text-indigo-600">
+                <Icon icon="solar:global-bold" className="w-4 h-4 md:w-5 md:h-5" />
+              </div>
+              <div>
+                <p className="text-[9px] text-gray-500 uppercase font-bold tracking-wider">
+                  Languages
+                </p>
+                <p className="text-xs md:text-sm font-bold dark:text-white">
+                  {course.languages.join(", ")}
+                </p>
+              </div>
+            </div>
+          )}
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center text-yellow-600">
               <Icon icon="solar:star-bold" className="w-4 h-4 md:w-5 md:h-5" />

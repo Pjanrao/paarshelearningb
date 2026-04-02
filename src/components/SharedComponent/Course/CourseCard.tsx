@@ -48,15 +48,15 @@ const CourseCard = ({ course }: { course: Course }) => {
     <div className="group bg-white dark:bg-darkmode rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-800">
       {/* Course Image */}
       <div className="relative aspect-[16/9] overflow-hidden">
-        <Link href={`/Course/${generatedSlug}`} className="block w-full h-full">
-          <Image
-            src={courseImage}
-            alt={name}
-            className="transition-transform duration-500 group-hover:scale-110 object-cover w-full h-full"
-            fill
-            quality={100}
-            unoptimized
-          />
+        <Link href={`/Course/${generatedSlug}`}>
+          <div className="relative aspect-[16/9] overflow-hidden">
+            <Image
+              src={courseImage}
+              alt={name}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          </div>
         </Link>
       </div>
 

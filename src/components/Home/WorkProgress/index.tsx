@@ -123,7 +123,7 @@ const Progresswork = ({ isColorMode }: { isColorMode: Boolean }) => {
                   width={360}
                   height={360}
                   quality={100}
-                  className='w-fit max-w-[360px] object-contain transform group-hover:scale-105 transition-transform duration-1000'
+                  className='h-auto w-fit max-w-[360px] object-contain transform group-hover:scale-105 transition-transform duration-1000'
                 />
               </div>
 

@@ -1,10 +1,16 @@
 /** @type {import('next').NextConfig} */
-
 const nextConfig = {
-  // output: "export", // Commented out to enable API routes for NextAuth
   images: {
-    unoptimized: true,
+    unoptimized: true, // keep if you want (optional)
+
+    domains: [
+      "res.cloudinary.com",
+      "upload.wikimedia.org",
+    ],
+
+    qualities: [25, 50, 75, 100],
   },
+
   trailingSlash: true,
 };
 

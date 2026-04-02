@@ -76,6 +76,7 @@ import { Servicebox } from '@/app/api/data'
 import Image from 'next/image'
 
 const Services = () => {
+
   return (
     <section className='bg-section dark:bg-darklight py-6 lg:py-12' id='services'>
       <div className='container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8'>
@@ -97,10 +98,11 @@ const Services = () => {
               className='min-w-[85%] sm:min-w-[48%] snap-center bg-white dark:bg-darkmode border border-transparent hover:border-primary rounded-2xl shadow-service p-4 sm:p-5 flex flex-col items-center text-center gap-3 transition duration-300 hover:shadow-xl'>
               <Image
                 src={item.icon}
-                alt='Service Box'
+                alt="Service Box"
                 width={36}
                 height={36}
-                className='object-contain' />
+                className="w-auto h-9 object-contain"
+              />
 
               <h3 className='text-md sm:text-lg font-bold max-w-[180px]'>
                 {item.title}
@@ -115,16 +117,17 @@ const Services = () => {
 
         <div className='hidden lg:grid grid-cols-3 gap-6'>
           {Servicebox.map((item, index) => (
+
             <div
               key={index}
               className='bg-white dark:bg-darkmode border border-transparent hover:border-secondary rounded-2xl shadow-service py-7 px-6 flex flex-col items-center text-center gap-4 transition duration-300 hover:-translate-y-1 hover:shadow-lg'>
               <Image
                 src={item.icon}
-                alt='Service Box'
+                alt="Service Box"
                 width={36}
                 height={36}
-                className='object-contain' />
-
+                className="w-auto h-9 object-contain"
+              />
               <h3 className='text-lg font-bold max-w-44'>
                 {item.title}
               </h3>
