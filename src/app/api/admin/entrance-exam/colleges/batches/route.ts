@@ -18,6 +18,8 @@ export const GET = authMiddleware(async function (request: Request) {
 
         const batches = await Test.distinct('batchName', { college: collegeId });
 
+        console.log("batches", batches);
+
         if (!batches || batches.length === 0) {
             return NextResponse.json({
                 success: true,
