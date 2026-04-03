@@ -20,6 +20,8 @@ interface Student {
     email: string;
     contact: string;
     avatar?: string;
+    status: string;
+    deletionReason?: string;
     createdAt: string;
 }
 
@@ -270,6 +272,7 @@ export default function StudentsPage() {
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Contact</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Joined Date</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Student Account Status</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
@@ -301,6 +304,13 @@ export default function StudentsPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.email}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{student.contact || "N/A"}</td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{formatDate(student.createdAt)}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                {student.status === "deleted" ? (
+                                                    <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold uppercase tracking-wider">Account Deleted</span>
+                                                ) : (
+                                                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold uppercase tracking-wider">Account Active</span>
+                                                )}
+                                            </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                 <div className="flex items-center gap-2">
                                                     <button onClick={() => openViewModal(student)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="View Details"><Eye size={18} /></button>
@@ -430,6 +440,14 @@ export default function StudentsPage() {
                                     <span className="text-gray-500 text-sm font-medium">User ID</span>
                                     <span className="text-gray-900 font-mono text-xs">{selectedStudent._id}</span>
                                 </div>
+                                {selectedStudent.status === "deleted" && (
+                                    <div className="mt-4 pt-4 border-t border-gray-200">
+                                        <span className="text-red-500 text-sm font-bold uppercase tracking-wider block mb-2">Reason of account delete</span>
+                                        <div className="bg-red-50 p-3 rounded-lg border border-red-100 text-gray-700 text-sm italic">
+                                            "{selectedStudent.deletionReason || "No reason provided"}"
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="flex gap-3 pt-2">
                                 <button

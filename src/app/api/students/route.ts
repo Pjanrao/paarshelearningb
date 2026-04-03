@@ -21,10 +21,17 @@ export async function GET(req: Request) {
       ];
     }
 
-    const [students, total] = await Promise.all([
+    const [studentsData, total] = await Promise.all([
       User.find(query, { password: 0 }).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       User.countDocuments(query),
     ]);
+
+    // Map through students to provide default status if missing
+    const students = studentsData.map((s: any) => ({
+      ...s,
+      status: s.status || "active",
+      deletionReason: s.deletionReason || ""
+    }));
 
     return NextResponse.json({
       students,
@@ -43,7 +50,10 @@ export async function DELETE(req: Request) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
-    await User.findByIdAndDelete(id);
+    await User.findByIdAndUpdate(id, {
+      status: "deleted",
+      deletionReason: "Deleted by Admin",
+    });
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -249,6 +249,9 @@ import Image from "next/image";
 import { Icon } from "@iconify/react";
 import { useGetCourseByIdQuery } from "@/redux/api/courseApi";
 import toast, { Toaster } from 'react-hot-toast';
+import { useGetCoursesQuery } from "@/redux/api/courseApi";
+import CourseCard from "@/components/SharedComponent/Course/CourseCard"; // adjust path
+
 
 // import VideoPlayer from '@/components/SharedComponent/Course/VideoPlayer';
 import { getImgPath } from '@/utils/image';
@@ -320,8 +323,28 @@ const COUNTRY_CODES = [
 ];
 
 const CourseDetails = ({ slug }: { slug: string }) => {
+
+  const { data: coursesResponse } = useGetCoursesQuery({
+    page: 1,
+    limit: 20, // get enough courses for slider
+  });
+
+
   const { data: courseData, isLoading } = useGetCourseByIdQuery(slug);
   const course = courseData as any;
+
+  const allCourses = coursesResponse?.courses || [];
+
+  // ✅ Random courses (excluding current)
+  const displayCourses = React.useMemo(() => {
+    if (!course) return [];
+
+    return allCourses
+      .filter((c: any) => c._id !== course._id)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 6);
+  }, [allCourses, course]);
+
   const [activeAccordion, setActiveAccordion] = useState<number | null>(0);
   const router = useRouter();
   const downloadPDF = async (url: string) => {
@@ -905,6 +928,27 @@ const CourseDetails = ({ slug }: { slug: string }) => {
               )}
 
             </div>
+          </div>
+        </div>
+      </section>
+      {/* ✅ Related Courses */}
+      <section className="container mx-auto max-w-7xl px-4 mb-16">
+        <div className="flex justify-center mb-5">
+          <h2 className="text-xl md:text-2xl font-bold text-[#2B4278] dark:text-white">
+            You May Also Like
+          </h2>
+        </div>
+
+        <div className="overflow-hidden relative py-4">
+          <div className="flex gap-5 animate-scroll">
+            {[...displayCourses, ...displayCourses].map((item: any, index: number) => (
+              <div
+                key={index}
+                className="min-w-[260px] max-w-[260px] flex-shrink-0"
+              >
+                <CourseCard course={item} />
+              </div>
+            ))}
           </div>
         </div>
       </section>

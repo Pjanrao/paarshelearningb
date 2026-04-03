@@ -50,13 +50,32 @@ export async function POST(req: Request) {
             );
         }
 
-        // --- Check duplicate ---
+        // --- Check duplicate or re-activate deleted account ---
         const userExists = await User.findOne({ email });
         if (userExists) {
-            return NextResponse.json(
-                { message: "An account with this email already exists." },
-                { status: 400 }
-            );
+            if (userExists.status === "deleted") {
+                // Re-activate the account
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(password, salt);
+
+                await User.findByIdAndUpdate(userExists._id, {
+                    name: name.trim(),
+                    contact,
+                    password: hashedPassword,
+                    status: "active",
+                    deletionReason: "", // Clear the reason
+                });
+
+                return NextResponse.json(
+                    { message: "Account re-activated. You can now sign in." },
+                    { status: 201 }
+                );
+            } else {
+                return NextResponse.json(
+                    { message: "An account with this email already exists." },
+                    { status: 400 }
+                );
+            }
         }
 
         // --- Hash password and create user ---

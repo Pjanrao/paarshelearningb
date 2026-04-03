@@ -26,10 +26,44 @@ const userSchema = new mongoose.Schema(
             enum: ["student", "teacher", "admin"],
             default: "student",
         },
+        status: {
+            type: String,
+            enum: ["active", "deleted"],
+            default: "active",
+        },
+        deletionReason: {
+            type: String,
+            default: "",
+        },
+
+
+        referralCode: {
+            type: String,
+            unique: true,
+        },
+
+        referredBy: {
+            type: String,
+            default: null,
+        },
+
+        walletBalance: {
+            type: Number,
+            default: 0,
+        },
+
+        hasUsedReferral: {
+            type: Boolean,
+            default: false,
+        },
+
     },
     { timestamps: true }
 );
 
-const User = mongoose.models.User || mongoose.model("User", userSchema);
+if (mongoose.models.User) {
+    delete mongoose.models.User;
+}
+const User = mongoose.model("User", userSchema);
 
 export default User;

@@ -42,6 +42,8 @@ export default function EntranceBulkUpload() {
     const [repoCategoryFilter, setRepoCategoryFilter] = useState("all");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [showProtocol, setShowProtocol] = useState(false);
+
     const [bulkUpload] = useBulkUploadEntranceQuestionsMutation();
     const { data: allQuestions = [], isLoading: isLoadingQuestions, refetch } = useFetchEntranceQuestionsQuery();
     const [deleteQuestion] = useDeleteEntranceQuestionMutation();
@@ -58,6 +60,47 @@ export default function EntranceBulkUpload() {
                 toast.error("Invalid file format. Please upload XLSX or CSV.");
             }
         }
+    };
+
+    const downloadCSVSample = () => {
+        const csvContent = `question,option1,option2,option3,option4,correctAnswer,category,explanation
+What is 2+2?,2,3,4,5,4,quantitative,Basic addition`;
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "sample_questions.csv";
+        link.click();
+    };
+    const downloadJSONSample = () => {
+        const jsonData = [
+            {
+                question: "What is 2+2?",
+                options: [
+                    { text: "2", isCorrect: false },
+                    { text: "3", isCorrect: false },
+                    { text: "4", isCorrect: true },
+                    { text: "5", isCorrect: false }
+                ],
+                category: "quantitative",
+                explanation: "Basic addition",
+                correctAnswer: "4",
+
+            }
+        ];
+
+        const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
+            type: "application/json"
+        });
+
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "sample_questions.json";
+        link.click();
     };
 
     const parseFile = (file: File) => {
@@ -170,6 +213,8 @@ export default function EntranceBulkUpload() {
         return matchesSearch && matchesCategory;
     });
 
+
+
     const getCategoryColor = (category: string) => {
         switch (category) {
             // case "aptitude": return "bg-blue-100 text-blue-700";
@@ -185,13 +230,25 @@ export default function EntranceBulkUpload() {
         <div className="bg-gray-50 h-full">
             <div className="mb-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <h1 className="text-3xl font-bold text-[#2C4276]">Bulk Upload Questions</h1>
-                    <div className="flex gap-4 w-full md:w-auto">
+                    <h1 className="text-3xl font-bold text-[#2C4276]">
+                        Bulk Upload Questions
+                    </h1>
+
+                    <div className="flex gap-3">
+                        {/* NEW BUTTON */}
+                        <button
+                            onClick={() => setShowProtocol(true)}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium shadow-sm"
+                        >
+                            <BookOpen size={18} />
+                            View Protocols
+                        </button>
+
                         {preview.length > 0 && (
                             <button
                                 onClick={handleUpload}
                                 disabled={isUploading}
-                                className="bg-[#2C4276] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors flex items-center gap-2 shadow-sm font-medium disabled:opacity-50"
+                                className="bg-[#2C4276] text-white px-4 py-2 rounded-lg flex items-center gap-2"
                             >
                                 {isUploading ? <Loader2 className="animate-spin" size={18} /> : <Upload size={18} />}
                                 {isUploading ? "Uploading..." : `Upload ${preview.length} Questions`}
@@ -208,7 +265,7 @@ export default function EntranceBulkUpload() {
                         onClick={() => fileInputRef.current?.click()}
                         className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center transition-all cursor-pointer hover:border-[#2C4276] hover:bg-gray-50 ${file ? "border-green-400 bg-green-50/30" : "border-gray-200"}`}
                     >
-                        <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx,.csv" className="hidden" />
+                        <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx,.csv,.json" className="hidden" />
                         <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${file ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}>
                             {file ? <CheckCircle2 size={32} /> : <Upload size={32} />}
                         </div>
@@ -450,6 +507,64 @@ export default function EntranceBulkUpload() {
                     </div>
                 )}
             </div>
+            {showProtocol && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div className="bg-white w-full max-w-4xl rounded-xl shadow-lg overflow-hidden">
+
+                        {/* HEADER */}
+                        <div className="bg-[#1E2A4A] text-white px-6 py-4 flex justify-between items-center">
+                            <h2 className="text-lg font-bold">Ingestion Protocol Specifications</h2>
+                            <button onClick={() => setShowProtocol(false)}>
+                                <X />
+                            </button>
+                        </div>
+
+                        {/* BODY */}
+                        <div className="p-6 grid md:grid-cols-2 gap-6">
+
+                            {/* JSON */}
+                            <div className="border rounded-xl p-4">
+                                <h3 className="font-bold mb-2">JSON Protocol</h3>
+                                <p className="text-sm text-gray-500 mb-4">
+                                    Array of objects with question, options and correctness flag.
+                                </p>
+
+                                <button
+                                    onClick={downloadJSONSample}
+                                    className="w-full border rounded-lg py-2 hover:bg-gray-50 font-medium"
+                                >
+                                    Download JSON Sample
+                                </button>
+                            </div>
+
+                            {/* CSV */}
+                            <div className="border rounded-xl p-4">
+                                <h3 className="font-bold mb-2">CSV Protocol</h3>
+                                <p className="text-sm text-gray-500 mb-4">
+                                    Headers: question, option1–4, correctAnswer, category, explanation
+                                </p>
+
+                                <button
+                                    onClick={downloadCSVSample}
+                                    className="w-full border rounded-lg py-2 hover:bg-gray-50 font-medium"
+                                >
+                                    Download CSV Sample
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* FOOTER */}
+                        <div className="p-4 flex justify-end">
+                            <button
+                                onClick={() => setShowProtocol(false)}
+                                className="bg-[#1E2A4A] text-white px-6 py-2 rounded-lg"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

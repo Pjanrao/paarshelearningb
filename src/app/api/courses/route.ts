@@ -8,6 +8,7 @@ import cloudinary from "@/lib/cloudinary";
 export const runtime = "nodejs";
 
 
+
 export const config = {
   api: {
     bodyParser: false,
@@ -20,6 +21,8 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   try {
     await connectDB();
+
+    // console.log("testing git");
 
     const { searchParams } = new URL(req.url);
 
