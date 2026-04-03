@@ -137,7 +137,7 @@ const InquiryPage = () => {
                                 </div>
                                 <div className="min-w-0">
                                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Email Support</p>
-                                    <Link href="mailto:info@paarshelearning.com" className="text-lg font-black text-[#2B4278] dark:text-white hover:text-[#01A0E2] transition-colors truncate block">info@paarshelearning.com</Link>
+                                    <Link href="mailto:paarshelearning@gmail.com" className="text-lg font-black text-[#2B4278] dark:text-white hover:text-[#01A0E2] transition-colors truncate block">paarshelearning@gmail.com</Link>
                                 </div>
                             </div>
                         </div>

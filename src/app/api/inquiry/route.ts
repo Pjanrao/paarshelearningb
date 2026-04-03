@@ -3,7 +3,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Inquiry from "@/models/Inquiry";
-import { sendConfirmationEmail } from "@/utils/sendEmail";
+import { sendConfirmationEmail, sendAdminNotificationEmail } from "@/utils/sendEmail";
 import { validateEmail, validatePhone } from "@/utils/validation";
 
 export async function GET(request: Request) {
@@ -129,12 +129,26 @@ export async function POST(request: Request) {
       country,
     });
 
-    // Send confirmation email
+    // Send Emails (User Confirmation & Admin Notification)
     try {
+      // 1. Send confirmation email to the inquirer
       await sendConfirmationEmail(email, name, type);
+
+      // 2. Send notification email to the admin
+      await sendAdminNotificationEmail({
+        name,
+        email,
+        phone,
+        message,
+        course,
+        type,
+        education,
+        college,
+        country
+      });
     } catch (err) {
       console.error("Email failure:", err);
-      // We continue as the inquiry is already saved
+      // We continue as the inquiry is already saved in the database
     }
 
     return NextResponse.json(

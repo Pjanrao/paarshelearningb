@@ -32,7 +32,7 @@ const Slides = () => {
                         .map((p: any) => ({
                             src: p.logoUrl,
                             alt: p.name,
-                            size: 1
+                            size: p.size || 1
                         }));
                     setPartners(activePartners);
                 } else {
@@ -132,19 +132,25 @@ const Slides = () => {
                 {extendedSlides.map((logo, idx) => (
                     <div
                         key={idx}
-                        className="flex-shrink-0 flex justify-center items-center h-24 px-5"
+                        className="flex-shrink-0 flex justify-center items-center h-28 px-5"
                         style={{ width: `${100 / visibleCount}%` }}
                     >
-                        <div className="relative w-full h-full p-4 group transition-transform hover:scale-105 duration-300">
-                             <Image
-                                 src={logo.src}
-                                 alt={logo.alt || "Achievement logo"}
-                                 fill
-                                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                                 className="object-contain drop-shadow-sm"
-                                 priority={idx < visibleCount}
-                             />
-                         </div>
+                        <div 
+                            className="relative group transition-transform hover:scale-110 duration-300"
+                            style={{ 
+                                width: `calc(${(logo.size || 1) * 80}%)`, 
+                                height: `calc(${(logo.size || 1) * 80}%)`,
+                            }}
+                        >
+                            <Image
+                                src={logo.src}
+                                alt={logo.alt || "Achievement logo"}
+                                fill
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                className="object-contain drop-shadow-sm"
+                                priority={idx < visibleCount}
+                            />
+                        </div>
                     </div>
                 ))}
             </div>

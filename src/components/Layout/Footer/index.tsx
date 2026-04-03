@@ -337,6 +337,14 @@ const Footer = () => {
                   info@paarshelearning.com
                 </a>
               </li>
+              <li className="flex items-center justify-start gap-2 hover:text-secondary transition cursor-pointer">
+                <a href="mailto:info@paarshelearning.com" className="flex items-center gap-2">
+                  <svg className="w-4 h-4 text-white/70" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 18V8l8 5 8-5v10H4z" />
+                  </svg>
+                  paarshelaraning@gmail.com
+                </a>
+              </li>
 
               <ul className="flex items-center justify-start gap-4 mt-8 lg:mt-5">
 

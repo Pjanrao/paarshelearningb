@@ -32,6 +32,7 @@ export async function POST(req: Request) {
             websiteUrl: body.websiteUrl?.trim() || "",
             displayOrder: body.displayOrder || 0,
             isActive: body.isActive !== undefined ? body.isActive : true,
+            size: body.size || 1,
         });
 
         return NextResponse.json({ success: true, data: partner }, { status: 201 });

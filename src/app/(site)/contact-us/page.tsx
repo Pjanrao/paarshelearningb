@@ -466,7 +466,7 @@ const ContactPage = () => {
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Email Us</p>
                     <Link href="mailto:info@paarshelearning.com" className="text-[#2B4278] dark:text-white">
-                      info@paarshelearning.com
+                      paarshelearning@gmail.com
                     </Link>
                   </div>
                 </div>
@@ -599,8 +599,8 @@ const ContactPage = () => {
             <button
               onClick={() => setActiveMap("Pune")}
               className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all flex items-center gap-2 ${activeMap === "Pune"
-                  ? "bg-[#01A0E2] text-white shadow-lg shadow-[#01A0E2]/30"
-                  : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-[#01A0E2]/50"
+                ? "bg-[#01A0E2] text-white shadow-lg shadow-[#01A0E2]/30"
+                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-[#01A0E2]/50"
                 }`}
             >
               <MapPin size={16} />
@@ -609,8 +609,8 @@ const ContactPage = () => {
             <button
               onClick={() => setActiveMap("Nashik")}
               className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all flex items-center gap-2 ${activeMap === "Nashik"
-                  ? "bg-[#2B4278] text-white shadow-lg shadow-[#2B4278]/30"
-                  : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-[#2B4278]/50"
+                ? "bg-[#2B4278] text-white shadow-lg shadow-[#2B4278]/30"
+                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-[#2B4278]/50"
                 }`}
             >
               <MapPin size={16} />

@@ -22,6 +22,10 @@ const industryPartnerSchema = new mongoose.Schema(
             type: Boolean,
             default: true,
         },
+        size: {
+            type: Number,
+            default: 1,
+        },
     },
     {
         timestamps: true,
@@ -29,5 +33,10 @@ const industryPartnerSchema = new mongoose.Schema(
     }
 );
 
-export default mongoose.models.IndustryPartner ||
-    mongoose.model("IndustryPartner", industryPartnerSchema);
+if (process.env.NODE_ENV === "development") {
+    delete (mongoose as any).models.IndustryPartner;
+}
+
+const IndustryPartner = mongoose.models.IndustryPartner || mongoose.model("IndustryPartner", industryPartnerSchema);
+
+export default IndustryPartner;

@@ -1,29 +1,11 @@
 import nodemailer from 'nodemailer';
 
-export const sendConfirmationEmail = async (email: string, name: string, type: string) => {
-    console.log(`[Email] Attempting to send ${type} email to: ${email}`);
+const user = (process.env.EMAIL_USER || "").replace(/"/g, "");
+const pass = (process.env.EMAIL_PASSWORD || "").replace(/"/g, "");
 
-    // Create transporter inside the function to ensure a fresh connection
-    // (Prevents stale connections in some Next.js environments)
-    const user = (process.env.EMAIL_USER || "").replace(/"/g, "");
-    const pass = (process.env.EMAIL_PASSWORD || "").replace(/"/g, "");
-
-    console.log(`[Email] Using credentials for: ${user}`);
-    if (!pass) {
-        console.error("[Email] EMAIL_PASSWORD is missing or empty!");
-    }
-
-    // const transporter = nodemailer.createTransport({
-    //     host: "smtp.hostinger.com",
-    //     port: 465,
-    //     secure: true,
-    //     auth: {
-    //         user: user,
-    //         pass: pass,
-    //     },
-    // });
-    const transporter = nodemailer.createTransport({
-        host: "smtp.hostinger.com",
+const createTransporter = () => {
+    return nodemailer.createTransport({
+        host: "smtp.gmail.com",
         port: 465,
         secure: true,
         auth: {
@@ -31,9 +13,20 @@ export const sendConfirmationEmail = async (email: string, name: string, type: s
             pass,
         },
         tls: {
-            rejectUnauthorized: false, // ✅ ADD THIS
+            rejectUnauthorized: false,
         },
     });
+};
+
+export const sendConfirmationEmail = async (email: string, name: string, type: string) => {
+    console.log(`[Email] Attempting to send ${type} confirmation email to: ${email}`);
+
+    if (!user || !pass) {
+        console.error("[Email] EMAIL_USER or EMAIL_PASSWORD is missing!");
+        return { success: false, error: "Credentials missing" };
+    }
+
+    const transporter = createTransporter();
 
     try {
         const subject = type === "Inquiry Form"
@@ -41,10 +34,10 @@ export const sendConfirmationEmail = async (email: string, name: string, type: s
             : "Thank you for contacting Paarsh Infotech";
 
         const mailOptions = {
-            from: `"Paarsh Infotech" <info@paarshelearning.com>`,
+            from: `"Paarsh Infotech" <${user}>`,
             to: email,
             subject: subject,
-            replyTo: "info@paarshelearning.com",
+            replyTo: user,
             html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #007bff;">Hello ${name},</h2>
@@ -60,12 +53,55 @@ export const sendConfirmationEmail = async (email: string, name: string, type: s
       `,
         };
 
-        console.log(`[Email] Sending mail via Hostinger SMTP...`);
+        console.log(`[Email] Sending confirmation mail via Gmail SMTP...`);
         const info = await transporter.sendMail(mailOptions);
-        console.log("[Email] Message sent successfully:", info.messageId);
+        console.log("[Email] Confirmation sent successfully:", info.messageId);
         return { success: true, data: info };
     } catch (error) {
-        console.error("[Email] Nodemailer error:", error);
+        console.error("[Email] Nodemailer confirmation error:", error);
         return { success: false, error };
     }
 };
+
+export const sendAdminNotificationEmail = async (data: any) => {
+    const { name, email, phone, message, course, type } = data;
+    console.log(`[Email] Attempting to send Admin Notification for ${type} from: ${email}`);
+
+    if (!user || !pass) {
+        console.error("[Email] EMAIL_USER or EMAIL_PASSWORD is missing!");
+        return { success: false, error: "Credentials missing" };
+    }
+
+    const transporter = createTransporter();
+
+    try {
+        const mailOptions = {
+            from: `"Website Notification" <${user}>`,
+            to: user, // Send to yourself
+            subject: `New ${type}: ${name}`,
+            html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+          <h2 style="color: #2B4278; border-bottom: 2px solid #01A0E2; padding-bottom: 10px;">New ${type} Received</h2>
+          <p><strong>Name:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Phone:</strong> ${phone}</p>
+          ${course ? `<p><strong>Interested Course:</strong> ${course}</p>` : ''}
+          <div style="background: #f9f9f9; padding: 15px; border-radius: 5px; margin-top: 15px;">
+            <p><strong>Message:</strong></p>
+            <p>${message}</p>
+          </div>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="font-size: 0.8em; color: #999;">Sent from Paarsh E-learning Website</p>
+        </div>
+      `,
+        };
+
+        console.log(`[Email] Sending admin notification via Gmail SMTP...`);
+        const info = await transporter.sendMail(mailOptions);
+        console.log("[Email] Admin notification sent successfully:", info.messageId);
+        return { success: true, data: info };
+    } catch (error) {
+        console.error("[Email] Nodemailer admin error:", error);
+        return { success: false, error };
+    }
+};

@@ -7,10 +7,15 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         await connectDB();
         const { id } = await params;
         const body = await req.json();
+        console.log(`[API] Updating industry partner ${id}:`, body);
 
-        const partner = await IndustryPartner.findByIdAndUpdate(id, body, { new: true });
+        // Ensure we are updating exactly what was sent
+        const updateData: any = { ...body };
+        
+        const partner = await IndustryPartner.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!partner) {
+            console.error(`[API] Partner not found: ${id}`);
             return NextResponse.json({ success: false, error: "Partner not found" }, { status: 404 });
         }
 

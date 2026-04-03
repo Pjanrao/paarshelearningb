@@ -20,6 +20,7 @@ interface Partner {
     websiteUrl: string;
     displayOrder: number;
     isActive: boolean;
+    size: number;
     createdAt: string;
 }
 
@@ -29,6 +30,7 @@ interface PartnerFormData {
     websiteUrl: string;
     displayOrder: number;
     isActive: boolean;
+    size: number;
 }
 
 export default function IndustryPartnersPage() {
@@ -50,6 +52,7 @@ export default function IndustryPartnersPage() {
         websiteUrl: "",
         displayOrder: 0,
         isActive: true,
+        size: 1,
     });
 
     const fetchPartners = async () => {
@@ -112,6 +115,7 @@ export default function IndustryPartnersPage() {
         if (!selectedPartner) return;
         setFormLoading(true);
         try {
+            console.log("[Client] Updating partner:", selectedPartner._id, formData);
             const response = await fetch(`/api/industry-partners/${selectedPartner._id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -212,6 +216,7 @@ export default function IndustryPartnersPage() {
             websiteUrl: partner.websiteUrl || "",
             displayOrder: partner.displayOrder || 0,
             isActive: partner.isActive,
+            size: partner.size || 1,
         });
         setIsEditModalOpen(true);
     };
@@ -223,6 +228,7 @@ export default function IndustryPartnersPage() {
             websiteUrl: "",
             displayOrder: 0,
             isActive: true,
+            size: 1,
         });
         setSelectedPartner(null);
     };
@@ -291,7 +297,8 @@ export default function IndustryPartnersPage() {
                                 <img
                                     src={partner.logoUrl}
                                     alt={partner.name}
-                                    className="max-h-full max-w-full object-contain"
+                                    className="max-h-full max-w-full object-contain transition-transform"
+                                    style={{ transform: `scale(${partner.size || 1})` }}
                                     onError={(e) => {
                                         (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='40' fill='%23ccc'%3E%3Ctext x='10' y='28' font-size='14'%3ENo Logo%3C/text%3E%3C/svg%3E";
                                     }}
@@ -314,6 +321,8 @@ export default function IndustryPartnersPage() {
                                 )}
                                 <div className="flex items-center gap-1.5 mt-2">
                                     <span className="text-[9px] font-bold text-gray-400 uppercase">Order: {partner.displayOrder}</span>
+                                    <span className="text-gray-200">•</span>
+                                    <span className="text-[9px] font-bold text-gray-400 uppercase">Size: {partner.size || 1}x</span>
                                     <span className="text-gray-200">•</span>
                                     <span className={`text-[9px] font-bold uppercase ${partner.isActive ? "text-green-600" : "text-gray-400"}`}>
                                         {partner.isActive ? "Active" : "Inactive"}
@@ -402,7 +411,8 @@ export default function IndustryPartnersPage() {
                                         <img
                                             src={formData.logoUrl}
                                             alt="Preview"
-                                            className="max-h-full max-w-full object-contain"
+                                            className="max-h-full max-w-full object-contain transition-transform"
+                                            style={{ transform: `scale(${formData.size || 1})` }}
                                             onError={(e) => {
                                                 (e.target as HTMLImageElement).style.display = "none";
                                             }}
@@ -441,6 +451,20 @@ export default function IndustryPartnersPage() {
                                     />
                                 </div>
                                 <div>
+                                    <label className="block text-xs font-semibold text-gray-700 mb-1">Logo Size (Scale)</label>
+                                    <input
+                                        type="number"
+                                        step="0.1"
+                                        min="0.1"
+                                        max="2"
+                                        value={formData.size}
+                                        onChange={(e) => setFormData({ ...formData, size: parseFloat(e.target.value) || 1 })}
+                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all text-sm"
+                                        placeholder="1.0"
+                                    />
+                                    <p className="text-[10px] text-gray-400 mt-1">1.0 = Default, 0.8 = Smaller, 1.2 = Larger</p>
+                                </div>
+                                <div className="col-span-2">
                                     <label className="block text-xs font-semibold text-gray-700 mb-1">Status</label>
                                     <select
                                         value={formData.isActive ? "active" : "inactive"}
