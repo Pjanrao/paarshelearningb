@@ -12,8 +12,22 @@ interface CounterProps {
 
 const Counter: React.FC<CounterProps> = ({ isColorMode }) => {
   const router = useRouter();
-  const { data, isLoading } = useGetCoursesQuery({ limit: 6, sort: "date_desc", featured: true });
-  const courses = (data?.courses || []).filter(course => course.featured === true).reverse();;
+  const { data, isLoading } = useGetCoursesQuery({ limit: 50 }); // Fetch more for better variety
+  
+  const courses = React.useMemo(() => {
+    if (!data?.courses) return [];
+    
+    // Shuffle all courses
+    const allCourses = [...data.courses];
+    
+    // Fisher-Yates Shuffle
+    for (let i = allCourses.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [allCourses[i], allCourses[j]] = [allCourses[j], allCourses[i]];
+    }
+    
+    return allCourses.slice(0, 16); // Increased to 16 random courses (15+ as requested)
+  }, [data]);
 
   return (
     <section className={isColorMode ? 'bg-section' : 'bg-white'}>

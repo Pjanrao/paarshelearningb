@@ -133,13 +133,6 @@ const AboutPage = () => {
                         {item.desc}
                       </p>
                     </div>
-
-                    {/* Right Arrow - Secondary Color accent on hover */}
-                    <div className="flex items-center opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center border border-secondary/20 text-secondary">
-                        <ChevronUp className="rotate-90" size={16} />
-                      </div>
-                    </div>
                   </div>
                 ))}
               </div>
