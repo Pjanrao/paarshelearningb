@@ -41,7 +41,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { email, password } = await req.json();
+        const { email, password, reason } = await req.json();
 
         if (!email || !password) {
             return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
@@ -56,11 +56,18 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Incorrect password" }, { status: 400 });
         }
 
-        // Cascade delete related records
-        await Payment.deleteMany({ studentId: dbUser._id });
+        // Soft delete user and save reason
+        console.log("DELETING USER:", dbUser._id, "REASON:", reason);
+        const result = await User.findByIdAndUpdate(dbUser._id, {
+            status: "deleted",
+            deletionReason: reason || "No reason provided",
+        }, { new: true });
+        console.log("UPDATE RESULT:", result);
 
-        // Delete user
-        await User.findByIdAndDelete(dbUser._id);
+        if (!result) {
+            console.error("FAILED TO UPDATE USER STATUS");
+            return NextResponse.json({ error: "Failed to update account status" }, { status: 500 });
+        }
 
         // Return success message
         return NextResponse.json({ message: "Account deleted successfully" });

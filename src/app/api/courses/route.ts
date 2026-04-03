@@ -22,7 +22,7 @@ export async function GET(req: Request) {
   try {
     await connectDB();
 
-    console.log("testing git");
+    // console.log("testing git");
 
     const { searchParams } = new URL(req.url);
 

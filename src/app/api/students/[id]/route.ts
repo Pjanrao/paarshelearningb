@@ -19,7 +19,10 @@ export async function DELETE(
       );
     }
 
-    const deleted = await User.findByIdAndDelete(id);
+    const deleted = await User.findByIdAndUpdate(id, {
+      status: "deleted",
+      deletionReason: "Deleted by Admin",
+    }, { new: true });
 
     if (!deleted) {
       return NextResponse.json(

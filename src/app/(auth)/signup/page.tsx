@@ -73,9 +73,9 @@ export default function SignupPage() {
 
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-            await axios.post(`${apiUrl}/api/register`, { name, email, contact, password });
+            const response = await axios.post(`${apiUrl}/api/register`, { name, email, contact, password });
 
-            toast.success("Signup successful! Please sign in.");
+            toast.success(response.data.message || "Signup successful! Please sign in.");
             const signinUrl = returnUrl ? `/signin?returnUrl=${encodeURIComponent(returnUrl)}` : "/signin";
             router.push(signinUrl);
         } catch (error: any) {

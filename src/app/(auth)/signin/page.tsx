@@ -78,10 +78,14 @@ export default function LoginPage() {
         router.push("/");
       }
     } catch (error: any) {
-      console.error("Login error:", error);
       const message = error?.response?.data?.message || "Login failed. Please check your credentials.";
+      if (message !== "User not found") {
+        console.error("Login error:", error);
+      }
       setError(message);
-      toast.error(message);
+      if (message !== "Account not found") {
+        toast.error(message);
+      }
     } finally {
       setIsLoading(false);
     }

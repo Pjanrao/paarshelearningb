@@ -39,6 +39,14 @@ export async function POST(req: Request) {
             );
         }
 
+        // Check if account is deleted
+        if (user.status === "deleted") {
+            return NextResponse.json(
+                { message: "Account not found" },
+                { status: 401 }
+            );
+        }
+
         // 2. Check password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {

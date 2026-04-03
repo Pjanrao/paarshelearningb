@@ -31,6 +31,9 @@ export const authOptions: NextAuthOptions = {
             );
 
             if (isMatch) {
+              if (user.status === "deleted") {
+                throw new Error("Account not found");
+              }
               return {
                 id: user._id.toString(),
                 email: user.email,

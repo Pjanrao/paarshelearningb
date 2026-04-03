@@ -28,6 +28,8 @@ export default function EditProfilePage() {
     const [deleteEmail, setDeleteEmail] = useState("");
     const [deletePassword, setDeletePassword] = useState("");
     const [deleteError, setDeleteError] = useState("");
+    const [showDeleteReason, setShowDeleteReason] = useState(false);
+    const [deleteReason, setDeleteReason] = useState("");
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
@@ -190,7 +192,7 @@ export default function EditProfilePage() {
             toast.error("Please fill in both email and password");
             return;
         }
-        setShowDeleteConfirm(true);
+        setShowDeleteReason(true);
     };
 
     const handleConfirmDelete = async () => {
@@ -199,7 +201,7 @@ export default function EditProfilePage() {
             const res = await fetch("/api/student/delete-account", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: deleteEmail, password: deletePassword }),
+                body: JSON.stringify({ email: deleteEmail, password: deletePassword, reason: deleteReason }),
             });
             const data = await res.json();
             if (res.ok) {
@@ -532,6 +534,58 @@ export default function EditProfilePage() {
                             </div>
                         </div>
                     ) : null}
+
+                    {/* Reason for Deletion Modal */}
+                    {showDeleteReason && (
+                        <div className="absolute inset-0 z-[55] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm rounded-3xl overflow-hidden">
+                            <div className="bg-white border border-gray-100 rounded-2xl shadow-2xl p-6 w-full max-w-sm animate-in zoom-in-95 duration-200 z-[55]">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h3 className="text-lg font-bold text-slate-800">Why are you leaving?</h3>
+                                    <button
+                                        onClick={() => setShowDeleteReason(false)}
+                                        className="text-slate-400 hover:text-slate-600 transition-colors"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                                <div className="flex flex-col items-center text-center my-4">
+                                    <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-4 border border-red-100">
+                                        <UserIcon size={32} />
+                                    </div>
+                                    <p className="text-slate-500 text-sm mb-4">
+                                        We're sorry to see you go. Please let us know the reason for deleting your account.
+                                    </p>
+                                    <textarea
+                                        value={deleteReason}
+                                        onChange={(e) => setDeleteReason(e.target.value)}
+                                        placeholder="Type your reason here..."
+                                        className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2C4276]/20 focus:border-[#2C4276] outline-none transition-all text-sm min-h-[100px] resize-none"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <button
+                                        onClick={() => setShowDeleteReason(false)}
+                                        className="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold transition-all text-sm"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (!deleteReason.trim()) {
+                                                toast.error("Please provide a reason");
+                                                return;
+                                            }
+                                            setShowDeleteReason(false);
+                                            setShowDeleteConfirm(true);
+                                        }}
+                                        className="flex-[1.5] px-4 py-2 bg-red-700 hover:bg-red-800 text-white rounded-lg font-bold transition-all text-sm shadow-lg shadow-red-700/20"
+                                    >
+                                        Delete Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Delete Confirmation Modal */}
                     {showDeleteConfirm && (
