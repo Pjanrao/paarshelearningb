@@ -9,11 +9,12 @@ export const sidebarConfig = {
     { name: "Batches", path: "/admin/batches" },
     // { name: "Consent", path: "/admin/concent" },
     { name: "Blogs", path: "/admin/blogs" },
-    { name: "Placement", path: "/admin/placement" },
+    // { name: "Placement", path: "/admin/placement" },
     { name: "Reports", path: "/admin/reports" },
     // { name: "Payments", path: "/admin/payments" },
     { name: "Testimonials", path: "/admin/testimonial" },
     // { name: "Workshops", path: "/admin/workshops" },
+    { name: "Industry Partners", path: "/admin/industry-partners" },
     { name: "Settings", path: "/admin/settings" },
   ],
 

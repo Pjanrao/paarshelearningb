@@ -43,10 +43,10 @@ export default function ProfileDropdown() {
             localStorage.removeItem("user");
             dispatch(logoutAction());
 
-            window.location.href = "/signin";
+            window.location.href = "/";
         } catch (error) {
             console.error("Logout error:", error);
-            window.location.href = "/signin";
+            window.location.href = "/";
         }
     };
 

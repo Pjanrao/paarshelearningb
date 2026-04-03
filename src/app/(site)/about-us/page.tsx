@@ -199,14 +199,13 @@ const AboutPage = () => {
 
       <div className="founder-section">
         <div className="social-media-container founder-section-dark">
-          <h1 className="founder-text">Tushar Pagare</h1>
-          <h3 className="ceo-text">Founder CEO </h3>
+          <h1 className="founder-text">Pratiksha Baviskar</h1>
+          <h3 className="ceo-text">Founder</h3>
 
           <div className="social-icons-row">
-            <a className="social-icon facebook" href="https://www.facebook.com/tushar.pagare.7" target="_blank" rel="noopener noreferrer"><FaFacebookF size={18} /></a>
-            <a className="social-icon instagram" href="https://www.instagram.com/tushar4842" target="_blank" rel="noopener noreferrer"><FaInstagram size={18} /></a>
-            <a className="social-icon linkedin" href="https://www.linkedin.com/in/tushar-pagare-a9244928a/" target="_blank" rel="noopener noreferrer"><FaLinkedinIn size={18} /></a>
-            <a className="social-icon github" href="https://github.com/tusharpaarsh" target="_blank" rel="noopener noreferrer"><FaGithub size={18} /></a>
+            <a className="social-icon facebook" href="https://m.facebook.com/pratiksha.baviskar.2025/" target="_blank" rel="noopener noreferrer"><FaFacebookF size={18} /></a>
+            <a className="social-icon instagram" href="https://www.instagram.com/pratikshabaviskar?igsh=bGE5Nng1ZDhiaWV3" target="_blank" rel="noopener noreferrer"><FaInstagram size={18} /></a>
+            <a className="social-icon linkedin" href="https://www.linkedin.com/in/pratiksha-baviskar-425b43141?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" rel="noopener noreferrer"><FaLinkedinIn size={18} /></a>
           </div>
 
           <div className="mission-vision-container mission-vision-container-dark rounded-3xl p-3 mt-1 relative">
@@ -214,19 +213,19 @@ const AboutPage = () => {
 
             <div className={`relative transition-all duration-700 ease-in-out ${isFounderExpanded ? 'max-h-[2000px]' : 'max-h-[250px] overflow-hidden'}`}>
               <p>
-                Tushar Pagare, the Founder and CEO of Paarsh E-Learning, is a visionary leader with a passion for transforming the education landscape. With a deep understanding of the power of learning and its potential to shape lives, Tushar is dedicated to providing accessible and innovative educational opportunities to individuals worldwide.
+                Pratiksha Baviskar, the Founder of Paarsh E-Learning, is a visionary leader with a passion for transforming the education landscape. With a deep understanding of the power of learning and its potential to shape lives, Pratiksha is dedicated to providing accessible and innovative educational opportunities to individuals worldwide.
               </p>
               <p>
-                Driven by a strong belief in the value of education, Tushar has spearheaded the growth of Paarsh E-Learning since its inception in 2018. Under his leadership, the platform has become a trusted destination for learners seeking high-quality courses and holistic support.
+                Driven by a strong belief in the value of education, Pratiksha has spearheaded the growth of Paarsh E-Learning since its inception in 2018. Under her leadership, the platform has become a trusted destination for learners seeking high-quality courses and holistic support.
               </p>
               <p>
-                With a forward-thinking mindset, Tushar remains at the forefront of educational advancements, embracing technology and innovative teaching methodologies to enhance the learning experience. He continuously collaborates with industry experts and partners to ensure that Paarsh E-Learning's courses align with current market trends and industry demands, giving learners a competitive edge in their chosen fields.
+                With a forward-thinking mindset, Pratiksha remains at the forefront of educational advancements, embracing technology and innovative teaching methodologies to enhance the learning experience. She continuously collaborates with industry experts and partners to ensure that Paarsh E-Learning's courses align with current market trends and industry demands, giving learners a competitive edge in their chosen fields.
               </p>
               <p>
-                Tushar's commitment to empowering individuals extends beyond the classroom. He is deeply invested in promoting lifelong learning, cultivating a supportive community, and facilitating job placements for learners, enabling them to thrive personally and professionally. His dedication to ethical practices and responsible learning creates an environment where learners can grow, connect, and contribute positively to society.
+                Pratiksha's commitment to empowering individuals extends beyond the classroom. She is deeply invested in promoting lifelong learning, cultivating a supportive community, and facilitating job placements for learners, enabling them to thrive personally and professionally. Her dedication to ethical practices and responsible learning creates an environment where learners can grow, connect, and contribute positively to society.
               </p>
               <p>
-                As the Founder and CEO, Tushar Pagare brings a unique blend of visionary thinking, strategic acumen, and a genuine passion for education to Paarsh E-Learning. With his leadership, the platform continues to expand its reach, making a lasting impact on the lives of learners worldwide.
+                As the Founder, Pratiksha Baviskar brings a unique blend of visionary thinking, strategic acumen, and a genuine passion for education to Paarsh E-Learning. With his leadership, the platform continues to expand its reach, making a lasting impact on the lives of learners worldwide.
               </p>
 
               {!isFounderExpanded && (

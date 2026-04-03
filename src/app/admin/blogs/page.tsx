@@ -416,12 +416,12 @@ export default function BlogsPage() {
             {/* Modals */}
             {(isAddModalOpen || isEditModalOpen) && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
                         <div className="p-6 border-b flex justify-between items-center bg-gray-50">
                             <h2 className="text-xl font-bold text-[#2C4276]">{isAddModalOpen ? "Write New Blog" : "Edit Blog Content"}</h2>
                             <button onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); }} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={24} /></button>
                         </div>
-                        <form onSubmit={isAddModalOpen ? handleAddBlog : handleEditBlog} className="p-6 space-y-4 h-[500px] overflow-y-auto">
+                        <form onSubmit={isAddModalOpen ? handleAddBlog : handleEditBlog} className="p-6 space-y-4 overflow-y-auto flex-1">
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Blog Title <span className="text-red-500">*</span></label>
                                 <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="Enter an engaging title" />
@@ -466,14 +466,14 @@ export default function BlogsPage() {
                                 </select>
                             </div>
 
-                            <div className="flex justify-end gap-3 pt-4 border-t sticky bottom-0 bg-white">
-                                <button type="button" onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); }} className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
-                                <button type="submit" disabled={formLoading} className="px-6 py-2 bg-[#2C4276] text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 flex items-center gap-2 shadow-md transition-all font-semibold">
-                                    {formLoading && <Loader2 className="animate-spin" size={16} />}
-                                    {isAddModalOpen ? "Create Post" : "Update Post"}
-                                </button>
-                            </div>
                         </form>
+                        <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50 flex-shrink-0">
+                            <button type="button" onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); }} className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+                            <button type="button" onClick={isAddModalOpen ? handleAddBlog : handleEditBlog} disabled={formLoading} className="px-6 py-2 bg-[#2C4276] text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 flex items-center gap-2 shadow-md transition-all font-semibold">
+                                {formLoading && <Loader2 className="animate-spin" size={16} />}
+                                {isAddModalOpen ? "Create Post" : "Update Post"}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

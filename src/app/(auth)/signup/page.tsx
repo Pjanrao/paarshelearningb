@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { User, Mail, Lock, ArrowRight, Loader2, Eye, EyeOff, Phone } from "lucide-react";
+import { User, Mail, Lock, ArrowRight, Loader2, Eye, EyeOff, Phone, ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -92,7 +92,16 @@ export default function SignupPage() {
         `w-full text-black pl-10 pr-3 py-2 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2C4276] focus:border-transparent transition-all ${errors[field] ? "border-red-400 bg-red-50" : "border-gray-200"}`;
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50/50 p-4 sm:p-6 lg:p-8 font-body">
+        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50/50 p-4 sm:p-6 lg:p-8 font-body relative">
+            <Link
+                href="/"
+                className="absolute top-4 left-4 sm:top-8 sm:left-8 flex items-center gap-2 text-gray-500 hover:text-[#2C4276] transition-all font-medium text-sm group"
+            >
+                <div className="p-2 rounded-full bg-white shadow-sm border border-gray-100 group-hover:border-[#2C4276]/20 group-hover:bg-blue-50 transition-all">
+                    <ArrowLeft size={18} />
+                </div>
+                <span className="hidden sm:inline">Back to Home</span>
+            </Link>
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

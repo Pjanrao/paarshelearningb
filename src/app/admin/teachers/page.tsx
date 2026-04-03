@@ -548,79 +548,79 @@ export default function TeachersPage() {
             {isViewModalOpen && selectedTeacher && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
-                            <h2 className="text-xl font-bold text-[#2C4276]">Teacher Profile Summary</h2>
-                            <button onClick={() => setIsViewModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={24} /></button>
+                        <div className="px-5 py-3 border-b flex justify-between items-center bg-gray-50">
+                            <h2 className="text-base font-bold text-[#2C4276]">Teacher Profile Summary</h2>
+                            <button onClick={() => setIsViewModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={20} /></button>
                         </div>
-                        <div className="p-6 space-y-6">
-                            <div className="flex flex-col items-center">
-                                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white text-4xl font-bold mb-4 shadow-xl border-4 border-white overflow-hidden">
+                        <div className="p-4 space-y-3">
+                            {/* Inline avatar + name + badges */}
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white text-xl font-bold shadow-md border-2 border-white overflow-hidden flex-shrink-0">
                                     {selectedTeacher.avatar ? (
                                         <img src={selectedTeacher.avatar} alt={selectedTeacher.name} className="w-full h-full object-cover" />
                                     ) : (
                                         selectedTeacher.name.charAt(0).toUpperCase()
                                     )}
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-900">{selectedTeacher.name}</h3>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="px-4 py-1.5 bg-blue-50 text-blue-700 rounded-full text-xs font-bold uppercase tracking-widest border border-blue-100">{selectedTeacher.designation || "Faculty"}</span>
-                                    <span className="px-4 py-1.5 bg-green-50 text-green-700 rounded-full text-xs font-bold uppercase tracking-widest border border-green-100">{selectedTeacher.course}</span>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-3">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                        <p className="text-gray-400 text-[10px] font-bold uppercase mb-1 whitespace-nowrap">Experience</p>
-                                        <p className="text-lg font-bold text-gray-900">{selectedTeacher.experience || "N/A"}</p>
-                                    </div>
-                                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                        <p className="text-gray-400 text-[10px] font-bold uppercase mb-1 whitespace-nowrap">Avg Rating</p>
-                                        <p className="text-lg font-bold text-gray-900 flex items-center gap-1">
-                                            <Star size={16} className="fill-yellow-500 text-yellow-500" /> {selectedTeacher.rating || 0}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-3">
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500 font-medium">Email Address</span>
-                                        <span className="text-gray-900 font-bold max-w-[180px] truncate">{selectedTeacher.email}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500 font-medium">Contact No</span>
-                                        <span className="text-gray-900 font-bold">{selectedTeacher.contact || "N/A"}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500 font-medium">Joining Date</span>
-                                        <span className="text-gray-900 font-bold">{formatDate(selectedTeacher.dateOfJoining || selectedTeacher.createdAt)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center text-sm">
-                                        <span className="text-gray-500 font-medium">Total Managed</span>
-                                        <span className="text-[#2C4276] font-extrabold">{selectedTeacher.totalStudents || 0} Students</span>
+                                <div>
+                                    <h3 className="text-sm font-bold text-gray-900 leading-tight">{selectedTeacher.name}</h3>
+                                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                        <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-blue-100">{selectedTeacher.designation || "Faculty"}</span>
+                                        <span className="px-2 py-0.5 bg-green-50 text-green-700 rounded-full text-[10px] font-bold uppercase tracking-wider border border-green-100">{selectedTeacher.course}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                                <span className="text-gray-400 text-[10px] font-bold uppercase block mb-3 tracking-widest">Expertise In</span>
-                                <div className="flex flex-wrap gap-2">
+                            {/* Stats row */}
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">
+                                    <p className="text-gray-400 text-[9px] font-bold uppercase">Experience</p>
+                                    <p className="text-sm font-bold text-gray-900">{selectedTeacher.experience || "N/A"}</p>
+                                </div>
+                                <div className="bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">
+                                    <p className="text-gray-400 text-[9px] font-bold uppercase">Avg Rating</p>
+                                    <p className="text-sm font-bold text-gray-900 flex items-center gap-1">
+                                        <Star size={13} className="fill-yellow-500 text-yellow-500" /> {selectedTeacher.rating || 0}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Info rows */}
+                            <div className="bg-gray-50 px-3 py-2 rounded-xl border border-gray-100 space-y-2">
+                                {[
+                                    { label: "Email Address", value: selectedTeacher.email, truncate: true },
+                                    { label: "Contact No", value: selectedTeacher.contact || "N/A" },
+                                    { label: "Joining Date", value: formatDate(selectedTeacher.dateOfJoining || selectedTeacher.createdAt) },
+                                    { label: "Total Managed", value: `${selectedTeacher.totalStudents || 0} Students`, highlight: true },
+                                ].map(({ label, value, truncate, highlight }) => (
+                                    <div key={label} className="flex justify-between items-center text-xs">
+                                        <span className="text-gray-500 font-medium">{label}</span>
+                                        <span className={`font-bold ${highlight ? "text-[#2C4276]" : "text-gray-900"} ${truncate ? "max-w-[160px] truncate" : ""}`}>{value}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Expertise */}
+                            <div className="bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">
+                                <span className="text-gray-400 text-[9px] font-bold uppercase block mb-1.5 tracking-widest">Expertise In</span>
+                                <div className="flex flex-wrap gap-1.5">
                                     {selectedTeacher.assignedCourses?.map((course: string, idx: number) => (
-                                        <span key={idx} className="bg-white px-3 py-1 border border-gray-200 rounded-lg text-xs font-bold text-gray-700 shadow-sm">{course}</span>
-                                    )) || <span className="text-gray-400 italic">No courses assigned</span>}
+                                        <span key={idx} className="bg-white px-2 py-0.5 border border-gray-200 rounded-lg text-[10px] font-bold text-gray-700 shadow-sm">{course}</span>
+                                    )) || <span className="text-gray-400 italic text-xs">No courses assigned</span>}
                                 </div>
                             </div>
 
-                            <div className="flex gap-3 pt-2">
+                            {/* Buttons */}
+                            <div className="flex gap-2 pt-1">
                                 <button
                                     onClick={() => { setIsViewModalOpen(false); openEditModal(selectedTeacher); }}
-                                    className="flex-1 py-3 bg-[#2C4276] text-white rounded-xl font-bold hover:bg-opacity-90 transition-all shadow-lg active:scale-95"
+                                    className="flex-1 py-2 bg-[#2C4276] text-white rounded-xl text-sm font-bold hover:bg-opacity-90 transition-all shadow-md active:scale-95"
                                 >
                                     Modify Profile
                                 </button>
                                 <button
                                     onClick={() => setIsViewModalOpen(false)}
-                                    className="px-6 py-3 border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-colors"
+                                    className="px-5 py-2 border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors"
                                 >
                                     Dismiss
                                 </button>

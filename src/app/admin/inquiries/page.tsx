@@ -342,7 +342,7 @@ export default function InquiriesManagementPage() {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-[10px] text-gray-500 font-medium">{new Date(enq.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <td className="px-4 py-2 whitespace-nowrap text-sm">
                                                 <div className="flex items-center gap-2">
                                                     <button onClick={() => openViewModal(enq)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="View Details"><Eye size={18} /></button>
                                                     <button onClick={() => openEditModal(enq)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Update Status"><Pencil size={18} /></button>
@@ -409,78 +409,80 @@ export default function InquiriesManagementPage() {
             {isViewModalOpen && selectedInquiry && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
-                            <h2 className="text-xl font-bold text-[#2C4276]">Inquiry Details</h2>
+                        <div className="px-5 py-3 border-b flex justify-between items-center bg-gray-50">
+                            <h2 className="text-base font-bold text-[#2C4276]">Inquiry Details</h2>
                             <button onClick={() => setIsViewModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
-                                <X size={24} />
+                                <X size={20} />
                             </button>
                         </div>
-                        <div className="p-8 space-y-6">
-                            <div className="flex flex-col items-center">
-                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white text-3xl font-bold mb-4 shadow-lg border-4 border-white">
+                        <div className="p-4 space-y-3">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white text-xl font-bold shadow-md border-2 border-white flex-shrink-0">
                                     {selectedInquiry.name.charAt(0)}
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-900">{selectedInquiry.name}</h3>
-                                <span className={`mt-2 px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${selectedInquiry.status === 'New' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                    selectedInquiry.status === 'Contacted' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                                        selectedInquiry.status === 'Enrolled' ? 'bg-green-50 text-green-600 border-green-100' :
-                                            'bg-red-50 text-red-600 border-red-100'
-                                    }`}>
-                                    {selectedInquiry.status}
-                                </span>
+                                <div>
+                                    <h3 className="text-base font-bold text-gray-900 leading-tight">{selectedInquiry.name}</h3>
+                                    <span className={`mt-1 inline-block px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${selectedInquiry.status === 'New' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                        selectedInquiry.status === 'Contacted' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                                            selectedInquiry.status === 'Enrolled' ? 'bg-green-50 text-green-600 border-green-100' :
+                                                'bg-red-50 text-red-600 border-red-100'
+                                        }`}>
+                                        {selectedInquiry.status}
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Email Address</p>
-                                    <p className="text-sm font-semibold text-gray-900 break-all">{selectedInquiry.email}</p>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                <div>
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Email Address</p>
+                                    <p className="text-xs font-semibold text-gray-900 break-all">{selectedInquiry.email}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Phone Number</p>
-                                    <p className="text-sm font-semibold text-gray-900">{selectedInquiry.phone}</p>
+                                <div>
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Phone Number</p>
+                                    <p className="text-xs font-semibold text-gray-900">{selectedInquiry.phone}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Interested Course</p>
-                                    <p className="text-sm font-semibold text-gray-900">{selectedInquiry.course}</p>
+                                <div>
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Interested Course</p>
+                                    <p className="text-xs font-semibold text-gray-900">{selectedInquiry.course || "Not Specified"}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Current Education</p>
-                                    <p className="text-sm font-semibold text-gray-900">{selectedInquiry.education || "N/A"}</p>
+                                <div>
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Current Education</p>
+                                    <p className="text-xs font-semibold text-gray-900">{selectedInquiry.education || "N/A"}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">College/School</p>
-                                    <p className="text-sm font-semibold text-gray-900">{selectedInquiry.college || "N/A"}</p>
+                                <div>
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">College/School</p>
+                                    <p className="text-xs font-semibold text-gray-900">{selectedInquiry.college || "N/A"}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Country</p>
-                                    <p className="text-sm font-semibold text-gray-900">{selectedInquiry.country || "N/A"}</p>
+                                <div>
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Country</p>
+                                    <p className="text-xs font-semibold text-gray-900">{selectedInquiry.country || "N/A"}</p>
                                 </div>
-                                <div className="space-y-1">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Source</p>
-                                    <p className="text-sm font-semibold text-gray-900">{selectedInquiry.source || "Direct"}</p>
+                                <div>
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Source</p>
+                                    <p className="text-xs font-semibold text-gray-900">{selectedInquiry.source || "Direct"}</p>
                                 </div>
                             </div>
 
                             {selectedInquiry.message && (
-                                <div className="space-y-2 bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Message</p>
-                                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap italic">
-                                        "{selectedInquiry.message}"
+                                <div className="bg-gray-50 px-4 py-3 rounded-xl border border-gray-100">
+                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Message</p>
+                                    <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap italic">
+                                        &quot;{selectedInquiry.message}&quot;
                                     </p>
                                 </div>
                             )}
 
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex gap-3 pt-1">
                                 <button
                                     onClick={() => { setIsViewModalOpen(false); setIsEditModalOpen(true); }}
-                                    className="flex-1 py-3 bg-[#2C4276] text-white rounded-xl font-bold shadow-md hover:bg-opacity-90 transition-all flex items-center justify-center gap-2"
+                                    className="flex-1 py-2 bg-[#2C4276] text-white rounded-xl font-bold shadow-md hover:bg-opacity-90 transition-all flex items-center justify-center gap-2 text-sm"
                                 >
-                                    <Pencil size={18} />
+                                    <Pencil size={15} />
                                     Update Status
                                 </button>
                                 <button
                                     onClick={() => setIsViewModalOpen(false)}
-                                    className="px-8 py-3 border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-100 transition-colors"
+                                    className="px-6 py-2 border border-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-100 transition-colors text-sm"
                                 >
                                     Close
                                 </button>

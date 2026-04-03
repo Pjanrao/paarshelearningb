@@ -80,7 +80,7 @@ export default function Topbar({ role }: { role: string }) {
     dispatch(logout());
 
     // Redirect to home or sign-in
-    router.push("/signin");
+    window.location.href = "/";
   };
 
   return (

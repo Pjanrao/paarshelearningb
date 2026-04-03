@@ -72,11 +72,12 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     { name: "Batches", path: "/admin/batches", icon: Users },
     // { name: "Group Consent", path: "/admin/group-management", icon: ClipboardCheck },
     { name: "Blogs", path: "/admin/blogs", icon: FileText },
-    { name: "Placement", path: "/admin/placement", icon: Briefcase },
+    // { name: "Placement", path: "/admin/placement", icon: Briefcase },
     { name: "Reports", path: "/admin/reports", icon: BarChart3 },
     // { name: "Payments", path: "/admin/payments", icon: CreditCard },
     { name: "Testimonials", path: "/admin/testimonial", icon: FileText },
     // { name: "Workshops", path: "/admin/workshops", icon: BookOpen },
+    { name: "Industry Partners", path: "/admin/industry-partners", icon: Briefcase },
     { name: "Settings", path: "/admin/settings", icon: Settings },
   ];
 

@@ -247,7 +247,7 @@ export default function SettingsPage() {
     }
 
     return (
-        <div className="md:p-2 bg-[#fbfbfb] dark:bg-slate-950 min-h-[calc(100vh-64px)] transition-colors duration-300">
+        <div className="md:p-2 bg-[#fbfbfb] dark:bg-slate-950 transition-colors duration-300">
             <div className="space-y-8 animate-in fade-in duration-500">
                 {/* Header */}
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -255,12 +255,11 @@ export default function SettingsPage() {
                         <h1 className="text-2xl sm:text-3xl font-bold text-[#2C4276] dark:text-slate-100 flex items-center gap-3">
                             Account Settings
                         </h1>
-                        <p className="text-gray-500 dark:text-slate-400 mt-1 text-sm sm:base">Manage your profile, security, and application preferences.</p>
                     </div>
                 </div>
 
                 <Tabs defaultValue="profile" className="space-y-6">
-                    <TabsList className="bg-white dark:bg-slate-900 p-1.5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 w-full lg:w-fit h-auto flex flex-col sm:flex-row gap-1 shadow-md">
+                    {/* <TabsList className="bg-white dark:bg-slate-900 p-1.5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 w-full lg:w-fit h-auto flex flex-col sm:flex-row gap-1 shadow-md">
                         <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-[#2C4276] data-[state=active]:text-white data-[state=inactive]:text-gray-500 py-3 px-6 font-bold transition-all flex-1 text-sm sm:text-base">
                             <User className="h-4 w-4 mr-2" />
                             Profile
@@ -277,7 +276,7 @@ export default function SettingsPage() {
                             <Monitor className="h-4 w-4 mr-2" />
                             Application
                         </TabsTrigger>
-                    </TabsList>
+                    </TabsList> */}
 
                     {/* Profile Tab */}
                     <TabsContent value="profile" className="space-y-6">

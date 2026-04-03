@@ -47,6 +47,7 @@ const Header: React.FC = () => {
 
     dispatch(logout());
     router.push("/");
+    window.location.href = "/";
   };
 
   const handleClickOutside = (event: MouseEvent) => {

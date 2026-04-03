@@ -53,10 +53,10 @@ export default function StudentLayout({
             dispatch(logoutAction());
 
             // Use hard redirect to ensure cookies are strictly updated in the next request
-            window.location.href = "/signin";
+            window.location.href = "/";
         } catch (error) {
             console.error("Logout error:", error);
-            window.location.href = "/signin";
+            window.location.href = "/";
         }
     };
 

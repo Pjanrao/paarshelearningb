@@ -396,7 +396,7 @@ const InquiryPage = () => {
                         className="relative"
                     >
                         {/* Form Card */}
-                        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 md:p-8 lg:p-10 mt-3 border border-slate-100 dark:border-white/5 shadow-2xl shadow-[#2B4278]/10 dark:shadow-none relative z-10 overflow-hidden">
+                        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-6 md:p-8 lg:p-10 mt-3 border border-slate-100 dark:border-white/5 shadow-2xl shadow-[#2B4278]/10 dark:shadow-none relative z-10">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[#01A0E2]/5 rounded-bl-full pointer-events-none"></div>
 
                             <div className="space-y-3 mb-10">
@@ -459,12 +459,47 @@ const InquiryPage = () => {
                                             className="w-full px-6 py-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 focus:ring-2 focus:ring-[#01A0E2] focus:bg-white dark:focus:bg-slate-900 outline-none transition-all text-sm font-medium appearance-none"
                                         >
                                             <option value="">Select a course</option>
-                                            <option value="Full Stack Development">Full Stack Development</option>
+                                            <option value="Python Full Stack Development"> Python Full Stack Development</option>
                                             <option value="Data Science">Data Science</option>
                                             <option value="Machine Learning">Machine Learning</option>
                                             <option value="UI/UX Design">UI/UX Design</option>
                                             <option value="Digital Marketing">Digital Marketing</option>
-                                            <option value="Other">Other</option>
+                                            <option value="Mern Stack Development">Mern Stack Development</option>
+                                            <option value="Python Programming">Python Programming</option>
+                                            <option value="NLP with Deep Learning">NLP with Deep Learning</option>
+                                            <option value="Generative AI">Generative AI</option>
+                                            <option value="Wordpress Development">Wordpress Development</option>
+                                            <option value="Tableau">Tableau</option>
+                                            <option value="SQL for Data Science">SQL for Data Science</option>
+                                            <option value="Rust Programming">Rust Programming</option>
+                                            <option value="React Native Development">React Native Development</option>
+                                            <option value="React Development">React Development</option>
+                                            <option value="Power BI">Power BI</option>
+                                            <option value="PHP Web Development">PHP Web Development</option>
+                                            <option value="Mobile App Development">Mobile App Development</option>
+                                            <option value="Kotlin Development">Kotlin Development</option>
+                                            <option value="Java Programming">Java Programming</option>
+                                            <option value="Java Full Stack">Java Full Stack</option>
+                                            <option value="ios Development">ios Development</option>
+                                            <option value="Full Stack Web Development">Full Stack Web Development</option>
+                                            <option value="Front End Development">Front End Development</option>
+                                            <option value="Flutter Development">Flutter Development</option>
+                                            <option value="Data Architecture">Data Architecture</option>
+                                            <option value="Cloud Computing">Cloud Computing</option>
+                                            <option value="C++ Programming Language">C++ Programming Language</option>
+                                            <option value="C Programming Language">C Programming Language</option>
+                                            <option value="Backend Development">Backend Development</option>
+                                            <option value="Network Security">Network Security</option>
+                                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                                            <option value="Game Development">Game Development</option>
+                                            <option value="Chatgpt for Scrum Masters">Chatgpt for Scrum Masters</option>
+                                            <option value="API & Automation Testing ">API & Automation Testing </option>
+                                            <option value="Software Testing">Software Testing</option>
+                                            <option value="Ethical Hacking">Ethical Hacking</option>
+                                            <option value="Project Manager">Project Manager</option>
+                                            <option value="Salesforce Development">Salesforce Development</option>
+                                            <option value="Data Analytics">Data Analytics</option>
+                                            <option value=".Net Development">.Net Development</option>
                                         </select>
                                     </div>
                                 </div>
