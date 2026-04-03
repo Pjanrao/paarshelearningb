@@ -4,9 +4,11 @@ import nodemailer from "nodemailer";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 
-// Configure Nodemailer with Gmail
+// Configure Nodemailer with Gmail SMTP
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD,
@@ -80,9 +82,14 @@ export async function POST(req: Request) {
             { status: 200 }
         );
     } catch (error: any) {
-        console.error("Forgot password error (Nodemailer):", error);
+        console.error("Forgot password error (Detailed):", {
+            message: error.message,
+            code: error.code,
+            command: error.command,
+            response: error.response,
+        });
         return NextResponse.json(
-            { message: "Internal server error", error: error.message },
+            { message: "Mailing service failed. Please check credentials or App Password.", error: error.message },
             { status: 500 }
         );
     }

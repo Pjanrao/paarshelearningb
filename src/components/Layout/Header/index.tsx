@@ -78,10 +78,11 @@ const Header: React.FC = () => {
   }, [navbarOpen])
 
   return (
-    <header className={`fixed top-0 z-999 w-full transition-all duration-300 ${sticky
-        ? 'py-2 bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100'
-        : 'py-4 bg-transparent shadow-none'
-      }`}>
+    <>
+      <header className={`fixed top-0 z-999 w-full transition-all duration-300 ${sticky
+          ? 'py-2 bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100'
+          : 'py-4 bg-transparent shadow-none'
+        }`}>
 
       <div className='container mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 lg:px-8'>
 
@@ -163,28 +164,34 @@ const Header: React.FC = () => {
 
         </div>
       </div>
+    </header>
 
       {/* Mobile Menu */}
       {navbarOpen && (
-        <div className='fixed inset-0 bg-black/60 z-40' onClick={() => setNavbarOpen(false)} />
+        <div className='fixed inset-0 bg-black/60 z-[1000] backdrop-blur-sm' onClick={() => setNavbarOpen(false)} />
       )}
 
       <div
         ref={mobileMenuRef}
-        className={`lg:hidden fixed top-0 right-0 h-full w-[300px] bg-white shadow-2xl transition-transform duration-300 ${navbarOpen ? 'translate-x-0' : 'translate-x-full'
-          } z-50`}>
+        className={`lg:hidden fixed top-0 right-0 h-full w-[300px] bg-white dark:bg-[#1a1c23] shadow-[-10px_0_30px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-in-out ${navbarOpen ? 'translate-x-0' : 'translate-x-full'
+          } z-[1001] flex flex-col`}>
 
-        <div className='flex justify-between p-6 border-b'>
+        <div className='flex items-center justify-between p-6 border-b dark:border-gray-800'>
           <Logo />
-          <button onClick={() => setNavbarOpen(false)}>✕</button>
+          <button
+            onClick={() => setNavbarOpen(false)}
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+          >
+            ✕
+          </button>
         </div>
 
-        <nav className='p-6 space-y-3'>
+        <nav className='flex-1 overflow-y-auto p-6 space-y-2'>
           {headerData.map((item, index) => (
             <MobileHeaderLink key={index} item={item} />
           ))}
 
-          <div className='pt-6 flex flex-col gap-3'>
+          <div className='pt-8 mt-4 border-t dark:border-gray-800 flex flex-col gap-4'>
             {user && user.role === "student" ? (
               <>
                 <button
@@ -192,6 +199,7 @@ const Header: React.FC = () => {
                     router.push("/student");
                     setNavbarOpen(false);
                   }}
+                  className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl bg-primary text-white shadow-lg transition-all active:scale-95"
                 >
                   Dashboard
                 </button>
@@ -201,22 +209,32 @@ const Header: React.FC = () => {
                     handleLogout();
                     setNavbarOpen(false);
                   }}
-                  className="text-red-500"
+                  className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/5 transition-all"
                 >
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <Link href='/signin'>Sign In</Link>
-                <Link href='/signup'>Sign Up</Link>
+                <Link
+                  href='/signin'
+                  onClick={() => setNavbarOpen(false)}
+                  className='w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl border border-primary text-primary hover:bg-primary/5 transition-all'>
+                  Sign In
+                </Link>
+                <Link
+                  href='/signup'
+                  onClick={() => setNavbarOpen(false)}
+                  className='w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl bg-primary text-white shadow-lg hover:shadow-xl transition-all active:scale-95'>
+                  Sign Up
+                </Link>
               </>
             )}
           </div>
 
         </nav>
       </div>
-    </header>
+    </>
   )
 }
 

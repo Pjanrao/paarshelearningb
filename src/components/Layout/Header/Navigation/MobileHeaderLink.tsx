@@ -17,7 +17,7 @@ const MobileHeaderLink: React.FC<{ item: HeaderItem }> = ({ item }) => {
       <div className="flex items-center w-full">
         <Link
           href={item.href}
-          className={`flex-1 py-1 px-4 text-base font-semibold rounded-lg transition-all duration-200 ${path === item.href ? 'bg-primary/10 text-primary' : 'text-midnight_text dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5 hover:text-primary'}`}
+          className={`flex-1 py-3 px-4 text-base font-bold rounded-xl transition-all duration-200 ${path === item.href ? 'bg-primary/10 text-primary' : 'text-midnight_text dark:text-gray-300 hover:bg-primary/5 hover:text-primary'}`}
         >
           {item.label}
         </Link>
