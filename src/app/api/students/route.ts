@@ -35,9 +35,11 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       students,
-      total,
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
+      pagination: {
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+      }
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

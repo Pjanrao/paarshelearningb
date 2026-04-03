@@ -326,7 +326,15 @@ export default function StudentsPage() {
 
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div className="text-sm text-gray-600">
-                                Showing <span className="font-medium">{(currentPage - 1) * studentsPerPage + 1}</span> to <span className="font-medium">{Math.min(currentPage * studentsPerPage, total)}</span> of <span className="font-medium">{total}</span> students
+                                {total === 0 ? (
+                                    "Showing 0 to 0 of 0 students"
+                                ) : (
+                                    <>
+                                        Showing <span className="font-medium">{(currentPage - 1) * studentsPerPage + 1}</span> to{" "}
+                                        <span className="font-medium">{Math.min(currentPage * studentsPerPage, total)}</span> of{" "}
+                                        <span className="font-medium">{total}</span> students
+                                    </>
+                                )}
                             </div>
                             <div className="flex items-center gap-2">
                                 <button

@@ -9,11 +9,36 @@ export async function GET(req: Request) {
         const { searchParams } = new URL(req.url);
         const isAdmin = searchParams.get("admin") === "true";
         const statusFilter = searchParams.get("status");
+        const page = parseInt(searchParams.get("page") || "1");
+        const limit = parseInt(searchParams.get("limit") || "10");
+        const search = searchParams.get("search") || "";
+        const skip = (page - 1) * limit;
 
-        const filter = (isAdmin || statusFilter === "all") ? {} : { status: "approved" };
-        const testimonials = await Testimonial.find(filter).sort({ createdAt: -1 });
+        const filter: any = (isAdmin || statusFilter === "all") ? {} : { status: "approved" };
 
-        return NextResponse.json({ success: true, data: testimonials });
+        if (search) {
+            filter.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { course: { $regex: search, $options: "i" } },
+                { message: { $regex: search, $options: "i" } },
+            ];
+        }
+
+        const [testimonials, total] = await Promise.all([
+            Testimonial.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+            Testimonial.countDocuments(filter),
+        ]);
+
+        return NextResponse.json({
+            success: true,
+            data: testimonials,
+            pagination: {
+                total,
+                totalPages: Math.ceil(total / limit),
+                currentPage: page,
+                limit
+            }
+        });
     } catch (error: any) {
         return NextResponse.json({ success: false, error: error.message }, { status: 500 });
     }
