@@ -45,7 +45,7 @@ export const courseApi = api.injectEndpoints({
     getCourses: builder.query<GetCoursesResponse, GetCoursesParams>({
       query: ({
         page = 1,
-        limit = 10,
+        limit = 50,
         search = "",
         category = "",
         sort = "",
