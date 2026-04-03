@@ -16,7 +16,6 @@ const videoSchema = new mongoose.Schema({
     },
     publicId: {
         type: String,
-        required: [true, "Cloudinary public ID is required"],
     },
     course: {
         type: mongoose.Schema.Types.ObjectId,

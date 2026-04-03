@@ -83,7 +83,7 @@ export default function LoginPage() {
         console.error("Login error:", error);
       }
       setError(message);
-      if (message !== "Account not found") {
+      if (message !== "User not found") {
         toast.error(message);
       }
     } finally {

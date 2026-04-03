@@ -4,7 +4,8 @@ import "@/models/Category";
 import "@/models/Subcategory";
 import "@/models/Teachers";
 import { NextResponse } from "next/server";
-import cloudinary from "@/lib/cloudinary";
+import fs from "fs";
+import path from "path";
 export const runtime = "nodejs";
 
 
@@ -144,60 +145,36 @@ export async function POST(req: Request) {
       let thumbnailUrl = "";
       let introVideoUrl = "";
 
+      // Helper function to save file locally
+      const saveLocalFile = async (file: File, folder: string) => {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+        const relativePath = `/uploads/courses/${folder}/${filename}`;
+        const fullPath = path.join(process.cwd(), "public", relativePath);
+        
+        // Ensure directory exists
+        const dir = path.dirname(fullPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+
+        await fs.promises.writeFile(fullPath, buffer);
+        return relativePath;
+      };
+
       // ===== UPLOAD PDF =====
       if (syllabusPdf && syllabusPdf.size > 0) {
-        const buffer = Buffer.from(await syllabusPdf.arrayBuffer());
-
-        const result: any = await new Promise((resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream(
-              { resource_type: "raw", folder: "courses/pdfs" },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-              }
-            )
-            .end(buffer);
-        });
-
-        syllabusPdfUrl = result.secure_url;
+        syllabusPdfUrl = await saveLocalFile(syllabusPdf, "pdfs");
       }
 
       // ===== UPLOAD IMAGE =====
       if (thumbnail && thumbnail.size > 0) {
-        const buffer = Buffer.from(await thumbnail.arrayBuffer());
-
-        const result: any = await new Promise((resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream(
-              { folder: "courses/images" },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-              }
-            )
-            .end(buffer);
-        });
-
-        thumbnailUrl = result.secure_url;
+        thumbnailUrl = await saveLocalFile(thumbnail, "images");
       }
 
       // ===== UPLOAD VIDEO =====
-      console.log("PDF exists:", !!syllabusPdf);
-      console.log("Video exists:", !!introVideo);
-      // ===== UPLOAD VIDEO (BETTER VERSION) =====
       if (introVideo && introVideo.size > 0) {
-        const buffer = Buffer.from(await introVideo.arrayBuffer());
-
-        const result: any = await cloudinary.uploader.upload_large(
-          `data:${introVideo.type};base64,${buffer.toString("base64")}`,
-          {
-            resource_type: "video",
-            folder: "courses/videos",
-          }
-        );
-
-        introVideoUrl = result.secure_url;
+        introVideoUrl = await saveLocalFile(introVideo, "videos");
       }
 
       // ===== PARSE NORMAL FIELDS SAFELY =====

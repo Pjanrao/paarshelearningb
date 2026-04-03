@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import cloudinary from "@/lib/cloudinary";
+import fs from "fs";
+import path from "path";
 
 export async function POST(req: Request) {
     try {
@@ -13,23 +14,22 @@ export async function POST(req: Request) {
             );
         }
 
-        // Convert file to buffer
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        // Save locally
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+        const relativePath = `/uploads/courses/receipts/${filename}`;
+        const fullPath = path.join(process.cwd(), "public", relativePath);
+        
+        // Ensure directory exists
+        const dir = path.dirname(fullPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
 
-        // Upload to Cloudinary
-        const result: any = await new Promise((resolve, reject) => {
-            cloudinary.uploader.upload_stream(
-                { folder: "receipts" },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            ).end(buffer);
-        });
+        await fs.promises.writeFile(fullPath, buffer);
 
         return NextResponse.json({
-            url: result.secure_url,
+            url: relativePath,
         });
 
     } catch (error) {

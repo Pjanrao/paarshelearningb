@@ -67,7 +67,6 @@ export default function StudentLayout({
         { icon: BookOpen, label: "My Courses", href: "/student/my-courses" },
         { icon: Video, label: "Meeting Links", href: "/student/meetings" },
         { icon: Gift, label: "Refer & Earn", href: "/student/refer-earn" },
-        { icon: Award, label: "Certificates", href: "#" },
         { icon: HelpCircle, label: "FAQ", href: "/student/faq" },
     ];
 

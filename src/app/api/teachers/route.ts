@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Teachers from "@/models/Teachers";
-import cloudinary from "@/lib/cloudinary";
+import fs from "fs";
+import path from "path";
 
 export async function GET(req: Request) {
   try {
@@ -44,10 +45,21 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     if (body.avatar && body.avatar.startsWith("data:image")) {
-      const uploadResponse = await cloudinary.uploader.upload(body.avatar, {
-        folder: "teachers",
-      });
-      body.avatar = uploadResponse.secure_url;
+      const base64Data = body.avatar.replace(/^data:image\/\w+;base64,/, "");
+      const extension = body.avatar.split(';')[0].split('/')[1] || 'png';
+      const buffer = Buffer.from(base64Data, "base64");
+      const filename = `${Date.now()}-teacher-avatar.${extension}`;
+      const relativePath = `/uploads/courses/images/${filename}`;
+      const fullPath = path.join(process.cwd(), "public", relativePath);
+      
+      // Ensure directory exists
+      const dir = path.dirname(fullPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      await fs.promises.writeFile(fullPath, buffer);
+      body.avatar = relativePath;
     }
 
     const teacher = await Teachers.create(body);

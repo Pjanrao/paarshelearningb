@@ -1,7 +1,8 @@
 import { connectDB } from "@/lib/db";
 import Course from "@/models/Course";
 import { NextResponse } from "next/server";
-import cloudinary from "@/lib/cloudinary";
+import fs from "fs";
+import path from "path";
 export const dynamic = "force-dynamic";
 
 const generateSlug = (text: string) => {
@@ -76,67 +77,65 @@ export async function PUT(
     const thumbnail = formData.get("thumbnail") as File | null;
     const introVideo = formData.get("introVideo") as File | null;
 
+    // Fetch existing course for file cleanup
+    const existingCourse = await Course.findById(id);
+    if (!existingCourse) {
+      return NextResponse.json({ message: "Course not found" }, { status: 404 });
+    }
+
     let syllabusPdfUrl = "";
     let thumbnailUrl = "";
     let introVideoUrl = "";
+
+    // Helper function to save file locally and delete old one
+    const saveLocalFile = async (file: File, folder: string, oldRelativePath?: string) => {
+      // 1. Delete old file if exists
+      if (oldRelativePath && oldRelativePath.startsWith("/uploads")) {
+        const fullOldPath = path.join(process.cwd(), "public", oldRelativePath);
+        try {
+          if (fs.existsSync(fullOldPath)) {
+            await fs.promises.unlink(fullOldPath);
+          }
+        } catch (err) {
+          console.error(`Error deleting old file ${fullOldPath}:`, err);
+        }
+      }
+
+      // 2. Save new file
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+      const relativePath = `/uploads/courses/${folder}/${filename}`;
+      const fullPath = path.join(process.cwd(), "public", relativePath);
+      
+      // Ensure directory exists
+      const dir = path.dirname(fullPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      await fs.promises.writeFile(fullPath, buffer);
+      return relativePath;
+    };
 
     // =============================
     // PDF Upload
     // =============================
     if (syllabusPdf && syllabusPdf.size > 0) {
-      const buffer = Buffer.from(await syllabusPdf.arrayBuffer());
-
-      const result: any = await new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream(
-            { resource_type: "raw", folder: "courses/pdfs" },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          )
-          .end(buffer);
-      });
-
-      syllabusPdfUrl = result.secure_url;
+      syllabusPdfUrl = await saveLocalFile(syllabusPdf, "pdfs", existingCourse.syllabusPdf);
     }
 
     // =============================
     // Thumbnail Upload
     // =============================
     if (thumbnail && thumbnail.size > 0) {
-      const buffer = Buffer.from(await thumbnail.arrayBuffer());
-
-      const result: any = await new Promise((resolve, reject) => {
-        cloudinary.uploader
-          .upload_stream(
-            { folder: "courses/images" },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          )
-          .end(buffer);
-      });
-
-      thumbnailUrl = result.secure_url;
+      thumbnailUrl = await saveLocalFile(thumbnail, "images", existingCourse.thumbnail);
     }
 
     // =============================
     // Video Upload
     // =============================
     if (introVideo && introVideo.size > 0) {
-      const buffer = Buffer.from(await introVideo.arrayBuffer());
-
-      const result: any = await cloudinary.uploader.upload_large(
-        `data:${introVideo.type};base64,${buffer.toString("base64")}`,
-        {
-          resource_type: "video",
-          folder: "courses/videos",
-        }
-      );
-
-      introVideoUrl = result.secure_url;
+      introVideoUrl = await saveLocalFile(introVideo, "videos", existingCourse.introVideo);
     }
 
     // =============================
@@ -218,10 +217,30 @@ export async function DELETE(
 
     const { id } = await context.params;
 
+    const course = await Course.findById(id);
+    if (!course) {
+      return NextResponse.json({ message: "Course not found" }, { status: 404 });
+    }
+
+    // Delete associated files
+    const filesToDelete = [course.thumbnail, course.syllabusPdf, course.introVideo];
+    for (const fileRelPath of filesToDelete) {
+      if (fileRelPath && fileRelPath.startsWith("/uploads")) {
+        const fullPath = path.join(process.cwd(), "public", fileRelPath);
+        try {
+          if (fs.existsSync(fullPath)) {
+            await fs.promises.unlink(fullPath);
+          }
+        } catch (err) {
+          console.error(`Error deleting file ${fullPath}:`, err);
+        }
+      }
+    }
+
     await Course.findByIdAndDelete(id);
 
     return NextResponse.json({
-      message: "Deleted successfully",
+      message: "Deleted successfully and files cleared",
     });
 
   } catch (error: any) {

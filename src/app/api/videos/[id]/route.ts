@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Video from "@/models/Video";
-import cloudinary from "@/lib/cloudinary";
+import fs from "fs";
+import path from "path";
 
 // ✅ UPDATE VIDEO
 export async function PUT(
@@ -83,14 +84,15 @@ export async function DELETE(
             );
         }
 
-        // ✅ DELETE FROM CLOUDINARY (SAFE)
-        if (video.publicId) {
+        // ✅ DELETE FROM LOCAL STORAGE
+        if (video.videoUrl && video.videoUrl.startsWith("/uploads")) {
+            const fullPath = path.join(process.cwd(), "public", video.videoUrl);
             try {
-                await cloudinary.uploader.destroy(video.publicId, {
-                    resource_type: "video",
-                });
-            } catch (cloudErr) {
-                console.error("Cloudinary delete error:", cloudErr);
+                if (fs.existsSync(fullPath)) {
+                    await fs.promises.unlink(fullPath);
+                }
+            } catch (err) {
+                console.error(`Error deleting video file ${fullPath}:`, err);
             }
         }
 

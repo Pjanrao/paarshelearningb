@@ -1,33 +1,31 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Video from "@/models/Video";
-import cloudinary from "@/lib/cloudinary";
+import fs from "fs";
+import path from "path";
 
-// Helper function to upload video to Cloudinary
-async function uploadToCloudinary(file: File): Promise<{ url: string; publicId: string } | null> {
+// Helper function to upload video to Cloudinary (Old) / Local (New)
+async function saveLocalVideo(file: File): Promise<{ url: string; publicId: string } | null> {
     try {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+        const relativePath = `/uploads/courses/videos/${filename}`;
+        const fullPath = path.join(process.cwd(), "public", relativePath);
+        
+        // Ensure directory exists
+        const dir = path.dirname(fullPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
 
-        const result: any = await new Promise((resolve, reject) => {
-            cloudinary.uploader.upload_stream(
-                {
-                    folder: "course-videos",
-                    resource_type: "auto", // ✅ IMPORTANT: 'auto' or 'video' for video files
-                },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            ).end(buffer);
-        });
+        await fs.promises.writeFile(fullPath, buffer);
 
         return {
-            url: result.secure_url,
-            publicId: result.public_id,
+            url: relativePath,
+            publicId: "", // Not needed for local
         };
     } catch (error) {
-        console.error("Cloudinary upload error:", error);
+        console.error("Local upload error:", error);
         return null;
     }
 }
@@ -74,12 +72,12 @@ export async function POST(req: Request) {
             );
         }
 
-        // Upload to Cloudinary
-        const uploadResult = await uploadToCloudinary(file);
+        // Upload locally
+        const uploadResult = await saveLocalVideo(file);
 
         if (!uploadResult) {
             return NextResponse.json(
-                { error: "Failed to upload video to Cloudinary" },
+                { error: "Failed to save video to local storage" },
                 { status: 500 }
             );
         }

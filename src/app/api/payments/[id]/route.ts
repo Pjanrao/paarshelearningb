@@ -1,25 +1,26 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Payment from "@/models/Payment";
-import cloudinary from "@/lib/cloudinary";
+import fs from "fs";
+import path from "path";
 
-async function uploadToCloudinary(file: File): Promise<string | null> {
+async function saveLocalReceipt(file: File): Promise<string | null> {
     try {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+        const relativePath = `/uploads/courses/receipts/${filename}`;
+        const fullPath = path.join(process.cwd(), "public", relativePath);
+        
+        // Ensure directory exists
+        const dir = path.dirname(fullPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
 
-        const result: any = await new Promise((resolve, reject) => {
-            cloudinary.uploader.upload_stream(
-                { folder: "receipts" },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            ).end(buffer);
-        });
-        return result.secure_url;
+        await fs.promises.writeFile(fullPath, buffer);
+        return relativePath;
     } catch (error) {
-        console.error("Cloudinary upload error:", error);
+        console.error("Local upload error:", error);
         return null;
     }
 }
@@ -64,7 +65,7 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
 
             console.log("Uploading receipt..."); // DEBUG
 
-            const url = await uploadToCloudinary(firstReceipt);
+            const url = await saveLocalReceipt(firstReceipt);
 
             console.log("UPLOAD RESPONSE:", url); // DEBUG
 
@@ -84,7 +85,7 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
 
             if (file && typeof file !== "string" && file.size > 0) {
 
-                const url = await uploadToCloudinary(file);
+                const url = await saveLocalReceipt(file);
 
                 if (url) {
                     updatedInstallments.push({

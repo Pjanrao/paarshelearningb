@@ -16,7 +16,8 @@ import {
     HelpCircle,
     CheckCircle2,
     Percent,
-    Home
+    Home,
+    Wallet
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -88,10 +89,10 @@ export default function StudentDashboard() {
                 >
                     <div className="p-5 flex-1 flex flex-col items-center justify-center text-center">
                         <div className="mb-2 bg-white/20 p-3 rounded-full">
-                            <Award size={30} />
+                            <Wallet size={30} />
                         </div>
-                        <h3 className="font-bold text-lg mb-1">Certificates</h3>
-                        <p className="text-xs text-purple-50/80 font-medium">View your achievements</p>
+                        <h3 className="font-bold text-lg mb-1">My Wallet</h3>
+                        <p className="text-xs text-purple-50/80 font-medium">View your balance & rewards</p>
                     </div>
                     <button className="bg-black/10 py-2 text-sm font-bold hover:bg-black/20 transition-colors border-t border-white/10 uppercase tracking-wider">
                         Explore &rarr;
@@ -157,11 +158,11 @@ export default function StudentDashboard() {
                     <div className="p-4 space-y-3">
                         <div className="flex items-center gap-4 p-3 rounded-xl bg-purple-50/30 border border-purple-100 transition-all hover:shadow-sm">
                             <div className="bg-purple-100 p-2.5 rounded-lg text-purple-600 border border-purple-200">
-                                <Award size={20} />
+                                <Wallet size={20} />
                             </div>
                             <div>
-                                <h4 className="font-bold text-[#1e293b] text-sm">No Certificates available for download.</h4>
-                                <p className="text-gray-500 text-xs mt-0.5 font-medium">No certificates available</p>
+                                <h4 className="font-bold text-[#1e293b] text-sm">No wallet activities found.</h4>
+                                <p className="text-gray-500 text-xs mt-0.5 font-medium">Start learning to earn rewards</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-4 p-4 rounded-xl bg-orange-50/30 border border-orange-100 transition-all hover:shadow-sm">
