@@ -26,6 +26,7 @@ import "./api/subcategoryApi";
 import "./api/paymentApi";
 import "./api/meetingApi";
 import "./api/batchApi";
+import "./api/referralApi"; // ✅ NEW
 
 // ✅ combine reducers (NO API CHANGE)
 const rootReducer = combineReducers({

@@ -26,6 +26,26 @@ const userSchema = new mongoose.Schema(
             enum: ["student", "teacher", "admin"],
             default: "student",
         },
+
+        referralCode: {
+            type: String,
+            unique: true,
+        },
+
+        referredBy: {
+            type: String,
+            default: null,
+        },
+
+        walletBalance: {
+            type: Number,
+            default: 0,
+        },
+
+        hasUsedReferral: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true }
 );

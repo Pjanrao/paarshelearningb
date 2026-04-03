@@ -13,13 +13,25 @@ export const sendConfirmationEmail = async (email: string, name: string, type: s
         console.error("[Email] EMAIL_PASSWORD is missing or empty!");
     }
 
+    // const transporter = nodemailer.createTransport({
+    //     host: "smtp.hostinger.com",
+    //     port: 465,
+    //     secure: true,
+    //     auth: {
+    //         user: user,
+    //         pass: pass,
+    //     },
+    // });
     const transporter = nodemailer.createTransport({
         host: "smtp.hostinger.com",
         port: 465,
         secure: true,
         auth: {
-            user: user,
-            pass: pass,
+            user,
+            pass,
+        },
+        tls: {
+            rejectUnauthorized: false, // ✅ ADD THIS
         },
     });
 
@@ -32,6 +44,7 @@ export const sendConfirmationEmail = async (email: string, name: string, type: s
             from: `"Paarsh Infotech" <info@paarshelearning.com>`,
             to: email,
             subject: subject,
+            replyTo: "info@paarshelearning.com",
             html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #007bff;">Hello ${name},</h2>
