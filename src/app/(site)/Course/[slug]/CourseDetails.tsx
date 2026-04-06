@@ -826,8 +826,8 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                   <div className="pt-2">
                     <div className="relative aspect-[16/11] w-full max-w-[240px] mx-auto rounded-xl border border-white/10 overflow-hidden group shadow-2xl">
                       <Image
-                        src={getImgPath('/images/testimonial/certificate.jpg')}
-                        alt='Professional Certification' 
+                        src={getImgPath('/images/testimonial/Paarsh E-Learning Certificate jpg.jpg.jpeg')}
+                        alt='Professional Certification'
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-700"
                         unoptimized
