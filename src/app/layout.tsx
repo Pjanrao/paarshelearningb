@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Script from "next/script";
 import Header from "@/components/Layout/Header";
 import Footer from "@/components/Layout/Footer";
 import LayoutWrapper from "@/components/Layout/LayoutWrapper";
@@ -30,6 +31,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-S21NWZ9CHM"
+        />
+        <Script id="google-analytics">
+          {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              gtag('config', 'G-S21NWZ9CHM');
+            `}
+        </Script>
+      </head>
       <body className={`${inter.className} ${inter.variable}`} suppressHydrationWarning>
         <NextTopLoader />
         <SessionProviderComp>
