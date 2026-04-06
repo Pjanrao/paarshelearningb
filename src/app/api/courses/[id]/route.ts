@@ -3,49 +3,25 @@ import Course from "@/models/Course";
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+
 export const dynamic = "force-dynamic";
 
-const generateSlug = (text: string) => {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
-};
-
+// =============================
 // GET SINGLE COURSE
+// =============================
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-
   const { id } = await params;
-  console.log("UPDATE API HIT", id);
+
   try {
     await connectDB();
 
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
-
-    let course;
-    if (isObjectId) {
-      course = await Course.findById(id)
-        .populate("category")
-        .populate("subcategory")
-        .populate("instructor");
-    }
-
-    // ✅ 2. If not found → match slug from name
-    if (!course) {
-      const courses = await Course.find()
-        .populate("category")
-        .populate("subcategory")
-        .populate("instructor");
-
-      course = courses.find(
-        (c: any) => generateSlug(c.name) === id
-      );
-    }
+    const course = await Course.findById(id)
+      .populate("category")
+      .populate("subcategory")
+      .populate("instructor");
 
     if (!course) {
       return NextResponse.json({ message: "Not found" }, { status: 404 });
@@ -60,8 +36,9 @@ export async function GET(
   }
 }
 
+// =============================
 // UPDATE COURSE
-// UPDATE COURSE
+// =============================
 export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -69,15 +46,13 @@ export async function PUT(
   try {
     await connectDB();
     const { id } = await params;
-    const formData = await req.formData();
 
-    const objectIdFields = ["category", "subcategory", "instructor"];
+    const formData = await req.formData();
 
     const syllabusPdf = formData.get("syllabusPdf") as File | null;
     const thumbnail = formData.get("thumbnail") as File | null;
     const introVideo = formData.get("introVideo") as File | null;
 
-    // Fetch existing course for file cleanup
     const existingCourse = await Course.findById(id);
     if (!existingCourse) {
       return NextResponse.json({ message: "Course not found" }, { status: 404 });
@@ -87,59 +62,85 @@ export async function PUT(
     let thumbnailUrl = "";
     let introVideoUrl = "";
 
-    // Helper function to save file locally and delete old one
-    const saveLocalFile = async (file: File, folder: string, oldRelativePath?: string) => {
-      // 1. Delete old file if exists
-      if (oldRelativePath && oldRelativePath.startsWith("/uploads")) {
-        const fullOldPath = path.join(process.cwd(), "public", oldRelativePath);
-        try {
-          if (fs.existsSync(fullOldPath)) {
-            await fs.promises.unlink(fullOldPath);
+    // =============================
+    // FILE SAVE FUNCTION
+    // =============================
+    const saveLocalFile = async (
+      file: File,
+      subfolder: string,
+      oldRelativePath?: string
+    ) => {
+      try {
+        // =============================
+        // DELETE OLD FILE
+        // =============================
+        if (oldRelativePath && oldRelativePath.startsWith("/uploads")) {
+          const oldFullPath = path.join("/var/www", oldRelativePath);
+
+          try {
+            if (fs.existsSync(oldFullPath)) {
+              await fs.promises.unlink(oldFullPath);
+            }
+          } catch (err) {
+            console.error("Error deleting old file:", err);
           }
-        } catch (err) {
-          console.error(`Error deleting old file ${fullOldPath}:`, err);
         }
-      }
 
-      // 2. Save new file
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-      const relativePath = `/uploads/courses/${folder}/${filename}`;
-      const fullPath = path.join(process.cwd(), "public", relativePath);
-      
-      // Ensure directory exists
-      const dir = path.dirname(fullPath);
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-      }
+        // =============================
+        // SAVE NEW FILE
+        // =============================
+        const buffer = Buffer.from(await file.arrayBuffer());
 
-      await fs.promises.writeFile(fullPath, buffer);
-      return relativePath;
+        // ✅ SAFE filename (NO REGEX ISSUE)
+        const sanitizedFileName =
+          Date.now() + "-" + file.name.replaceAll(" ", "_");
+
+        const relativePath = `/uploads/courses/${id}/${subfolder}/${sanitizedFileName}`;
+        const fullPath = path.join("/var/www", relativePath);
+
+        const dir = path.dirname(fullPath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirSync(dir, { recursive: true });
+        }
+
+        await fs.promises.writeFile(fullPath, buffer);
+
+        return relativePath;
+      } catch (err) {
+        console.error(`Error saving ${subfolder}:`, err);
+        throw err;
+      }
     };
 
     // =============================
-    // PDF Upload
+    // HANDLE FILE UPLOADS
     // =============================
     if (syllabusPdf && syllabusPdf.size > 0) {
-      syllabusPdfUrl = await saveLocalFile(syllabusPdf, "pdfs", existingCourse.syllabusPdf);
+      syllabusPdfUrl = await saveLocalFile(
+        syllabusPdf,
+        "pdfs",
+        existingCourse.syllabusPdf
+      );
     }
 
-    // =============================
-    // Thumbnail Upload
-    // =============================
     if (thumbnail && thumbnail.size > 0) {
-      thumbnailUrl = await saveLocalFile(thumbnail, "images", existingCourse.thumbnail);
+      thumbnailUrl = await saveLocalFile(
+        thumbnail,
+        "images",
+        existingCourse.thumbnail
+      );
     }
 
-    // =============================
-    // Video Upload
-    // =============================
     if (introVideo && introVideo.size > 0) {
-      introVideoUrl = await saveLocalFile(introVideo, "videos", existingCourse.introVideo);
+      introVideoUrl = await saveLocalFile(
+        introVideo,
+        "intro",
+        existingCourse.introVideo
+      );
     }
 
     // =============================
-    // Parse Form Fields
+    // PARSE FORM DATA
     // =============================
     const data: any = {};
 
@@ -152,18 +153,17 @@ export async function PUT(
       "testimonials",
     ];
 
-    for (const [key, value] of formData.entries()) {
+    const objectIdFields = ["category", "subcategory", "instructor"];
 
-      if (
-        key === "syllabusPdf" ||
-        key === "thumbnail" ||
-        key === "introVideo"
-      ) {
-        continue;
-      }
+    for (const [key, value] of formData.entries()) {
+      if (["syllabusPdf", "thumbnail", "introVideo"].includes(key)) continue;
 
       if (jsonFields.includes(key)) {
-        data[key] = JSON.parse(value as string);
+        try {
+          data[key] = JSON.parse(value as string);
+        } catch {
+          data[key] = [];
+        }
         continue;
       }
 
@@ -177,37 +177,35 @@ export async function PUT(
     }
 
     // =============================
-    // Attach Uploaded URLs
+    // ATTACH FILE URLS
     // =============================
     if (syllabusPdfUrl) data.syllabusPdf = syllabusPdfUrl;
     if (thumbnailUrl) data.thumbnail = thumbnailUrl;
     if (introVideoUrl) data.introVideo = introVideoUrl;
 
     // =============================
-    // Update Course
+    // UPDATE DB
     // =============================
-    const updatedCourse = await Course.findByIdAndUpdate(
-      id,
-      data,
-      { new: true }
-    );
+    const updatedCourse = await Course.findByIdAndUpdate(id, data, {
+      new: true,
+    });
 
     return NextResponse.json(updatedCourse);
-
   } catch (error: any) {
     console.error("COURSE UPDATE ERROR:", error);
 
     return NextResponse.json(
       {
-        message: "Error updating course",
-        error: error.message,
+        message: error.message || "Error updating course",
       },
       { status: 500 }
     );
   }
 }
 
-
+// =============================
+// DELETE COURSE
+// =============================
 export async function DELETE(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -222,17 +220,25 @@ export async function DELETE(
       return NextResponse.json({ message: "Course not found" }, { status: 404 });
     }
 
-    // Delete associated files
-    const filesToDelete = [course.thumbnail, course.syllabusPdf, course.introVideo];
+    // =============================
+    // DELETE FILES
+    // =============================
+    const filesToDelete = [
+      course.thumbnail,
+      course.syllabusPdf,
+      course.introVideo,
+    ];
+
     for (const fileRelPath of filesToDelete) {
       if (fileRelPath && fileRelPath.startsWith("/uploads")) {
-        const fullPath = path.join(process.cwd(), "public", fileRelPath);
+        const fullPath = path.join("/var/www", fileRelPath);
+
         try {
           if (fs.existsSync(fullPath)) {
             await fs.promises.unlink(fullPath);
           }
         } catch (err) {
-          console.error(`Error deleting file ${fullPath}:`, err);
+          console.error("Error deleting file:", err);
         }
       }
     }
@@ -240,14 +246,12 @@ export async function DELETE(
     await Course.findByIdAndDelete(id);
 
     return NextResponse.json({
-      message: "Deleted successfully and files cleared",
+      message: "Deleted successfully and files removed",
     });
-
   } catch (error: any) {
     return NextResponse.json(
       {
-        message: "Error deleting course",
-        error: error.message,
+        message: error.message || "Error deleting course",
       },
       { status: 500 }
     );

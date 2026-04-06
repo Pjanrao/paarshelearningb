@@ -85,11 +85,11 @@ export async function POST(req: Request) {
     await connectDB();
 
     const formData = await req.formData();
-    
+
     // 1. Get or Generate ID
     let courseId = formData.get("_id") as string;
     if (!courseId) {
-       courseId = new mongoose.Types.ObjectId().toString();
+      courseId = new mongoose.Types.ObjectId().toString();
     }
 
     // ===== GET FILES =====
@@ -104,26 +104,34 @@ export async function POST(req: Request) {
     // Helper function to save file locally with courseId structure
     const saveLocalFile = async (file: File, subfolder: string) => {
       try {
+        // 🔥 FILE SIZE VALIDATION (ADD HERE)
+        if (file.size > 100 * 1024 * 1024) {
+          throw new Error(`${subfolder} file too large (Max 100MB allowed)`);
+        }
+
         const buffer = Buffer.from(await file.arrayBuffer());
         const timestamp = Date.now();
-        const sanitizedFileName = file.name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9.\-_]/g, "");
+
+        const sanitizedFileName = file.name
+          .replace(/\s+/g, "_")
+          .replace(/[^a-zA-Z0-9.\-_]/g, "");
+
         const filename = `${timestamp}-${sanitizedFileName}`;
-        
-        // Structure: /uploads/courses/{courseId}/{subfolder}/{filename}
+
         const relativePath = `/uploads/courses/${courseId}/${subfolder}/${filename}`;
-        const fullPath = path.join(process.cwd(), "public", relativePath);
-        
-        // Ensure directory exists
+        const fullPath = path.join("/var/www", relativePath);
+
         const dir = path.dirname(fullPath);
         if (!fs.existsSync(dir)) {
           fs.mkdirSync(dir, { recursive: true });
         }
 
         await fs.promises.writeFile(fullPath, buffer);
+
         return relativePath;
       } catch (err) {
         console.error(`Error saving ${subfolder}:`, err);
-        return "";
+        throw err; // 🔥 important (so API knows error)
       }
     };
 
@@ -142,9 +150,9 @@ export async function POST(req: Request) {
       // Validate video type
       const allowedVideoTypes = ["video/mp4", "video/x-matroska", "video/webm"];
       if (allowedVideoTypes.includes(introVideo.type)) {
-          introVideoUrl = await saveLocalFile(introVideo, "intro");
+        introVideoUrl = await saveLocalFile(introVideo, "intro");
       } else {
-          console.warn("Invalid intro video type attempted");
+        console.warn("Invalid intro video type attempted");
       }
     }
 
@@ -209,4 +217,4 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
-}
+}
