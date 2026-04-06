@@ -6,15 +6,9 @@ import "@/models/Teachers";
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import mongoose from "mongoose";
+
 export const runtime = "nodejs";
-
-
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
 
 export const dynamic = "force-dynamic";
 
@@ -22,8 +16,6 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   try {
     await connectDB();
-
-    // console.log("testing git");
 
     const { searchParams } = new URL(req.url);
 
@@ -86,70 +78,39 @@ export async function GET(req: Request) {
     );
   }
 }
-// CREATE COURSE
+
+// CREATE/UPDATE COURSE
 export async function POST(req: Request) {
   try {
     await connectDB();
 
     const formData = await req.formData();
-    console.log("FORM DATA:", Object.fromEntries(formData.entries()));
-
-    let data: any = {};
-
-    // ✅ NEW: check if JSON data is sent
-    const jsonData = formData.get("data");
-
-    if (jsonData) {
-      data = JSON.parse(jsonData as string);
+    
+    // 1. Get or Generate ID
+    let courseId = formData.get("_id") as string;
+    if (!courseId) {
+       courseId = new mongoose.Types.ObjectId().toString();
     }
 
-    const objectIdFields = ["category", "subcategory", "instructor"];
+    // ===== GET FILES =====
+    const syllabusPdf = formData.get("syllabusPdf") as File | null;
+    const thumbnail = formData.get("thumbnail") as File | null;
+    const introVideo = formData.get("introVideo") as File | null;
 
-    if (jsonData) {
+    let syllabusPdfUrl = "";
+    let thumbnailUrl = "";
+    let introVideoUrl = "";
+
+    // Helper function to save file locally with courseId structure
+    const saveLocalFile = async (file: File, subfolder: string) => {
       try {
-        data = JSON.parse(jsonData as string);
-      } catch (err) {
-        return NextResponse.json(
-          { message: "Invalid JSON format in 'data' field" },
-          { status: 400 }
-        );
-      }
-
-      const course = await Course.create(data);
-
-      return NextResponse.json(course, { status: 201 });
-    } else {
-
-
-      // ===== GET FILES =====
-      const syllabusPdf = formData.get("syllabusPdf") as File | null;
-      const thumbnail = formData.get("thumbnail") as File | null;
-      const introVideo = formData.get("introVideo") as File | null;
-
-      console.log("PDF:", syllabusPdf);
-      console.log("Thumbnail:", thumbnail);
-      console.log("Video:", introVideo);
-
-      if (syllabusPdf)
-        console.log("PDF size:", syllabusPdf.size);
-
-      if (thumbnail)
-        console.log("Image size:", thumbnail.size);
-
-      if (introVideo)
-        console.log("Video size:", introVideo.size);
-
-      console.log("=======================");
-
-      let syllabusPdfUrl = "";
-      let thumbnailUrl = "";
-      let introVideoUrl = "";
-
-      // Helper function to save file locally
-      const saveLocalFile = async (file: File, folder: string) => {
         const buffer = Buffer.from(await file.arrayBuffer());
-        const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-        const relativePath = `/uploads/courses/${folder}/${filename}`;
+        const timestamp = Date.now();
+        const sanitizedFileName = file.name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9.\-_]/g, "");
+        const filename = `${timestamp}-${sanitizedFileName}`;
+        
+        // Structure: /uploads/courses/{courseId}/{subfolder}/{filename}
+        const relativePath = `/uploads/courses/${courseId}/${subfolder}/${filename}`;
         const fullPath = path.join(process.cwd(), "public", relativePath);
         
         // Ensure directory exists
@@ -160,93 +121,92 @@ export async function POST(req: Request) {
 
         await fs.promises.writeFile(fullPath, buffer);
         return relativePath;
-      };
-
-      // ===== UPLOAD PDF =====
-      if (syllabusPdf && syllabusPdf.size > 0) {
-        syllabusPdfUrl = await saveLocalFile(syllabusPdf, "pdfs");
+      } catch (err) {
+        console.error(`Error saving ${subfolder}:`, err);
+        return "";
       }
+    };
 
-      // ===== UPLOAD IMAGE =====
-      if (thumbnail && thumbnail.size > 0) {
-        thumbnailUrl = await saveLocalFile(thumbnail, "images");
-      }
-
-      // ===== UPLOAD VIDEO =====
-      if (introVideo && introVideo.size > 0) {
-        introVideoUrl = await saveLocalFile(introVideo, "videos");
-      }
-
-      // ===== PARSE NORMAL FIELDS SAFELY =====
-      const data: any = {};
-
-      const jsonFields = [
-        "languages",
-        "popularTags",
-        "syllabus",
-        "benefits",
-        "whyJoin",
-        "testimonials",
-      ];
-
-      for (const [key, value] of formData.entries()) {
-
-        if (key === "data") continue;
-
-        if (
-          key === "syllabusPdf" ||
-          key === "thumbnail" ||
-          key === "introVideo"
-        ) {
-          continue;
-        }
-
-        if (jsonFields.includes(key)) {
-          try {
-            if (!value || value === "undefined" || value === "null") {
-              data[key] = [];
-            } else {
-              data[key] = JSON.parse(value as string);
-            }
-          } catch (err) {
-            console.error(`JSON parse failed for ${key}:`, value);
-            data[key] = [];
-          }
-
-          continue;
-        }
-
-        // 🔥 Handle ObjectId fields safely
-        if (objectIdFields.includes(key)) {
-          if (!value || value === "") continue;
-          data[key] = value;
-          continue;
-        }
-
-        data[key] = value;
-      }
-
-      // ===== ATTACH CLOUDINARY URLS =====
-      if (syllabusPdfUrl) data.syllabusPdf = syllabusPdfUrl;
-      if (thumbnailUrl) data.thumbnail = thumbnailUrl;
-      if (introVideoUrl) data.introVideo = introVideoUrl;
-
-      // ===== SAVE TO DB =====
-      const course = await Course.create(data);
-
-      return NextResponse.json(course, { status: 201 });
-
+    // ===== UPLOAD PDF =====
+    if (syllabusPdf && syllabusPdf.size > 0) {
+      syllabusPdfUrl = await saveLocalFile(syllabusPdf, "pdfs");
     }
-  }
-  catch (error: any) {
-    console.error("COURSE CREATE ERROR:", error);
 
+    // ===== UPLOAD IMAGE =====
+    if (thumbnail && thumbnail.size > 0) {
+      thumbnailUrl = await saveLocalFile(thumbnail, "images");
+    }
+
+    // ===== UPLOAD VIDEO =====
+    if (introVideo && introVideo.size > 0) {
+      // Validate video type
+      const allowedVideoTypes = ["video/mp4", "video/x-matroska", "video/webm"];
+      if (allowedVideoTypes.includes(introVideo.type)) {
+          introVideoUrl = await saveLocalFile(introVideo, "intro");
+      } else {
+          console.warn("Invalid intro video type attempted");
+      }
+    }
+
+    // ===== PARSE NORMAL FIELDS =====
+    const bodyData: any = {};
+    const jsonFields = [
+      "languages",
+      "popularTags",
+      "syllabus",
+      "benefits",
+      "whyJoin",
+      "testimonials",
+    ];
+    const objectIdFields = ["category", "subcategory", "instructor"];
+
+    for (const [key, value] of formData.entries()) {
+      if (["syllabusPdf", "thumbnail", "introVideo", "_id"].includes(key)) continue;
+
+      if (jsonFields.includes(key)) {
+        try {
+          if (!value || value === "undefined" || value === "null") {
+            bodyData[key] = [];
+          } else {
+            bodyData[key] = JSON.parse(value as string);
+          }
+        } catch (err) {
+          bodyData[key] = [];
+        }
+        continue;
+      }
+
+      if (objectIdFields.includes(key)) {
+        if (!value || value === "") continue;
+        bodyData[key] = value;
+        continue;
+      }
+
+      bodyData[key] = value;
+    }
+
+    // ===== ATTACH URLS =====
+    if (syllabusPdfUrl) bodyData.syllabusPdf = syllabusPdfUrl;
+    if (thumbnailUrl) bodyData.thumbnail = thumbnailUrl;
+    if (introVideoUrl) bodyData.introVideo = introVideoUrl;
+
+    // Use the pre-generated or existing id
+    bodyData._id = courseId;
+
+    // ===== SAVE TO DB (UPSERT) =====
+    const course = await Course.findByIdAndUpdate(courseId, bodyData, {
+      new: true,
+      upsert: true,
+      runValidators: true
+    });
+
+    return NextResponse.json(course, { status: 201 });
+
+  } catch (error: any) {
+    console.error("COURSE UPSERT ERROR:", error);
     return NextResponse.json(
-      {
-        message: "Course creation failed",
-        error: error.message,
-      },
+      { message: "Course operation failed", error: error.message },
       { status: 500 }
     );
   }
-}
+}

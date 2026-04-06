@@ -4,7 +4,6 @@ const nextConfig = {
     unoptimized: true, // keep if you want (optional)
 
     domains: [
-      "res.cloudinary.com",
       "upload.wikimedia.org",
     ],
 
