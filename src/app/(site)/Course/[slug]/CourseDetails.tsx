@@ -465,7 +465,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
 
   return (
-    <div className="bg-[#F8FAFC] dark:bg-darkmode min-h-screen pt-20 pb-10">
+    <div className="bg-[#F8FAFC] dark:bg-darkmode min-h-screen pt-24 md:pt-20 pb-10">
       {/* Breadcrumbs */}
       <nav className="container mx-auto px-4 py-2 text-sm font-medium">
         <ol className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
@@ -478,7 +478,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-r from-[#1E3A8A] via-[#3B82F6] to-[#6366F1] py-6 md:py-10 px-4 h-[400px]">
+      <section className="relative overflow-hidden bg-gradient-to-r from-[#1E3A8A] via-[#3B82F6] to-[#6366F1] py-10 md:py-16 px-4 min-h-[400px]">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 skew-x-12 transform translate-x-20"></div>
         <div className="container mx-auto max-w-7xl relative z-10 grid lg:grid-cols-12 gap-10 items-center">
           <div className="text-white lg:col-span-6">
@@ -516,7 +516,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
           </div>
 
           <div className="relative group lg:col-span-6 w-full lg:-mt-12 flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-[500px] h-[250px] mt-15">
+            <div className="relative w-full max-w-[500px] h-[250px] lg:mt-15 mt-8">
               <div className="absolute inset-0 bg-blue-400 blur-3xl opacity-20 group-hover:opacity-30 transition-opacity rounded-full"></div>
               <div className="relative h-full rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10 bg-black">
                 <video
@@ -535,7 +535,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
       {/* Meta Info Bar */}
       <div className="container mx-auto max-w-7xl px-4 -mt-6 relative z-20">
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-3 md:p-5 grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 border border-gray-100 dark:border-gray-800">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-3 md:p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4 border border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600">
               <Icon icon="solar:clock-circle-bold" className="w-4 h-4 md:w-5 md:h-5" />
@@ -619,7 +619,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             </section>
 
             {/* Curriculum */}
-            <section className="space-y-4 -mt-24">
+            <section className="space-y-4 lg:-mt-24 mt-0">
               <h2 className="text-xl font-bold text-[#2B4278] dark:text-white">Course Curriculum</h2>
               <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
                 {(course.curriculum || (course.syllabus || [])).map((item: any, index: number) => (
@@ -663,8 +663,8 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             {(course.whatYouLearn || course.benefits) && (
               <section className="p-2 md:p-4 lg:p-6">
                 <div className="relative z-10">
-                  <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#2B4278] dark:text-white flex items-center gap-4 -mt-10">
-                    <div className="w-14 h-14 bg-white dark:bg-gray-800 shadow-lg rounded-2xl flex items-center justify-center border border-gray-50 dark:border-gray-700 -mt-12 ">
+                  <h2 className="text-xl md:text-2xl font-bold mb-2 text-[#2B4278] dark:text-white flex items-center gap-4 lg:-mt-10 mt-0">
+                    <div className="w-14 h-14 bg-white dark:bg-gray-800 shadow-lg rounded-2xl flex items-center justify-center border border-gray-50 dark:border-gray-700 lg:-mt-12 mt-0">
                       <Icon icon="solar:lightbulb-bolt-bold-duotone" className="text-[#01A0E2] w-8 h-8" />
                     </div>
                     <div className="flex flex-col">
@@ -827,7 +827,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                     <div className="relative aspect-[16/11] w-full max-w-[240px] mx-auto rounded-xl border border-white/10 overflow-hidden group shadow-2xl">
                       <Image
                         src={getImgPath('/images/testimonial/certificate.jpg')}
-                        alt='Professional Certification'
+                        alt='Professional Certification' 
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-700"
                         unoptimized
@@ -895,7 +895,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
       </main>
 
-      <section className="container mx-auto max-w-6xl px-4 -mt-16 md:-mt-24 w-fit mb-0">
+      <section className="container mx-auto max-w-6xl px-4 lg:-mt-24 mt-0 mb-0">
         <div className="bg-[#081738] rounded-[2rem] md:rounded-[3rem] p-2 md:p-8 text-left md:text-center text-white relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
             <div className="absolute top-[-50%] left-[-20%] w-[100%] h-[150%] bg-blue-500 rounded-full blur-[120px]"></div>

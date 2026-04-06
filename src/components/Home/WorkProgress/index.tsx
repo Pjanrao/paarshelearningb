@@ -120,10 +120,10 @@ const Progresswork = ({ isColorMode }: { isColorMode: Boolean }) => {
                 <Image
                   src={getImgPath('/images/work-progress/why_choose.png')}
                   alt='Why Choose Paarsh'
-                  width={360}
-                  height={360}
+                  width={280}
+                  height={280}
                   quality={100}
-                  className='h-auto w-fit max-w-[360px] object-contain transform group-hover:scale-105 transition-transform duration-1000'
+                  className='h-auto w-fit max-w-[280px] sm:max-w-[360px] object-contain transform group-hover:scale-105 transition-transform duration-1000'
                 />
               </div>
 
@@ -161,15 +161,15 @@ const Progresswork = ({ isColorMode }: { isColorMode: Boolean }) => {
               </span>
             </div>
 
-            <h2 className='text-2xl md:text-2xl lg:text-4xl font-black text-primary dark:text-white leading-[1.1] mb-6'>
-              Paarsh <span className="text-secondary relative whitespace-nowrap">E-Learning
-                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 318 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <h2 className='text-xl sm:text-2xl lg:text-4xl font-black text-primary dark:text-white leading-[1.1] mb-6'>
+              Paarsh <span className="text-secondary relative whitespace-nowrap">              E-Learning
+                <svg className="absolute bottom-0 md:-bottom-2 left-0 w-full" viewBox="0 0 318 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M3.5 9C27.2302 4.0492 68.3033 2 159 2C249.697 2 290.77 4.0492 314.5 9" stroke="#01A0E2" strokeWidth="5" strokeLinecap="round" />
                 </svg>
               </span>
             </h2>
 
-            <p className='text-gray-600 dark:text-white/70 text-base md:text-md leading-relaxed mb-8 max-w-xl'>
+            <p className='text-gray-600 dark:text-white/70 text-sm md:text-base leading-relaxed mb-8 max-w-xl'>
               Deliver industry-focused education through expert mentors and live interactive sessions. We combine practical learning and career support for real success.
             </p>
 
@@ -177,12 +177,12 @@ const Progresswork = ({ isColorMode }: { isColorMode: Boolean }) => {
               {points.map((item, index) => (
                 <div
                   key={index}
-                  className="group flex items-center gap-4 p-3.5 rounded-xl bg-white dark:bg-white/5 border border-primary/5 hover:border-secondary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
+                  className="group flex items-center gap-3 p-2.5 rounded-xl bg-white dark:bg-white/5 border border-primary/5 hover:border-secondary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
                 >
-                  <div className="shrink-0 w-9 h-9 rounded-xl bg-primary/5 dark:bg-white/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                  <div className="shrink-0 w-8 h-8 rounded-lg bg-primary/5 dark:bg-white/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
                     <Icon icon="ic:round-check" className="text-primary dark:text-secondary group-hover:text-white text-xl" />
                   </div>
-                  <p className="text-gray-700 dark:text-white/80 font-bold text-[12px] lg:text-[12px] leading-tight transition-colors duration-300 group-hover:text-primary dark:group-hover:text-white">
+                  <p className="text-gray-700 dark:text-white/80 font-bold text-[11px] lg:text-[12px] leading-tight transition-colors duration-300 group-hover:text-primary dark:group-hover:text-white">
                     {item.title}
                   </p>
                 </div>

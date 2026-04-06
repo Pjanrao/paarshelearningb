@@ -375,7 +375,7 @@ const ContactPage = () => {
   return (
     <div className="bg-white dark:bg-[#0f172a] transition-colors duration-300">
       {/* Hero Section */}
-      <section className="relative w-full bg-gradient-to-b from-[#01A0E2]/5 to-white dark:from-slate-900 dark:to-[#0f172a] pt-20 pb-12 md:pt-32 md:pb-24 overflow-hidden">
+      <section className="relative w-full bg-gradient-to-b from-[#01A0E2]/5 to-white dark:from-slate-900 dark:to-[#0f172a] pt-24 pb-12 md:pt-32 md:pb-24 overflow-hidden">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-[#2B4278]/5 skew-x-12 transform translate-x-32 pointer-events-none"></div>
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#01A0E2]/5 rounded-full blur-3xl pointer-events-none"></div>
 

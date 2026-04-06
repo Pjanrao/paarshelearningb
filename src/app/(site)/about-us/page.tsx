@@ -54,9 +54,9 @@ const AboutPage = () => {
 
   return (
     <>
-      <div className="w-full mt-10 text-center bg-white text-primary dark:bg-[#18181b] dark:text-white transition-colors duration-300 relative overflow-hidden">
-        <div className="text-center mb-16 md:mb-10 mt-20">
-          <h2 className="text-3xl md:text-3xl font-extrabold text-blue-950 dark:text-white mb-6">
+      <div className="w-full pt-20 pb-4 md:pt-32 text-center bg-white text-primary dark:bg-[#18181b] dark:text-white transition-colors duration-300 relative overflow-hidden">
+        <div className="text-center mb-16 md:mb-10">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-blue-950 dark:text-white mb-6">
             About Us
           </h2>
           <div className="w-20 h-1.5 bg-secondary mx-auto rounded-full" />

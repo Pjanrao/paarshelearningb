@@ -23,6 +23,7 @@ export default function TestimonialFormModal({ isOpen, onClose, onSuccess }: Tes
         course: "",
         message: "",
         rating: 5,
+        imageUrl: "",
     });
     const [errors, setErrors] = useState<FormErrors>({});
     const [loading, setLoading] = useState(false);
@@ -79,7 +80,7 @@ export default function TestimonialFormModal({ isOpen, onClose, onSuccess }: Tes
                 toast.success("Thank you! Your testimonial has been submitted for review.");
                 onClose();
                 if (onSuccess) onSuccess();
-                setForm({ name: "", course: "", message: "", rating: 5 });
+                setForm({ name: "", course: "", message: "", rating: 5, imageUrl: "" });
                 setErrors({});
             } else {
                 toast.error(data.error || "Submission failed. Please try again.");
@@ -136,6 +137,19 @@ export default function TestimonialFormModal({ isOpen, onClose, onSuccess }: Tes
                             />
                             {errors.course && <p className="text-xs text-red-500 mt-0.5">{errors.course}</p>}
                         </div>
+                    {/* Image URL (Optional) */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                            Image URL <span className="text-gray-400 font-normal">(Optional)</span>
+                        </label>
+                        <input
+                            type="url"
+                            placeholder="e.g. https://example.com/photo.jpg"
+                            value={form.imageUrl}
+                            onChange={(e) => handleChange("imageUrl", e.target.value)}
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+                        />
+                    </div>
                     </div>
 
                     {/* Star Rating */}

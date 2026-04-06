@@ -5,9 +5,6 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
 	title: "Blogs | Paarsh E - Learning",
-	 icons: {
-    icon: '/favicon.png',
-  },
 };
 
 const BlogPage = () => {

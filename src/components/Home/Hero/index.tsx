@@ -115,16 +115,16 @@ const Hero = () => {
             </span>
           </div>
 
-          <h1 className='text-[#0f172a] font-black dark:text-white text-4xl md:text-5xl leading-[1.1] mb-4 tracking-tight'>
+          <h1 className='text-[#0f172a] font-black dark:text-white text-3xl sm:text-4xl md:text-5xl leading-[1.1] mb-4 tracking-tight'>
             Education : <br />
             <span className='text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary'>
               The Gateway to Success
             </span>
           </h1>
 
-          <p className='text-slate-600 dark:text-slate-300 text-lg font-normal max-w-xl mb-8 leading-relaxed'>
-            Paarsh eLearning is a leading institute in Nashik offering industry-focused programming language training with real-time projects and placement support.
-          </p>
+            <p className='text-slate-600 dark:text-slate-300 text-base md:text-lg font-normal max-w-xl mb-8 leading-relaxed'>
+              Paarsh eLearning is a leading institute in Nashik offering industry-focused programming language training with real-time projects and placement support.
+            </p>
 
           <div className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
             <Link

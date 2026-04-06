@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const BlogHero = () => {
     return (
-        <section className="relative py-15 lg:py-20 overflow-hidden bg-[#001f3f] mt-18">
+        <section className="relative py-15 lg:py-20 overflow-hidden bg-[#001f3f] mt-24 md:mt-28">
             {/* Background elements */}
             <div className="absolute top-0 right-0 -mr-24 mt-24 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl opacity-50 ring-1 ring-white/5 animate-pulse"></div>
             <div className="absolute bottom-0 left-0 -ml-24 mt-24 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl opacity-30 ring-1 ring-white/5"></div>
@@ -16,7 +16,7 @@ const BlogHero = () => {
                     </span>
                 </div>
 
-                <h1 className="text-2xl md:text-3xl lg:text-5xl font-black text-white leading-[1.1] mb-8 tracking-tight max-w-4xl mx-auto">
+                <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-black text-white leading-[1.1] mb-8 tracking-tight max-w-4xl mx-auto">
                     Learn, Explore & Grow with <span className="text-blue-400">Our Blogs</span>
                 </h1>
 

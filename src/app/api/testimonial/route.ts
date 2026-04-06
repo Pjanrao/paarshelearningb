@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     try {
         await connectDB();
         const body = await req.json();
-        const { name, course, message, rating } = body;
+        const { name, course, message, rating, imageUrl } = body;
 
         // --- Backend Validation ---
         if (!isRequired(name || ""))
@@ -82,6 +82,7 @@ export async function POST(req: Request) {
             course: course.trim(),
             message: message.trim(),
             rating: parsedRating,
+            imageUrl: imageUrl || "/images/hero/user.png",
         });
 
         return NextResponse.json({ success: true, data: testimonial }, { status: 201 });

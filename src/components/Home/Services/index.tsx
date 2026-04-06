@@ -88,7 +88,7 @@ const Services = () => {
           <div className="w-16 h-1 bg-secondary mx-auto rounded-full" />
         </div>
 
-        <div className='lg:hidden flex gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth px-2 no-scrollbar pb-2 text-justify '>
+        <div className='lg:hidden flex gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth px-2 no-scrollbar pb-2 text-left '>
           {Servicebox.map((item, index) => (
             <div
               key={index}

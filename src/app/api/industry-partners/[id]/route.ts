@@ -11,7 +11,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
         // Ensure we are updating exactly what was sent
         const updateData: any = { ...body };
-        
+
         const partner = await IndustryPartner.findByIdAndUpdate(id, updateData, { new: true });
 
         if (!partner) {

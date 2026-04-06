@@ -88,7 +88,7 @@ const InquiryPage = () => {
                 <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#01A0E2]/10 dark:bg-[#01A0E2]/20 rounded-full blur-3xl"></div>
             </div>
 
-            <main className="container mx-auto px-4 max-w-7xl relative z-10 pt-12 pb-8 lg:pt-16 lg:pb-16">
+            <main className="container mx-auto px-4 max-w-7xl relative z-10 pt-24 pb-8 md:pt-32 lg:pt-16 lg:pb-16">
                 <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-center">
 
                     {/* Left Column: Info & Hero */}

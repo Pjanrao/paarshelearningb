@@ -116,7 +116,7 @@ export default function TestimonialsSection() {
                                                     <CardHeader className="flex-row items-center gap-3 bg-gray-50/50 dark:bg-gray-700/30 p-4">
                                                         <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white dark:border-gray-600 shadow-sm flex-shrink-0">
                                                             <Image
-                                                                src={testimonial.imageUrl || "/user.png"}
+                                                                src={testimonial.imageUrl || "/images/hero/user.png"}
                                                                 alt={testimonial.name}
                                                                 fill
                                                                 className="object-cover"
@@ -157,7 +157,7 @@ export default function TestimonialsSection() {
                         <DialogTitle className="flex items-center gap-4 mb-4">
                             <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-blue-100">
                                 <Image
-                                    src={selectedTestimonial?.imageUrl || "/user.png"}
+                                    src={selectedTestimonial?.imageUrl || "/images/hero/user.png"}
                                     alt={selectedTestimonial?.name || ""}
                                     fill
                                     className="object-cover"

@@ -56,7 +56,7 @@ const Index = () => {
             <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 relative z-10">
 
                 <h2 className="
-                    text-2xl
+                    text-xl
                     sm:text-3xl
                     lg:text-4xl
                     font-extrabold
@@ -112,7 +112,7 @@ const Index = () => {
                             "
                         >
                             <h3 className="
-                                text-3xl
+                                text-2xl
                                 sm:text-4xl
                                 lg:text-5xl
                                 font-black

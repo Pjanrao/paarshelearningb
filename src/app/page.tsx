@@ -12,14 +12,6 @@ import BlogSection from '@/components/Home/BlogSection';
 // import { coursesData } from '@/data/coursesData';
 // import Blog from '@/components/SharedComponent/Blog'
 // import Contactform from '@/components/Home/Contact';
-export const metadata: Metadata = {
-  title: "Paarsh E-Learning | Placement-Oriented IT & Software Training Institute in Nashik",
-  description: "Join Paarsh E-Learning in Nashik for IT and software training with practical learning, internship, and placement support.",
-  icons: {
-    icon: '/favicon.png',
-  },
-};
-
 export default function Home() {
   return (
     <main>

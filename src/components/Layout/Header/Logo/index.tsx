@@ -11,7 +11,7 @@ const Logo: React.FC = () => {
         alt="Paarsh eLearning digital marketing training institute"
         width={180}
         height={72}
-        className="h-[50px] w-auto"
+        className="h-10 sm:h-[50px] w-auto"
         priority
       />
       <Image
