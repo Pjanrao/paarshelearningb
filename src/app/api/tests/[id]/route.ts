@@ -5,11 +5,12 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await connectDB();
-    const test = await PracticeTest.findById(params.id).populate(
+    const test = await PracticeTest.findById(id).populate(
       "courseIds",
       "name"
     );
@@ -29,13 +30,14 @@ export async function GET(
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await connectDB();
     const data = await req.json();
 
-    const test = await PracticeTest.findByIdAndUpdate(params.id, data, {
+    const test = await PracticeTest.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
     });
@@ -55,19 +57,17 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     await connectDB();
 
-    const test = await PracticeTest.findByIdAndDelete(params.id);
+    const test = await PracticeTest.findByIdAndDelete(id);
 
     if (!test) {
       return NextResponse.json({ message: "Test not found" }, { status: 404 });
     }
-
-    // Optional: Delete all questions associated with this test
-    // await Question.deleteMany({ testId: params.id });
 
     return NextResponse.json({ message: "Test deleted successfully" });
   } catch (error: any) {

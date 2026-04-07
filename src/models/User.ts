@@ -61,10 +61,6 @@ const userSchema = new mongoose.Schema(
             default: false,
         },
 
-        image: {
-            type: String,
-            default: "",
-        },
         designation: {
             type: String,
             default: "Admin",

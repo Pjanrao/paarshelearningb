@@ -6,13 +6,14 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { testId: string } }
+  { params }: { params: Promise<{ testId: string }> }
 ) {
+  const { testId } = await params;
   try {
     await connectDB();
 
     // Find all attempts for this test, and populate the userId with name and email
-    const attempts = await TestAttempt.find({ testId: params.testId })
+    const attempts = await TestAttempt.find({ testId: testId })
       .populate({
         path: "userId",
         select: "name email contact status",
