@@ -162,7 +162,7 @@ const Progresswork = ({ isColorMode }: { isColorMode: Boolean }) => {
             </div>
 
             <h2 className='text-xl sm:text-2xl lg:text-4xl font-black text-primary dark:text-white leading-[1.1] mb-6'>
-              Paarsh <span className="text-secondary relative whitespace-nowrap">              E-Learning
+              Paarsh <span className="text-secondary relative whitespace-nowrap">E-Learning
                 <svg className="absolute bottom-0 md:-bottom-2 left-0 w-full" viewBox="0 0 318 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M3.5 9C27.2302 4.0492 68.3033 2 159 2C249.697 2 290.77 4.0492 314.5 9" stroke="#01A0E2" strokeWidth="5" strokeLinecap="round" />
                 </svg>
