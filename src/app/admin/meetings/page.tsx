@@ -297,8 +297,8 @@ export default function MeetingManagement() {
                             key={i}
                             onClick={() => setCurrentPage(i + 1)}
                             className={`w-10 h-10 rounded-lg ${currentPage === i + 1
-                                    ? "bg-blue-900 text-white"
-                                    : "border"
+                                ? "bg-blue-900 text-white"
+                                : "border"
                                 }`}
                         >
                             {i + 1}

@@ -26,6 +26,10 @@ const userSchema = new mongoose.Schema(
             enum: ["student", "teacher", "admin"],
             default: "student",
         },
+        image: {
+            type: String,
+            default: "",
+        },
         status: {
             type: String,
             enum: ["active", "deleted"],

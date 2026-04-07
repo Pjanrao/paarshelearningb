@@ -17,12 +17,16 @@ import {
     CheckCircle2,
     Percent,
     Home,
-    Wallet
+    ClipboardCheck
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useGetStudentTestsQuery } from "@/redux/api/practiceTestApi";
 
 export default function StudentDashboard() {
+    const { data: tests, isLoading: isLoadingTests } = useGetStudentTestsQuery();
+    const activeTestsCount = tests?.length || 0;
+
     return (
         <>
             {/* Welcome Text Section */}
@@ -106,14 +110,19 @@ export default function StudentDashboard() {
                 >
                     <div className="p-5 flex-1 flex flex-col items-center justify-center text-center">
                         <div className="mb-2 bg-white/20 p-3 rounded-full">
-                            <HelpCircle size={30} />
+                            <ClipboardCheck size={30} />
                         </div>
                         <h3 className="font-bold text-lg mb-1">Practice Tests</h3>
-                        <p className="text-xs text-orange-50/80 font-medium">Practice with sample tests</p>
+                        <p className="text-xs text-orange-50/80 font-medium">
+                            {isLoadingTests ? "Checking tests..." : `${activeTestsCount} Active Tests Available`}
+                        </p>
                     </div>
-                    <button className="bg-black/10 py-2 text-sm font-bold hover:bg-black/20 transition-colors border-t border-white/10 uppercase tracking-wider">
-                        Explore &rarr;
-                    </button>
+                    <Link
+                        href="/student/tests"
+                        className="bg-black/10 py-2 text-sm font-bold hover:bg-black/20 transition-colors border-t border-white/10 uppercase tracking-wider text-center"
+                    >
+                        Take Test &rarr;
+                    </Link>
                 </motion.div>
             </div>
 
@@ -141,8 +150,8 @@ export default function StudentDashboard() {
                                 <CheckCircle2 size={20} />
                             </div>
                             <div>
-                                <h4 className="font-bold text-[#1e293b] text-sm">1 Total Ongoing Courses.</h4>
-                                <p className="text-gray-500 text-xs mt-0.5 font-medium">No Courses are About to Complete</p>
+                                <h4 className="font-bold text-[#1e293b] text-sm">Ongoing Learning.</h4>
+                                <p className="text-gray-500 text-xs mt-0.5 font-medium">Stay consistent with your goals</p>
                             </div>
                         </div>
                     </div>
@@ -165,15 +174,19 @@ export default function StudentDashboard() {
                                 <p className="text-gray-500 text-xs mt-0.5 font-medium">Start learning to earn rewards</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4 p-4 rounded-xl bg-orange-50/30 border border-orange-100 transition-all hover:shadow-sm">
+                        <Link href="/student/tests" className="flex items-center gap-4 p-4 rounded-xl bg-orange-50/30 border border-orange-100 transition-all hover:shadow-sm hover:translate-x-1 cursor-pointer">
                             <div className="bg-orange-100 p-2.5 rounded-lg text-orange-600 border border-orange-200">
                                 <Percent size={20} />
                             </div>
                             <div>
-                                <h4 className="font-bold text-[#1e293b] text-sm">No Practice Tests are available.</h4>
-                                <p className="text-gray-500 text-xs mt-0.5 font-medium">No practice tests available</p>
+                                <h4 className="font-bold text-[#1e293b] text-sm">
+                                    {activeTestsCount > 0 ? `${activeTestsCount} Practice Tests Ready` : "No Practice Tests available."}
+                                </h4>
+                                <p className="text-gray-500 text-xs mt-0.5 font-medium">
+                                    {activeTestsCount > 0 ? "Click to start practicing" : "Check back later for tests"}
+                                </p>
                             </div>
-                        </div>
+                        </Link>
                     </div>
                 </div>
             </div>

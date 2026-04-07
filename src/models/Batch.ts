@@ -23,7 +23,7 @@ const BatchSchema = new mongoose.Schema(
         status: {
             type: String,
             enum: ["Upcoming", "Active", "Completed"],
-            default: "Upcoming"
+            default: "Active"
         }
     },
     { timestamps: true }

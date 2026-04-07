@@ -11,7 +11,8 @@ import {
     Bell,
     Video,
     HelpCircle,
-    Gift
+    Gift,
+    ClipboardCheck
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -65,6 +66,7 @@ export default function StudentLayout({
         { icon: LayoutDashboard, label: "Dashboard", href: "/student" },
         { icon: Home, label: "Home", href: "/" },
         { icon: BookOpen, label: "My Courses", href: "/student/my-courses" },
+        { icon: ClipboardCheck, label: "Practice Tests", href: "/student/tests" },
         { icon: Video, label: "Meeting Links", href: "/student/meetings" },
         { icon: Gift, label: "Refer & Earn", href: "/student/refer-earn" },
         { icon: HelpCircle, label: "FAQ", href: "/student/faq" },

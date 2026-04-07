@@ -4,9 +4,10 @@ import type { RootState } from "./store";
 export const api = createApi({
 
   reducerPath: "api",
-  tagTypes: ["Colleges", "Tests", "Questions", "Students", "Sessions", "Inquiry", "College", "Student", "EntranceTests", "Auth", "StudentLog", "Teachers", "Blogs", "Testimonials", "Reports", "Placements", "Courses", "Category", "Subcategory", "Payments", "Batch", "Meetings", "Videos", "Referral", "ReferralStats", "Dashboard"],
+  tagTypes: ["Colleges", "Tests", "Questions", "Students", "Sessions", "Inquiry", "College", "Student", "EntranceTests", "Auth", "StudentLog", "Teachers", "Blogs", "Testimonials", "Reports", "Placements", "Courses", "Category", "Subcategory", "Payments", "Batch", "Meetings", "Videos", "Referral", "ReferralStats", "Dashboard", "PracticeTests", "PracticeQuestions", "TestAttempts"],
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
+    credentials: "include",
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
       const token = state.auth.token;

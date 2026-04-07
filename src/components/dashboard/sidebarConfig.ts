@@ -13,6 +13,7 @@ export const sidebarConfig = {
     { name: "Reports", path: "/admin/reports" },
     // { name: "Payments", path: "/admin/payments" },
     { name: "Testimonials", path: "/admin/testimonial" },
+    { name: "Practice Tests", path: "/admin/practice-tests" },
     // { name: "Workshops", path: "/admin/workshops" },
     { name: "Industry Partners", path: "/admin/industry-partners" },
     { name: "Settings", path: "/admin/settings" },
@@ -27,6 +28,7 @@ export const sidebarConfig = {
   student: [
     { name: "Dashboard", path: "/student" },
     { name: "My Courses", path: "/student/courses" },
+    { name: "Practice Tests", path: "/student/tests" },
     { name: "Results", path: "/student/results" },
   ],
 };

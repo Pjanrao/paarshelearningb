@@ -114,7 +114,7 @@ export default function ProfileDropdown() {
                             <div className="w-8 h-8 rounded-lg bg-red-50/50 flex items-center justify-center group-hover:bg-red-50 transition-colors">
                                 <LogOut size={16} />
                             </div>
-                            <span className="font-medium">Logout</span>
+                            <span className="font-medium">Sign Out</span>
                         </button>
                     </div>
                 </div>
