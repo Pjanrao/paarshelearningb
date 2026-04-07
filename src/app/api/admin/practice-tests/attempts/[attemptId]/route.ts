@@ -4,11 +4,11 @@ import { NextResponse } from "next/server";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { attemptId: string } }
+  { params }: { params: Promise<{ attemptId: string }> }
 ) {
   try {
     await connectDB();
-    const { attemptId } = params;
+    const { attemptId } = await params;
 
     const deletedAttempt = await TestAttempt.findByIdAndDelete(attemptId);
 

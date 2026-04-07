@@ -5,6 +5,7 @@ export const metadata = {
   description: "View practice test logs and student attempts",
 };
 
-export default function TestLogsPage({ params }: { params: { testId: string } }) {
-  return <TestLogs testId={params.testId} />;
+export default function TestLogsPage() {
+  return <TestLogs />;
 }
+

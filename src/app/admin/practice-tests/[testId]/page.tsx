@@ -5,6 +5,7 @@ export const metadata = {
   description: "Manage questions for practice tests",
 };
 
-export default function QuestionsPage({ params }: { params: { testId: string } }) {
-  return <QuestionManagement testId={params.testId} />;
+export default async function QuestionsPage({ params }: { params: Promise<{ testId: string }> }) {
+  const { testId } = await params;
+  return <QuestionManagement testId={testId} />;
 }

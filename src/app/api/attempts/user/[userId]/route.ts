@@ -5,12 +5,13 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   req: Request,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
+  const { userId } = await params;
   try {
     await connectDB();
 
-    const attempts = await TestAttempt.find({ userId: params.userId })
+    const attempts = await TestAttempt.find({ userId })
       .populate("testId", "name duration")
       .sort({ createdAt: -1 });
 
