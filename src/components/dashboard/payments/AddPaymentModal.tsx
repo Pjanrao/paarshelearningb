@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { useGetCoursesQuery } from "@/redux/api/courseApi";
 import { useAddPaymentMutation } from "@/redux/api/paymentApi";
 import { toast, Toaster } from "sonner";
+import { useDispatch } from "react-redux";
+import { referralAdminApi } from "@/redux/api/referralAdminApi";
 
 export default function AddPaymentModal({ close }: any) {
-
+    const dispatch = useDispatch();
     const [students, setStudents] = useState<any[]>([]);
     const [receiptFile, setReceiptFile] = useState<File | null>(null);
     const [isDuplicate, setIsDuplicate] = useState(false);
@@ -233,6 +235,11 @@ export default function AddPaymentModal({ close }: any) {
             });
 
             await promise;
+
+            // 🔥 ADD THIS LINE (MAIN FIX)
+            dispatch(
+                referralAdminApi.util.invalidateTags(["Referral", "ReferralStats"])
+            );
 
             close();
         } catch (error: any) {

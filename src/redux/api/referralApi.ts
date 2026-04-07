@@ -3,11 +3,13 @@ import { api } from "@/redux/api";
 export const referralApi = api.injectEndpoints({
     endpoints: (builder) => ({
 
-        getReferralData: builder.query<any, void>({
+        // ✅ Referral List (table)
+        getReferralList: builder.query<any, void>({
             query: () => "/referral/my-referrals",
             providesTags: ["Referral"],
         }),
 
+        // ✅ Referral Stats (code + earnings)
         getReferralStats: builder.query<any, void>({
             query: () => "/referral/stats",
             providesTags: ["ReferralStats"],
@@ -16,7 +18,8 @@ export const referralApi = api.injectEndpoints({
     }),
 });
 
+// ✅ EXPORT HOOKS
 export const {
-    useGetReferralDataQuery,
+    useGetReferralListQuery,   // 🔥 renamed (better meaning)
     useGetReferralStatsQuery,
 } = referralApi;

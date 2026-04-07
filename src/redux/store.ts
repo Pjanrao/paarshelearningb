@@ -26,10 +26,11 @@ import "./api/subcategoryApi";
 import "./api/paymentApi";
 import "./api/meetingApi";
 import "./api/batchApi";
-import "./api/referralApi"; // ✅ NEW
+import "./api/referralApi";
 import "./api/practiceTestApi";
 import "./api/questionApi";
 import "./api/attemptApi";
+// import "./api/referralAdminApi";
 
 // ✅ combine reducers (NO API CHANGE)
 const rootReducer = combineReducers({
@@ -50,12 +51,13 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 export const store = configureStore({
   reducer: persistedReducer,
 
+
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     })
       .concat(api.middleware)
-      .concat(dashboardApi.middleware),
+      .concat(dashboardApi.middleware)
 });
 
 // ✅ export persistor

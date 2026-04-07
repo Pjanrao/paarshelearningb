@@ -3,47 +3,8 @@ import { connectDB } from "@/lib/db";
 import Payment from "@/models/Payment";
 import User from "@/models/User";
 import Course from "@/models/Course";
+import ReferralSettings from "@/models/ReferralSettings";
 
-
-
-// export async function GET(req: Request) {
-//     try {
-//         await connectDB();
-
-//         const { searchParams } = new URL(req.url);
-
-//         const courseId = searchParams.get("courseId");
-
-//         // ✅ CONDITIONALLY APPLY FILTER
-//         const filter: any = {};
-
-//         if (courseId) {
-//             filter.courseId = courseId;
-//         }
-
-//         const payments = await Payment.find(filter)
-//             .populate({
-//                 path: "studentId",
-//                 model: User,
-//                 select: "name email contact",
-//             })
-//             .populate({
-//                 path: "courseId",
-//                 model: Course,
-//                 select: "name fee",
-//             })
-//             .sort({ createdAt: -1 })
-//             .lean();
-
-//         return NextResponse.json(payments ?? []);
-
-//     } catch (error) {
-//         console.error("PAYMENT FETCH ERROR:", error);
-
-//         // keep your original behavior (don’t break UI)
-//         return NextResponse.json([], { status: 200 });
-//     }
-// }
 export async function GET(req: Request) {
     try {
         await connectDB();
@@ -85,22 +46,65 @@ export async function GET(req: Request) {
         return NextResponse.json([], { status: 200 });
     }
 }
+
+
 export async function POST(req: Request) {
     try {
         await connectDB();
 
         const body = await req.json();
 
+        // ✅ 1. CREATE PAYMENT
         const payment = await Payment.create(body);
+
+        // 🔥 2. REFERRAL LOGIC START
+        const user = await User.findById(body.studentId);
+
+        if (user && user.referredBy && !user.referralReward) {
+
+            // ✅ find referrer
+            const referrer = await User.findOne({
+                referralCode: user.referredBy,
+            });
+
+            // ✅ get settings
+            let settings = await ReferralSettings.findOne();
+
+            if (!settings) {
+                settings = await ReferralSettings.create({});
+            }
+
+            const rewardAmount = settings.cashbackAmount || 50;
+
+            if (referrer) {
+
+                // 🔥 1. ADD WALLET
+                referrer.walletBalance =
+                    (referrer.walletBalance || 0) + rewardAmount;
+
+                await referrer.save();
+
+                // 🔥 2. MARK COMPLETED
+                // user.hasUsedReferral = true;
+
+                // 🔥 3. STORE REWARD (IMPORTANT 🔥🔥🔥)
+                user.referralReward = rewardAmount;
+
+                await user.save();
+            }
+        }
+        // 🔥 2. REFERRAL LOGIC END
 
         return NextResponse.json(payment);
 
     } catch (error) {
         console.error("PAYMENT SAVE ERROR:", error);
-        return NextResponse.json({ error: "Failed to save payment" }, { status: 500 });
+        return NextResponse.json(
+            { error: "Failed to save payment" },
+            { status: 500 }
+        );
     }
 }
-
 
 
 //import { NextResponse } from "next/server";
