@@ -91,7 +91,7 @@ export default function EditTestModal({
                 <SelectTrigger>
                   <SelectValue placeholder="Select Level" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="Easy">Easy</SelectItem>
                   <SelectItem value="Intermediate">Intermediate</SelectItem>
                   <SelectItem value="Hard">Hard</SelectItem>
@@ -117,7 +117,7 @@ export default function EditTestModal({
                 <SelectTrigger>
                   <SelectValue placeholder="Select Status" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                 </SelectContent>
@@ -133,7 +133,7 @@ export default function EditTestModal({
                 <SelectTrigger>
                   <SelectValue placeholder="Select Course" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white">
                   {coursesData?.courses.map((course: any) => (
                     <SelectItem key={course._id} value={course._id}>
                       {course.name}
