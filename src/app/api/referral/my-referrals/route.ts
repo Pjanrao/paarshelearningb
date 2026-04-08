@@ -1,44 +1,113 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
-import { getToken } from "next-auth/jwt";
+import jwt from "jsonwebtoken";
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
     try {
         await connectDB();
 
-        const token: any = await getToken({
-            req,
-            secret: process.env.NEXTAUTH_SECRET,
-        });
+        const authHeader = req.headers.get("authorization");
 
-        if (!token) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        if (!authHeader) {
+            return NextResponse.json({ error: "No token" }, { status: 401 });
         }
 
-        const user = await User.findById(token.id);
+        const token = authHeader.split(" ")[1];
+        const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+
+        const user = await User.findById(decoded.id);
 
         if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
+        // ✅ ensure referral code
+        if (!user.referralCode) {
+            user.referralCode = `REF${user._id.toString().slice(-5)}`;
+            await user.save();
+        }
+
+        // ✅ get referred users
         const referrals = await User.find({
             referredBy: user.referralCode,
-        }).select("name email createdAt");
+        }).select("name email createdAt referralReward");
 
-        const formatted = referrals.map((ref: any) => ({
-            _id: ref._id,
-            name: ref.name,
-            status: "Completed",
-            reward: 50,
+        // ✅ format response (IMPORTANT)
+        const formatted = referrals.map((r: any) => ({
+            _id: r._id,
+            name: r.name,
+            email: r.email,
+            createdAt: r.createdAt,
+            status: r.referralReward > 0 ? "Completed" : "Pending",
+            reward: r.referralReward || 0,
         }));
 
         return NextResponse.json(formatted);
 
     } catch (error) {
-        return NextResponse.json(
-            { error: "Error fetching referrals" },
-            { status: 500 }
-        );
+        console.error(error);
+        return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 }
+
+
+
+// import { NextResponse } from "next/server";
+// import { connectDB } from "@/lib/db";
+// import User from "@/models/User";
+// import ReferralSettings from "@/models/ReferralSettings"; // ✅ NEW
+// import jwt from "jsonwebtoken";
+
+// export async function GET(req: Request) {
+//     try {
+//         await connectDB();
+
+//         // ✅ GET TOKEN
+//         const authHeader = req.headers.get("authorization");
+
+//         if (!authHeader) {
+//             return NextResponse.json({ error: "No token" }, { status: 401 });
+//         }
+
+//         const token = authHeader.split(" ")[1];
+//         const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+
+//         // ✅ GET USER
+//         const user = await User.findById(decoded.id);
+
+//         if (!user) {
+//             return NextResponse.json({ error: "User not found" }, { status: 404 });
+//         }
+
+//         // ✅ GET REFERRAL SETTINGS (DYNAMIC)
+//         let settings = await ReferralSettings.findOne();
+
+//         if (!settings) {
+//             settings = await ReferralSettings.create({}); // default values
+//         }
+
+//         const rewardAmount = settings.cashbackAmount || 50;
+
+//         // ✅ GET REFERRALS
+//         const referrals = await User.find({
+//             referredBy: user.referralCode,
+//         }).select("name email createdAt hasUsedReferral");
+
+//         // ✅ FORMAT RESPONSE
+//         const formatted = referrals.map((r: any) => ({
+//             _id: r._id,
+//             name: r.name,
+//             email: r.email,
+//             createdAt: r.createdAt,
+//             status: r.hasUsedReferral ? "Completed" : "Pending",
+//             reward: r.hasUsedReferral ? rewardAmount : 0, // 🔥 DYNAMIC
+//         }));
+
+//         return NextResponse.json(formatted);
+
+//     } catch (error) {
+//         console.error(error);
+//         return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+//     }
+// }

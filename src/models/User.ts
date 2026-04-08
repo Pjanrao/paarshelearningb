@@ -60,6 +60,10 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        referralReward: {
+            type: Number,
+            default: 0,
+        },
 
         designation: {
             type: String,

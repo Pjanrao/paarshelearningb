@@ -99,9 +99,12 @@ export default function StudentDashboard() {
                         <h3 className="font-bold text-lg mb-1">My Wallet</h3>
                         <p className="text-xs text-purple-50/80 font-medium">View your balance & rewards</p>
                     </div>
-                    <button className="bg-black/10 py-2 text-sm font-bold hover:bg-black/20 transition-colors border-t border-white/10 uppercase tracking-wider">
+                    <Link
+                        href="/student/wallet"
+                        className="bg-black/10 py-2 text-sm font-bold hover:bg-black/20 transition-colors border-t border-white/10 uppercase tracking-wider text-center"
+                    >
                         Explore &rarr;
-                    </button>
+                    </Link>
                 </motion.div>
 
                 {/* Card 4: Practice Tests */}

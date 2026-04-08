@@ -20,6 +20,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Video,
+  Gift,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 // import Image from "next/image";
@@ -86,6 +87,8 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     },
     // { name: "Workshops", path: "/admin/workshops", icon: BookOpen },
     { name: "Industry Partners", path: "/admin/industry-partners", icon: Briefcase },
+    { name: "Referral", path: "/admin/referral", icon: Gift },
+    { name: "Withdrawals", path: "/admin/withdrawals", icon: CreditCard },
     { name: "Settings", path: "/admin/settings", icon: Settings },
   ];
 

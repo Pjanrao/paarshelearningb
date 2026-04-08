@@ -42,7 +42,7 @@ const CourseCard = ({ course }: { course: Course }) => {
   const courseImage = galleryImage || image || thumbnail || "/images/course/default.jpeg";
 
 
-  const generatedSlug = slug || generateSlug(name);
+  const generatedSlug = course._id || slug || generateSlug(name);
 
   return (
     <div className="group bg-white dark:bg-darkmode rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-800">

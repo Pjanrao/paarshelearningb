@@ -3,6 +3,8 @@ import Course from "@/models/Course";
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import mongoose from "mongoose";
+import { coursesData } from "@/data/coursesData";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +20,20 @@ export async function GET(
   try {
     await connectDB();
 
-    const course = await Course.findById(id)
-      .populate("category")
-      .populate("subcategory")
-      .populate("instructor");
+    let course = null;
+
+    // 1. Check if ID is a valid MongoDB ObjectId
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      course = await Course.findById(id)
+        .populate("category")
+        .populate("subcategory")
+        .populate("instructor");
+    }
+
+    // 2. If not found in DB OR not an ObjectId (e.g. it's a "slug"), check static data
+    if (!course) {
+      course = coursesData.find((c) => c.slug === id);
+    }
 
     if (!course) {
       return NextResponse.json({ message: "Not found" }, { status: 404 });

@@ -17,6 +17,7 @@ export const sidebarConfig = {
     // { name: "Workshops", path: "/admin/workshops" },
     { name: "Industry Partners", path: "/admin/industry-partners" },
     { name: "Settings", path: "/admin/settings" },
+    { name: "Withdrawals", path: "/admin/withdrawals" },
   ],
 
   teacher: [

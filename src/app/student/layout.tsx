@@ -12,6 +12,7 @@ import {
     Video,
     HelpCircle,
     Gift,
+    Wallet,
     ClipboardCheck
 } from "lucide-react";
 import Image from "next/image";
@@ -69,6 +70,7 @@ export default function StudentLayout({
         { icon: ClipboardCheck, label: "Practice Tests", href: "/student/tests" },
         { icon: Video, label: "Meeting Links", href: "/student/meetings" },
         { icon: Gift, label: "Refer & Earn", href: "/student/refer-earn" },
+        { icon: Wallet, label: "Wallet", href: "/student/wallet" },
         { icon: HelpCircle, label: "FAQ", href: "/student/faq" },
     ];
 

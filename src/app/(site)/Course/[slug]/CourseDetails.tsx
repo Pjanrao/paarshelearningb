@@ -330,7 +330,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
   });
 
 
-  const { data: courseData, isLoading } = useGetCourseByIdQuery(slug);
+  const { data: courseData, isLoading, error } = useGetCourseByIdQuery(slug);
   const course = courseData as any;
 
   const allCourses = coursesResponse?.courses || [];
@@ -382,7 +382,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
   // Trigger modal or direct download based on authentication
   const handleDownloadSyllabusClick = () => {
-    if (!course.syllabusPdf) {
+    if (!course?.syllabusPdf) {
       toast.error("Syllabus PDF is not available for this course.");
       return;
     }
@@ -452,11 +452,26 @@ const CourseDetails = ({ slug }: { slug: string }) => {
     setActiveAccordion(activeAccordion === index ? null : index);
   };
 
-  if (!course) {
+  if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-gray-500 font-medium animate-pulse">Loading course excellence...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 pt-20">
+        <div className="w-12 h-12 border-4 border-[#01A0E2] border-t-transparent rounded-full animate-spin shadow-lg"></div>
+        <p className="text-[#2B4278] font-bold animate-pulse text-lg tracking-wide">Loading course excellence...</p>
+      </div>
+    );
+  }
+
+  if (error || !course) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 pt-20 text-center px-4">
+        <div className="w-20 h-20 bg-red-50 text-red-500 rounded-full flex items-center justify-center mb-2">
+          <Icon icon="solar:danger-triangle-bold-duotone" className="w-10 h-10" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900">Course Not Found</h2>
+        <p className="text-gray-500 max-w-md">The course you are looking for does not exist or has been removed.</p>
+        <button onClick={() => router.push('/Course')} className="mt-4 px-6 py-2.5 bg-[#01A0E2] hover:bg-[#2B4278] text-white font-bold rounded-xl shadow-lg transition-all">
+          Browse All Courses
+        </button>
       </div>
     );
   }
