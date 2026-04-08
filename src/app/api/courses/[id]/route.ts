@@ -20,6 +20,7 @@ export async function GET(
   try {
     await connectDB();
 
+<<<<<<< HEAD
     let course = null;
 
     // 1. Check if ID is a valid MongoDB ObjectId
@@ -34,6 +35,29 @@ export async function GET(
     if (!course) {
       course = coursesData.find((c) => c.slug === id);
     }
+=======
+    let course;
+
+
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+    if (isObjectId) {
+      course = await Course.findById(id);
+    } else {
+      course = await Course.findOne({ slug: id });
+    }
+
+
+    if (!course) {
+      return NextResponse.json({ message: "Not found" }, { status: 404 });
+    }
+
+    // const course = await Course.findById(id)
+    await course.populate("category");
+    await course.populate("subcategory");
+    await course.populate("instructor");
+
+>>>>>>> e8ae686 (course-detail-page issue fixed)
 
     if (!course) {
       return NextResponse.json({ message: "Not found" }, { status: 404 });
