@@ -20,20 +20,27 @@ export async function GET(
   try {
     await connectDB();
 
-    let course = null;
+    let course;
 
-    // 1. Check if ID is a valid MongoDB ObjectId
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      course = await Course.findById(id)
-        .populate("category")
-        .populate("subcategory")
-        .populate("instructor");
+
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+    if (isObjectId) {
+      course = await Course.findById(id);
+    } else {
+      course = await Course.findOne({ slug: id });
     }
 
-    // 2. If not found in DB OR not an ObjectId (e.g. it's a "slug"), check static data
+
     if (!course) {
-      course = coursesData.find((c) => c.slug === id);
+      return NextResponse.json({ message: "Not found" }, { status: 404 });
     }
+
+    // const course = await Course.findById(id)
+    await course.populate("category");
+    await course.populate("subcategory");
+    await course.populate("instructor");
+
 
     if (!course) {
       return NextResponse.json({ message: "Not found" }, { status: 404 });
