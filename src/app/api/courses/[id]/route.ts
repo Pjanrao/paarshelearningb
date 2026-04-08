@@ -20,22 +20,6 @@ export async function GET(
   try {
     await connectDB();
 
-<<<<<<< HEAD
-    let course = null;
-
-    // 1. Check if ID is a valid MongoDB ObjectId
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      course = await Course.findById(id)
-        .populate("category")
-        .populate("subcategory")
-        .populate("instructor");
-    }
-
-    // 2. If not found in DB OR not an ObjectId (e.g. it's a "slug"), check static data
-    if (!course) {
-      course = coursesData.find((c) => c.slug === id);
-    }
-=======
     let course;
 
 
@@ -57,7 +41,6 @@ export async function GET(
     await course.populate("subcategory");
     await course.populate("instructor");
 
->>>>>>> e8ae686 (course-detail-page issue fixed)
 
     if (!course) {
       return NextResponse.json({ message: "Not found" }, { status: 404 });
