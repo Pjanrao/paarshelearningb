@@ -4,7 +4,11 @@ import type { RootState } from "./store";
 export const api = createApi({
 
   reducerPath: "api",
+<<<<<<< HEAD
   tagTypes: ["Colleges", "Tests", "Questions", "Students", "Sessions", "Inquiry", "College", "Student", "EntranceTests", "Auth", "StudentLog", "Teachers", "Blogs", "Testimonials", "Reports", "Placements", "Courses", "Category", "Subcategory", "Payments", "Batch", "Meetings", "Videos", "Referral", "ReferralStats", "ReferralSettings", "Dashboard", "PracticeTests", "PracticeQuestions", "TestAttempts", "Withdrawal"],
+=======
+  tagTypes: ["Colleges", "Tests", "Questions", "Students", "Sessions", "Inquiry", "College", "Student", "EntranceTests", "Auth", "StudentLog", "Teachers", "Blogs", "Testimonials", "Reports", "Placements", "Courses", "Category", "Subcategory", "Payments", "Batch", "Meetings", "Videos", "Referral", "ReferralStats", "Dashboard", "PracticeTests", "PracticeQuestions", "TestAttempts"],
+>>>>>>> 649ec9d05f56094f385f7b3611f1bec29c6d9bcc
   baseQuery: fetchBaseQuery({
     baseUrl: "/api",
     credentials: "include",
