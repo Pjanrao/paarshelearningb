@@ -35,21 +35,34 @@ export async function POST(req: Request) {
                 settings = await ReferralSettings.create({});
             }
 
-            const rewardAmount = settings.cashbackAmount || 50;
+            const rewardAmount = settings.cashbackAmount || 1000;
 
-            // ✅ ADD WALLET TO REFERRER
+            // ✅ NEW: get new user reward
+            const newUserReward = settings.newUserReward || 50;
+
+            // 🎁 ADD WALLET TO REFERRER (EXISTING)
             referrer.walletBalance =
                 (referrer.walletBalance || 0) + rewardAmount;
 
             await referrer.save();
 
-            // ✅ STORE REWARD IN REFERRED USER (IMPORTANT)
+            // 🎁 NEW: ADD WALLET TO NEW USER ⭐
+            user.walletBalance =
+                (user.walletBalance || 0) + newUserReward;
+
+            // ✅ STORE REWARD IN REFERRED USER (EXISTING)
             user.referralReward = rewardAmount;
+
+            // ✅ OPTIONAL (better tracking)
+            user.hasUsedReferral = true;
 
             await user.save();
         }
 
-        return NextResponse.json({ success: true });
+        return NextResponse.json({
+            success: true,
+            message: "Referral reward applied",
+        });
 
     } catch (error) {
         console.error("REFERRAL PAYMENT ERROR:", error);
@@ -59,8 +72,6 @@ export async function POST(req: Request) {
         );
     }
 }
-
-
 // import { NextResponse } from "next/server";
 // import { connectDB } from "@/lib/db";
 // import User from "@/models/User";
