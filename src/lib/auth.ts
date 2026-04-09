@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
+import crypto from "crypto";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -30,18 +31,28 @@ export const authOptions: NextAuthOptions = {
               user.password
             );
 
-            if (isMatch) {
-              if (user.status === "deleted") {
-                throw new Error("Account not found");
+              if (isMatch) {
+                if (user.status === "deleted") {
+                  throw new Error("Account not found");
+                }
+
+                let sessionId = user.currentSessionId;
+                if (user.role === "student") {
+                  sessionId = crypto.randomUUID();
+                  await User.findByIdAndUpdate(user._id, {
+                    currentSessionId: sessionId
+                  });
+                }
+
+                return {
+                  id: user._id.toString(),
+                  email: user.email,
+                  name: user.name,
+                  role: user.role,
+                  image: user.image || "",
+                  currentSessionId: sessionId
+                };
               }
-              return {
-                id: user._id.toString(),
-                email: user.email,
-                name: user.name,
-                role: user.role,
-                image: user.image || ""
-              };
-            }
           }
         } catch (error) {
           console.error("DB auth error:", error);
@@ -72,16 +83,26 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = user.role;
         token.image = user.image;
+        token.currentSessionId = (user as any).currentSessionId;
       }
       return token;
     },
     async session({ session, token }: { session: any; token: any }) {
       if (token) {
+        if (token.role === "student") {
+          await connectDB();
+          const dbUser = await User.findById(token.id).select("currentSessionId");
+          if (!dbUser || dbUser.currentSessionId !== token.currentSessionId) {
+            return null as any;
+          }
+        }
+
         session.user = {
           ...session.user,
           id: token.id,
           role: token.role,
           image: token.image,
+          currentSessionId: token.currentSessionId,
         };
       }
       return session;
