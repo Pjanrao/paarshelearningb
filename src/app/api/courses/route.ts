@@ -79,6 +79,37 @@ export async function GET(req: Request) {
   }
 }
 
+const generateSlug = (text: string) => {
+  if (!text) return "course";
+
+  return text
+    .toLowerCase()
+    .trim()
+    .split(" ")
+    .slice(0, 5) // limit words
+    .join(" ")
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+};
+
+const generateUniqueSlug = async (name: string, excludeId?: string) => {
+  let baseSlug = generateSlug(name);
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (
+    await Course.findOne({
+      slug,
+      _id: { $ne: excludeId }, // ignore current course (important for update)
+    })
+  ) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+
+  return slug;
+};
 // CREATE/UPDATE COURSE
 export async function POST(req: Request) {
   try {
@@ -119,7 +150,11 @@ export async function POST(req: Request) {
         const filename = `${timestamp}-${sanitizedFileName}`;
 
         const relativePath = `/uploads/courses/${courseId}/${subfolder}/${filename}`;
-        const fullPath = path.join("/var/www", relativePath);
+        
+        const basePath = process.env.NODE_ENV === "development"
+          ? path.join(process.cwd(), "public")
+          : "/var/www";
+        const fullPath = path.join(basePath, relativePath);
 
         const dir = path.dirname(fullPath);
         if (!fs.existsSync(dir)) {
@@ -197,6 +232,11 @@ export async function POST(req: Request) {
     if (syllabusPdfUrl) bodyData.syllabusPdf = syllabusPdfUrl;
     if (thumbnailUrl) bodyData.thumbnail = thumbnailUrl;
     if (introVideoUrl) bodyData.introVideo = introVideoUrl;
+
+
+    if (bodyData.name) {
+      bodyData.slug = await generateUniqueSlug(bodyData.name, courseId);
+    }
 
     // Use the pre-generated or existing id
     bodyData._id = courseId;

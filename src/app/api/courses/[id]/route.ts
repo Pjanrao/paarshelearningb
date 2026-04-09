@@ -20,20 +20,27 @@ export async function GET(
   try {
     await connectDB();
 
-    let course = null;
+    let course;
 
-    // 1. Check if ID is a valid MongoDB ObjectId
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      course = await Course.findById(id)
-        .populate("category")
-        .populate("subcategory")
-        .populate("instructor");
+
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+
+    if (isObjectId) {
+      course = await Course.findById(id);
+    } else {
+      course = await Course.findOne({ slug: id });
     }
 
-    // 2. If not found in DB OR not an ObjectId (e.g. it's a "slug"), check static data
+
     if (!course) {
-      course = coursesData.find((c) => c.slug === id);
+      return NextResponse.json({ message: "Not found" }, { status: 404 });
     }
+
+    // const course = await Course.findById(id)
+    await course.populate("category");
+    await course.populate("subcategory");
+    await course.populate("instructor");
+
 
     if (!course) {
       return NextResponse.json({ message: "Not found" }, { status: 404 });
@@ -87,7 +94,10 @@ export async function PUT(
         // DELETE OLD FILE
         // =============================
         if (oldRelativePath && oldRelativePath.startsWith("/uploads")) {
-          const oldFullPath = path.join("/var/www", oldRelativePath);
+          const basePath = process.env.NODE_ENV === "development"
+            ? path.join(process.cwd(), "public")
+            : "/var/www";
+          const oldFullPath = path.join(basePath, oldRelativePath);
 
           try {
             if (fs.existsSync(oldFullPath)) {
@@ -108,7 +118,10 @@ export async function PUT(
           Date.now() + "-" + file.name.replaceAll(" ", "_");
 
         const relativePath = `/uploads/courses/${id}/${subfolder}/${sanitizedFileName}`;
-        const fullPath = path.join("/var/www", relativePath);
+        const basePath = process.env.NODE_ENV === "development"
+          ? path.join(process.cwd(), "public")
+          : "/var/www";
+        const fullPath = path.join(basePath, relativePath);
 
         const dir = path.dirname(fullPath);
         if (!fs.existsSync(dir)) {
@@ -243,7 +256,10 @@ export async function DELETE(
 
     for (const fileRelPath of filesToDelete) {
       if (fileRelPath && fileRelPath.startsWith("/uploads")) {
-        const fullPath = path.join("/var/www", fileRelPath);
+        const basePath = process.env.NODE_ENV === "development"
+          ? path.join(process.cwd(), "public")
+          : "/var/www";
+        const fullPath = path.join(basePath, fileRelPath);
 
         try {
           if (fs.existsSync(fullPath)) {

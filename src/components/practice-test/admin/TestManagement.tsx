@@ -48,7 +48,7 @@ export default function TestManagement() {
   const totalRecords = data?.total || 0;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen">
       {/* MAIN PAGE HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>

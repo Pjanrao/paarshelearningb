@@ -13,6 +13,10 @@ const referralSettingsSchema = new mongoose.Schema({
         type: String,
         default: "Unlimited",
     },
+    newUserReward: {   // ✅ NEW FIELD
+        type: Number,
+        default: 50,
+    },
     rewardDays: {
         type: Number,
         default: 1,

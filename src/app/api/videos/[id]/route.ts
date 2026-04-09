@@ -86,7 +86,10 @@ export async function DELETE(
 
         // ✅ DELETE FROM LOCAL STORAGE
         if (video.videoUrl && video.videoUrl.startsWith("/uploads")) {
-            const fullPath = path.join(process.cwd(), "public", video.videoUrl);
+            const basePath = process.env.NODE_ENV === "development"
+                ? path.join(process.cwd(), "public")
+                : "/var/www";
+            const fullPath = path.join(basePath, video.videoUrl);
             try {
                 if (fs.existsSync(fullPath)) {
                     await fs.promises.unlink(fullPath);

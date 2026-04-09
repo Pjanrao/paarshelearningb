@@ -107,7 +107,7 @@ const TestLogs = () => {
     };
 
     return (
-        <div className="bg-gray-50 h-full p-6">
+        <div className="bg-gray-50 h-full">
             <div className="mb-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>

@@ -13,18 +13,22 @@ export default function ReferralSettings() {
     const [open, setOpen] = useState(false);
 
     const [form, setForm] = useState({
-        discount: 0,
+        discountPercentage: 0,
         cashbackAmount: 0,
         maxReferrals: "",
-        creditDays: 0,
+        rewardDays: 0,
+        newUserReward: 0, // ✅ ADD THIS
+
     });
 
     const handleOpen = () => {
         setForm({
-            discount: data?.discount || 0,
+            discountPercentage: data?.discountPercentage || 0,
             cashbackAmount: data?.cashbackAmount || 0,
             maxReferrals: data?.maxReferrals || "",
-            creditDays: data?.creditDays || 0,
+            rewardDays: data?.rewardDays || 0,
+            newUserReward: data?.newUserReward || 0, // ✅ ADD THIS
+
         });
         setOpen(true);
     };
@@ -59,13 +63,13 @@ export default function ReferralSettings() {
                     </button>
                 </div>
 
-                <div className="grid md:grid-cols-4 gap-4">
+                <div className="grid md:grid-cols-5 gap-4">
 
                     {/* Discount */}
                     <div className="bg-white/10 p-4 rounded-xl">
                         <p className="text-sm opacity-80">Discount Percentage</p>
                         <h3 className="text-lg font-semibold">
-                            {data?.discount !== undefined ? `${data.discount}%` : "%"}
+                            {data?.discountPercentage !== undefined ? `${data.discountPercentage}%` : "%"}
                         </h3>
                     </div>
 
@@ -76,7 +80,12 @@ export default function ReferralSettings() {
                             {data?.cashbackAmount ? `₹${data.cashbackAmount}` : "₹"}
                         </h3>
                     </div>
-
+                    <div className="bg-white/10 p-4 rounded-xl">
+                        <p className="text-sm opacity-80">New User Reward</p>
+                        <h3 className="text-lg font-semibold">
+                            {data?.newUserReward ? `₹${data.newUserReward}` : "₹"}
+                        </h3>
+                    </div>
                     {/* Max Referrals */}
                     <div className="bg-white/10 p-4 rounded-xl">
                         <p className="text-sm opacity-80">Maximum Referrals</p>
@@ -89,8 +98,8 @@ export default function ReferralSettings() {
                     <div className="bg-white/10 p-4 rounded-xl">
                         <p className="text-sm opacity-80">Reward Credit Days</p>
                         <h3 className="text-lg font-semibold">
-                            {data?.creditDays !== undefined
-                                ? `${data.creditDays} day`
+                            {data?.rewardDays !== undefined
+                                ? `${data.rewardDays} day(s)`
                                 : "0 day"}
                         </h3>
                     </div>
@@ -122,9 +131,9 @@ export default function ReferralSettings() {
                                 </label>
                                 <input
                                     type="number"
-                                    value={form.discount}
+                                    value={form.discountPercentage}
                                     onChange={(e) =>
-                                        setForm({ ...form, discount: Number(e.target.value) })
+                                        setForm({ ...form, discountPercentage: Number(e.target.value) })
                                     }
                                     className="w-full border p-2 rounded mt-1"
                                 />
@@ -143,7 +152,19 @@ export default function ReferralSettings() {
                                     className="w-full border p-2 rounded mt-1"
                                 />
                             </div>
-
+                            <div>
+                                <label className="text-sm text-gray-600">
+                                    New User Reward (₹)
+                                </label>
+                                <input
+                                    type="number"
+                                    value={form.newUserReward}
+                                    onChange={(e) =>
+                                        setForm({ ...form, newUserReward: Number(e.target.value) })
+                                    }
+                                    className="w-full border p-2 rounded mt-1"
+                                />
+                            </div>
                             <div>
                                 <label className="text-sm text-gray-600">
                                     Maximum Referrals (0 for unlimited)
@@ -164,9 +185,9 @@ export default function ReferralSettings() {
                                 </label>
                                 <input
                                     type="number"
-                                    value={form.creditDays}
+                                    value={form.rewardDays}
                                     onChange={(e) =>
-                                        setForm({ ...form, creditDays: Number(e.target.value) })
+                                        setForm({ ...form, rewardDays: Number(e.target.value) })
                                     }
                                     className="w-full border p-2 rounded mt-1"
                                 />
