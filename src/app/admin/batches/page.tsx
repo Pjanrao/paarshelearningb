@@ -88,11 +88,11 @@ export default function Page() {
     };
 
     return (
-        <div className="p-6">
+        <div>
 
             {/* HEADER */}
             <div className="flex justify-between items-center mb-5">
-                <h1 className="text-2xl font-semibold text-[#2C4276]">
+                <h1 className="text-3xl font-semibold text-[#2C4276]">
                     Batch Management
                 </h1>
                 <div className="flex gap-3">

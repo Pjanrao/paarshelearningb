@@ -43,6 +43,15 @@ export const referralAdminApi = api.injectEndpoints({
             invalidatesTags: ["Withdrawal", "ReferralStats"],
         }),
 
+        // ✅ ADMIN: Delete Withdrawal Request
+        deleteWithdrawalAdmin: builder.mutation<any, string>({
+            query: (id) => ({
+                url: `/admin/withdrawal/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["Withdrawal", "ReferralStats"],
+        }),
+
     }),
 });
 
@@ -55,4 +64,5 @@ export const {
     useUpdateReferralSettingsMutation,
     useGetAllWithdrawalsAdminQuery,
     useUpdateWithdrawalStatusAdminMutation,
+    useDeleteWithdrawalAdminMutation,
 } = referralAdminApi;

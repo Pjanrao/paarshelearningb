@@ -2,24 +2,27 @@
 
 import {
     useGetAllWithdrawalsAdminQuery,
-    useUpdateWithdrawalStatusAdminMutation,
 } from "@/redux/api/referralAdminApi";
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { toast } from "react-hot-toast";
+import { Eye, Pencil, Trash2 } from "lucide-react";
+import WithdrawalViewModal from "./WithdrawalViewModal";
+import WithdrawalEditModal from "./WithdrawalEditModal";
+import DeleteWithdrawalDialog from "./DeleteWithdrawalDialog";
 
 export default function WithdrawalTable() {
     const { data = [], isLoading } = useGetAllWithdrawalsAdminQuery(undefined, {
         refetchOnMountOrArgChange: true,
     });
-    const [updateStatus, { isLoading: isUpdating }] =
-        useUpdateWithdrawalStatusAdminMutation();
-
     const [search, setSearch] = useState("");
     const [filterStatus, setFilterStatus] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
-    const [actionId, setActionId] = useState<string | null>(null);
-    const [remarks, setRemarks] = useState("");
+    
+    // Modal States
+    const [viewOpen, setViewOpen] = useState(false);
+    const [editOpen, setOpenEdit] = useState(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [selectedWithdrawal, setSelectedWithdrawal] = useState<any | null>(null);
 
     const itemsPerPage = 10;
 
@@ -51,19 +54,6 @@ export default function WithdrawalTable() {
     );
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-    // ACTION
-    const handleAction = async (id: string, status: "approved" | "rejected") => {
-        try {
-            await updateStatus({ id, status, remarks }).unwrap();
-            toast.success(
-                `Withdrawal ${status === "approved" ? "approved" : "rejected"} successfully`
-            );
-            setActionId(null);
-            setRemarks("");
-        } catch {
-            toast.error("Failed to update withdrawal");
-        }
-    };
 
     // STATUS BADGE
     const getStatusBadge = (status: string) => {
@@ -108,7 +98,8 @@ export default function WithdrawalTable() {
         .reduce((sum: number, w: any) => sum + (w.amount || 0), 0);
 
     return (
-        <div className="space-y-6">
+        <>
+            <div className="space-y-6">
             {/* STATS CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white p-5 rounded-2xl shadow">
@@ -192,6 +183,7 @@ export default function WithdrawalTable() {
                                         </th>
                                         <th className="px-4 py-2 text-center">
                                             Actions
+                                            
                                         </th>
                                     </tr>
                                 </thead>
@@ -237,38 +229,37 @@ export default function WithdrawalTable() {
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
-                                                    {w.status === "pending" ? (
-                                                        <div className="flex gap-2 justify-center">
-                                                            <button
-                                                                onClick={() =>
-                                                                    handleAction(
-                                                                        w._id,
-                                                                        "approved"
-                                                                    )
-                                                                }
-                                                                disabled={
-                                                                    isUpdating
-                                                                }
-                                                                className="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded-lg text-xs font-semibold transition"
-                                                            >
-                                                                ✓ Approve
-                                                            </button>
-                                                            <button
-                                                                onClick={() =>
-                                                                    setActionId(
-                                                                        w._id
-                                                                    )
-                                                                }
-                                                                className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-lg text-xs font-semibold transition"
-                                                            >
-                                                                ✗ Reject
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-                                                        <span className="text-gray-400 text-xs">
-                                                            —
-                                                        </span>
-                                                    )}
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedWithdrawal(w);
+                                                                setViewOpen(true);
+                                                            }}
+                                                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all"
+                                                            title="View Details"
+                                                        >
+                                                            <Eye size={18} />
+                                                        </button>
+
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedWithdrawal(w);
+                                                                setOpenEdit(true);
+                                                            }}
+                                                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                                                            title="Edit Withdrawal"
+                                                        >
+                                                            <Pencil size={18} />
+                                                        </button>
+
+                                                        <button
+                                                            onClick={() => setDeleteId(w._id)}
+                                                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                                            title="Delete Request"
+                                                        >
+                                                            <Trash2 size={18} />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         )
@@ -328,47 +319,25 @@ export default function WithdrawalTable() {
                     </>
                 )}
             </div>
-
-            {/* REJECT MODAL */}
-            {actionId && (
-                <div className="fixed inset-0 z-50 bg-black/40 flex justify-center items-center p-4">
-                    <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
-                        <h2 className="text-lg font-semibold mb-4">
-                            Reject Withdrawal
-                        </h2>
-                        <p className="text-sm text-gray-500 mb-3">
-                            Please provide a reason for rejection (optional):
-                        </p>
-                        <textarea
-                            value={remarks}
-                            onChange={(e) => setRemarks(e.target.value)}
-                            placeholder="Reason for rejection..."
-                            className="w-full border rounded-lg p-3 text-sm mb-4"
-                            rows={3}
-                        />
-                        <div className="flex gap-3 justify-end">
-                            <button
-                                onClick={() => {
-                                    setActionId(null);
-                                    setRemarks("");
-                                }}
-                                className="px-4 py-2 bg-gray-100 rounded-lg text-sm"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={() =>
-                                    handleAction(actionId, "rejected")
-                                }
-                                disabled={isUpdating}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold disabled:opacity-50"
-                            >
-                                Confirm Rejection
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
+
+        {/* MODALS */}
+        <WithdrawalViewModal
+            open={viewOpen}
+            setOpen={setViewOpen}
+            withdrawal={selectedWithdrawal}
+        />
+
+        <WithdrawalEditModal
+            open={editOpen}
+            setOpen={setOpenEdit}
+            withdrawal={selectedWithdrawal}
+        />
+
+        <DeleteWithdrawalDialog
+            deleteId={deleteId}
+            setDeleteId={setDeleteId}
+        />
+    </>
     );
 }

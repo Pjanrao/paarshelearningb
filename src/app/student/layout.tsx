@@ -101,10 +101,10 @@ export default function StudentLayout({
                         />
                     </div>
                     <div className="flex items-center gap-4 ml-auto">
-                        <button className="p-2 text-gray-400 hover:text-[#2C4276] relative transition-colors">
+                        {/* <button className="p-2 text-gray-400 hover:text-[#2C4276] relative transition-colors">
                             <Bell size={22} />
                             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                        </button>
+                        </button> */}
                         <div className="h-8 w-px bg-gray-100 mx-2 hidden sm:block"></div>
                         <ProfileDropdown />
                     </div>
