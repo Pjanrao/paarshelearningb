@@ -34,6 +34,12 @@ interface SidebarProps {
 export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
 
+  const handleItemClick = () => {
+    if (window.innerWidth < 768) {
+      onToggle(); // close sidebar on mobile
+    }
+  };
+
   const adminMenu = [
     { name: "Dashboard", path: "/admin", icon: LayoutDashboard },
 
@@ -106,7 +112,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
       initial={false}
       transition={{ duration: 0.25, ease: "easeInOut" }}
       className={`
-  fixed md:relative top-0 left-0 h-full z-50 bg-white border-r border-gray-200 shadow-lg
+  fixed md:relative left-0 top-16 md:top-0 h-[calc(100vh-64px)] md:h-full z-50 bg-white border-r border-gray-200 shadow-lg
   flex flex-col overflow-hidden flex-shrink-0
   transition-all duration-300
   ${collapsed ? "-translate-x-full md:translate-x-0 md:w-16" : "translate-x-0 w-64"}
@@ -200,7 +206,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
                             return (
                               <li key={sub.name}>
                                 <Link
-                                  href={sub.path}
+                                  href={sub.path} onClick={handleItemClick}
                                   className={`flex items-center gap-2.5 px-2 py-1.5 text-[13px] rounded-md transition-all duration-200
                                     ${isSubActive
                                       ? "text-blue-600 font-semibold bg-blue-50/80"
@@ -225,7 +231,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
                   "path" in item &&
                   item.path && (
                     <Link
-                      href={item.path}
+                      href={item.path} onClick={handleItemClick}
                       title={collapsed ? item.name : undefined}
                       className={`flex items-center px-2 py-2 rounded-lg text-sm font-medium transition-all duration-200
                         ${collapsed ? "justify-center" : "gap-3"}
