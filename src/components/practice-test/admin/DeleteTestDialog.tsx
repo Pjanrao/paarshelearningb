@@ -35,7 +35,7 @@ export default function DeleteTestDialog({
 
   return (
     <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-white">
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
@@ -47,7 +47,7 @@ export default function DeleteTestDialog({
           <AlertDialogCancel onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
-            className="bg-red-600 hover:bg-red-700"
+            className="bg-red-600 hover:bg-red-700 text-white"
             disabled={isLoading}
           >
             {isLoading ? "Deleting..." : "Delete"}

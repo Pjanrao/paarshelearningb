@@ -153,7 +153,10 @@ export const practiceTestApi = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["PracticeTests"],
+      invalidatesTags: (result, error, { testId }) => [
+        "PracticeTests",
+        { type: "PracticeQuestions", id: `LIST-${testId}` },
+      ],
     }),
   }),
 });
