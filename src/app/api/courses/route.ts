@@ -150,7 +150,11 @@ export async function POST(req: Request) {
         const filename = `${timestamp}-${sanitizedFileName}`;
 
         const relativePath = `/uploads/courses/${courseId}/${subfolder}/${filename}`;
-        const fullPath = path.join("/var/www", relativePath);
+        
+        const basePath = process.env.NODE_ENV === "development"
+          ? path.join(process.cwd(), "public")
+          : "/var/www";
+        const fullPath = path.join(basePath, relativePath);
 
         const dir = path.dirname(fullPath);
         if (!fs.existsSync(dir)) {
