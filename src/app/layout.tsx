@@ -20,7 +20,40 @@ export const metadata: Metadata = {
   title: "Paarsh E-Learning | Placement-Oriented IT & Software Training Institute in Nashik",
   description: "Join Paarsh E-Learning in Nashik for IT and software training with practical learning, internship, and placement support.",
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/images/logo/logo.jpeg", sizes: "192x192", type: "image/jpeg" },
+    ],
+    shortcut: "/images/logo/logo.jpeg",
+    apple: "/images/logo/logo.jpeg",
+    other: [
+      {
+        rel: "apple-touch-icon-precomposed",
+        url: "/images/logo/logo.jpeg",
+      },
+    ],
+  },
+  openGraph: {
+    title: "Paarsh E-Learning | Placement-Oriented IT & Software Training Institute in Nashik",
+    description: "Join Paarsh E-Learning in Nashik for IT and software training with practical learning, internship, and placement support.",
+    url: "https://paarshelearning.com",
+    siteName: "Paarsh E-Learning",
+    images: [
+      {
+        url: "/images/logo/logo.jpeg",
+        width: 800,
+        height: 800,
+        alt: "Paarsh E-Learning Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Paarsh E-Learning | Placement-Oriented IT & Software Training Institute in Nashik",
+    description: "Join Paarsh E-Learning in Nashik for IT and software training with practical learning, internship, and placement support.",
+    images: ["/images/logo/logo.jpeg"],
   },
 };
 
