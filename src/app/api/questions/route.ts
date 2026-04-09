@@ -14,7 +14,7 @@ export async function GET(req: Request) {
       query.testId = testId;
     }
 
-    const questions = await Question.find(query).sort({ createdAt: 1 });
+    const questions = await Question.find(query).sort({ createdAt: -1 });
 
     return NextResponse.json(questions);
   } catch (error: any) {

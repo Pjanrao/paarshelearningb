@@ -69,8 +69,8 @@ export default function QuestionManagement({ testId }: { testId: string }) {
             fileType: fileType as "csv" | "json"
           }).unwrap();
 
-          if (result.success) {
-            toast.success(`${result.count} questions uploaded successfully!`);
+          if (result) {
+            toast.success(result.message || `${result.count} questions uploaded successfully!`);
             setFile(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
           }
