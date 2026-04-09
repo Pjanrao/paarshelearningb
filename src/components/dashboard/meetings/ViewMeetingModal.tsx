@@ -26,10 +26,10 @@ export default function MeetingViewModal({ meeting, onClose }: any) {
 
                 {/* HEADER */}
 
-                <div className="flex justify-between items-start px-6 py-5 border-b">
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-4 px-6 py-5 border-b">
 
                     {/* LEFT SIDE */}
-                    <div>
+                    <div className="flex-1">
                         <h2 className="text-2xl font-bold text-gray-900">
                             Meeting Details
                         </h2>
@@ -50,19 +50,19 @@ export default function MeetingViewModal({ meeting, onClose }: any) {
                     </div>
 
                     {/* RIGHT SIDE */}
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-center gap-3 w-full sm:w-auto self-end sm:self-start">
 
                         {/* COPY BUTTON */}
                         <button
                             onClick={copyLink}
-                            className="flex items-center gap-2 border px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100"
+                            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 border px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 text-sm whitespace-nowrap"
                         >
                             <Icon icon="mdi:content-copy" />
                             Copy Link
                         </button>
 
                         {/* CLOSE BUTTON */}
-                        <button onClick={onClose}>
+                        <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-full">
                             <Icon icon="mdi:close" width="22" />
                         </button>
 
@@ -79,7 +79,7 @@ export default function MeetingViewModal({ meeting, onClose }: any) {
                             Meeting Information
                         </h4>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                             {/* Platform */}
                             <div>
@@ -133,15 +133,15 @@ export default function MeetingViewModal({ meeting, onClose }: any) {
                 </div>
 
                 {/* FOOTER */}
-                <div className="flex justify-end gap-3 px-6 py-4 border-t">
+                <div className="flex flex-col sm:flex-row justify-end gap-3 px-6 py-4 border-t">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 border rounded-lg"
+                        className="w-full sm:w-auto px-4 py-2 border rounded-lg"
                     >
                         Close
                     </button>
 
-                    <button className="flex items-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-100">
+                    <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border rounded-lg hover:bg-gray-100">
                         <Icon icon="mdi:pencil-outline" />
                         Edit
                     </button>

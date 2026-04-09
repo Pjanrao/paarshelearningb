@@ -20,14 +20,7 @@ export const metadata: Metadata = {
   title: "Paarsh E-Learning | Placement-Oriented IT & Software Training Institute in Nashik",
   description: "Join Paarsh E-Learning in Nashik for IT and software training with practical learning, internship, and placement support.",
   icons: {
-    icon: [
-      { url: "/favicon.ico" },
-      { url: "/images/logo/logo.jpeg", type: "image/jpeg" },
-    ],
-    shortcut: ["/favicon.ico"],
-    apple: [
-      { url: "/images/logo/logo.jpeg", type: "image/jpeg" },
-    ],
+    icon: "/favicon.ico",
   },
 };
 

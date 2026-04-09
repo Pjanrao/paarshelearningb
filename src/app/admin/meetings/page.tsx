@@ -108,7 +108,7 @@ export default function MeetingManagement() {
             </div>
 
             {/* FILTERS */}
-            <div className="bg-white rounded-xl shadow-md p-4 flex flex-col md:flex-row gap-4 items-center mb-4">
+            <div className="bg-white rounded-xl shadow-md p-4 flex flex-col sm:flex-row gap-4 items-center mb-4">
 
                 {/* Search */}
                 <div className="relative w-full max-w-md">
@@ -123,7 +123,7 @@ export default function MeetingManagement() {
 
                 {/* Platform */}
                 <Select value={platform} onValueChange={setPlatform}>
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-full sm:w-48">
                         <SelectValue placeholder="Platform" />
                     </SelectTrigger>
                     <SelectContent>
@@ -132,20 +132,19 @@ export default function MeetingManagement() {
                 </Select>
             </div>
 
-            {/* TABLE */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                <table className="w-full text-sm">
+            <div className="bg-white rounded-xl shadow-md overflow-x-auto">
+                <table className="w-full text-sm min-w-[800px] md:min-w-0">
 
                     {/* HEADER */}
                     <thead className="bg-gray-50 text-gray-600 text-xs uppercase">
                         <tr>
-                            <th className="px-6 py-4 text-left">#</th>
-                            <th className="px-6 py-4 text-left">Title</th>
-                            <th className="px-6 py-4 text-left">Instructor</th>
-                            <th className="px-6 py-4 text-left">Date & Time</th>
-                            <th className="px-6 py-4 text-left">Platform</th>
-                            <th className="px-6 py-4 text-left">Status</th>
-                            <th className="px-6 py-4 text-left">Actions</th>
+                            <th className="px-4 md:px-6 py-4 text-left">#</th>
+                            <th className="px-4 md:px-6 py-4 text-left">Title</th>
+                            <th className="px-4 md:px-6 py-4 text-left hidden sm:table-cell">Instructor</th>
+                            <th className="px-4 md:px-6 py-4 text-left">Date & Time</th>
+                            <th className="px-4 md:px-6 py-4 text-left hidden lg:table-cell">Platform</th>
+                            <th className="px-4 md:px-6 py-4 text-left">Status</th>
+                            <th className="px-4 md:px-6 py-4 text-left">Actions</th>
                         </tr>
                     </thead>
 
@@ -192,20 +191,20 @@ export default function MeetingManagement() {
                                         className="border-t hover:bg-gray-50 transition"
                                     >
                                         {/* ID */}
-                                        <td className="px-6 py-5">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                                        <td className="px-4 md:px-6 py-5">{(currentPage - 1) * itemsPerPage + index + 1}</td>
 
                                         {/* Title */}
-                                        <td className="px-6 py-5 font-semibold text-gray-900">
+                                        <td className="px-4 md:px-6 py-5 font-semibold text-gray-900">
                                             {meeting.title}
                                         </td>
 
                                         {/* Instructor */}
-                                        <td className="px-6 py-5 text-gray-700">
+                                        <td className="px-4 md:px-6 py-5 text-gray-700 hidden sm:table-cell">
                                             {meeting.teacher?.name || "N/A"}
                                         </td>
 
                                         {/* Date */}
-                                        <td className="px-6 py-5 text-gray-700">
+                                        <td className="px-4 md:px-6 py-5 text-gray-700">
 
 
                                             <div>{date}</div>
@@ -218,14 +217,14 @@ export default function MeetingManagement() {
                                         </td>
 
                                         {/* Platform */}
-                                        <td className="px-6 py-5">
+                                        <td className="px-4 md:px-6 py-5 hidden lg:table-cell">
                                             <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-xs">
                                                 {meeting.platform || "Zoom"}
                                             </span>
                                         </td>
 
                                         {/* Status */}
-                                        <td className="px-6 py-5">
+                                        <td className="px-4 md:px-6 py-5">
                                             <span
                                                 className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
                                                     status
@@ -236,7 +235,7 @@ export default function MeetingManagement() {
                                         </td>
 
                                         {/* Actions */}
-                                        <td className="px-6 py-5">
+                                        <td className="px-4 md:px-6 py-5">
                                             <div className="flex items-center gap-2">
 
                                                 {/* View */}
@@ -277,17 +276,17 @@ export default function MeetingManagement() {
             </div>
 
             {/* PAGINATION */}
-            <div className="px-6 py-4 border-t bg-gray-50 flex justify-between items-center mt-2">
+            <div className="px-4 md:px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-4 mt-2">
                 <p className="text-sm text-gray-600">
                     Showing {meetings.length} meetings
                 </p>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
 
                     <button
                         disabled={currentPage === 1}
                         onClick={() => setCurrentPage((prev) => prev - 1)}
-                        className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50"
+                        className="px-3 md:px-4 py-2 border rounded-lg text-sm disabled:opacity-50"
                     >
                         Previous
                     </button>
@@ -296,7 +295,7 @@ export default function MeetingManagement() {
                         <button
                             key={i}
                             onClick={() => setCurrentPage(i + 1)}
-                            className={`w-10 h-10 rounded-lg ${currentPage === i + 1
+                            className={`w-9 h-9 md:w-10 md:h-10 rounded-lg text-sm md:text-base ${currentPage === i + 1
                                 ? "bg-blue-900 text-white"
                                 : "border"
                                 }`}
@@ -307,8 +306,8 @@ export default function MeetingManagement() {
 
                     <button
                         disabled={currentPage === totalPages}
-                        onClick={() => setCurrentPage((prev) => prev + 1)}
-                        className="px-4 py-2 border rounded-lg text-sm disabled:opacity-50"
+                        onClick={() => setCurrentPage((prev) => prev - 1)}
+                        className="px-3 md:px-4 py-2 border rounded-lg text-sm disabled:opacity-50"
                     >
                         Next
                     </button>

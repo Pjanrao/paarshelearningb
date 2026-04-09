@@ -166,7 +166,7 @@ toast.error("Cannot select past date/time");
                 <div className="flex flex-col flex-1 min-h-0">
                     {/* Scrollable Body */}
                     <div className="flex-1 overflow-y-auto px-4 pt-4 pb-2">
-                        <div className="grid grid-cols-2 gap-3 p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-6">
 
                             {/* Title */}
                             <div>

@@ -61,24 +61,22 @@ export default function DeleteMeetingModal({
                 </AlertDialogHeader>
 
                 {/* FOOTER */}
-                <AlertDialogFooter className="flex justify-center gap-3 mt-4">
-
+                <AlertDialogFooter className="flex flex-col sm:flex-row justify-center gap-3 mt-4">
                     <Button
                         variant="outline"
                         onClick={() => setDeleteId(null)}
+                        className="w-full sm:w-auto"
                     >
                         Cancel
                     </Button>
-
                     <Button
                         onClick={handleDelete}
                         disabled={loading}
-                        className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-60"
+                        className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white disabled:opacity-60"
                     >
                         {loading && <Loader2 className="animate-spin mr-2" size={16} />}
                         Delete
                     </Button>
-
                 </AlertDialogFooter>
 
             </AlertDialogContent>
