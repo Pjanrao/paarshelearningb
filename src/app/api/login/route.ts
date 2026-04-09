@@ -56,9 +56,16 @@ export async function POST(req: Request) {
             );
         }
 
+        // Generate a new loginToken
+        const loginToken = crypto.randomUUID();
+        
+        // Update user in DB with the new token
+        user.loginToken = loginToken;
+        await user.save();
+
         // 3. Generate JWT
         const token = jwt.sign(
-            { id: user._id, role: user.role },
+            { id: user._id, role: user.role, loginToken },
             process.env.JWT_SECRET || "default_secret",
             { expiresIn: "1d" }
         );
