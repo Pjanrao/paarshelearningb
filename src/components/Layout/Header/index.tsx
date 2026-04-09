@@ -98,14 +98,11 @@ const Header: React.FC = () => {
         {/* Right Section */}
         <div className='flex items-center gap-3 relative'>
 
-          {/* ✅ STUDENT ONLY */}
-
-          {role === "student" ? (
+          {role ? (
             <div className="flex items-center gap-3 relative">
-
               <button
-                onClick={() => router.push("/student")}
-                className="flex px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-primary text-white shadow-md text-sm sm:text-base"
+                onClick={() => router.push(role === "admin" ? "/admin" : role === "teacher" ? "/teacher" : "/student")}
+                className="flex px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-primary text-white shadow-md text-sm sm:text-base transition hover:bg-primary/90"
               >
                 Dashboard
               </button>
@@ -122,33 +119,30 @@ const Header: React.FC = () => {
               </div>
 
               {profileOpen && (
-                <div className="absolute right-2 top-12 w-64 bg-white shadow-lg p-4 rounded-xl z-50">
-
-                  <p className="font-semibold">{user.name}</p>
-                  <p className="text-sm text-gray-500">{user.email}</p>
-
+                <div className="absolute right-2 top-12 w-64 bg-white shadow-xl dark:bg-gray-800 border dark:border-gray-700 p-4 rounded-xl z-50 animate-in fade-in slide-in-from-top-2">
+                  <p className="font-bold text-gray-900 dark:text-white truncate">{user?.name || "User"}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user?.email || ""}</p>
+                  <div className="my-3 border-t dark:border-gray-700" />
                   <button
                     onClick={handleLogout}
-                    className="w-full bg-red-500 text-white py-2 mt-3 rounded"
+                    className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-semibold transition shadow-md active:scale-95"
                   >
                     Logout
                   </button>
                 </div>
               )}
             </div>
-
           ) : (
-            /* ✅ ADMIN + GUEST */
             <>
               <Link
                 href='/signin'
-                className='hidden sm:inline-flex px-5 py-2.5 rounded-full text-primary hover:bg-primary/5'>
+                className='hidden sm:inline-flex px-5 py-2.5 rounded-full text-primary hover:bg-primary/5 font-semibold'>
                 Sign In
               </Link>
 
               <Link
                 href='/signup'
-                className='hidden sm:inline-flex px-6 py-2.5 rounded-full bg-primary text-white shadow-md'>
+                className='hidden sm:inline-flex px-6 py-2.5 rounded-full bg-primary text-white shadow-md font-semibold hover:bg-primary/90 active:scale-95 transition-all'>
                 Sign Up
               </Link>
             </>
@@ -192,11 +186,11 @@ const Header: React.FC = () => {
           ))}
 
           <div className='pt-8 mt-4 border-t dark:border-gray-800 flex flex-col gap-4'>
-            {user && user.role === "student" ? (
+            {role ? (
               <>
                 <button
                   onClick={() => {
-                    router.push("/student");
+                    router.push(role === "admin" ? "/admin" : role === "teacher" ? "/teacher" : "/student");
                     setNavbarOpen(false);
                   }}
                   className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl bg-primary text-white shadow-lg transition-all active:scale-95"

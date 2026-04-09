@@ -73,10 +73,6 @@ const userSchema = new mongoose.Schema(
             type: String,
             default: "",
         },
-        currentSessionId: {
-            type: String,
-            default: null,
-        },
 
     },
     { timestamps: true }
