@@ -74,7 +74,8 @@ export async function POST(req: Request) {
                 settings = await ReferralSettings.create({});
             }
 
-            const rewardAmount = settings.cashbackAmount || 50;
+            const rewardAmount = settings.cashbackAmount || 1000;
+            const newUserReward = settings.newUserReward || 50;
 
             if (referrer) {
 
@@ -87,6 +88,23 @@ export async function POST(req: Request) {
                 await User.findByIdAndUpdate(user._id, {
                     $set: { referralReward: rewardAmount }
                 });
+                // 🎁 ADD WALLET TO REFERRER (EXISTING)
+                referrer.walletBalance =
+                    (referrer.walletBalance || 0) + rewardAmount;
+
+                await referrer.save();
+
+                // 🎁 NEW: ADD WALLET TO NEW USER ⭐
+                user.walletBalance =
+                    (user.walletBalance || 0) + newUserReward;
+
+                // 🔥 3. STORE REWARD (IMPORTANT 🔥🔥🔥)
+                user.referralReward = rewardAmount;
+
+                // ✅ OPTIONAL (better tracking)
+                user.hasUsedReferral = true;
+
+                await user.save();
             }
         }
         // 🔥 2. REFERRAL LOGIC END

@@ -14,10 +14,12 @@ async function saveLocalVideo(file: File, courseId: string): Promise<{ url: stri
         const sanitizedFileName = file.name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9.\-_]/g, "");
         const filename = `${timestamp}-${sanitizedFileName}`;
         
-        // Target structure: uploads/courses/{courseId}/{videoFileName}
-        // Placing it inside 'public' for static serving from Next.js
-        const relativePath = `/uploads/courses/${courseId}/${filename}`;
-        const fullPath = path.join(process.cwd(), "public", relativePath);
+        // Target structure: uploads/courses/{courseId}/videos/{videoFileName}
+        const relativePath = `/uploads/courses/${courseId}/videos/${filename}`;
+        const basePath = process.env.NODE_ENV === "development" 
+            ? path.join(process.cwd(), "public")
+            : "/var/www";
+        const fullPath = path.join(basePath, relativePath);
         
         // Ensure directory exists (uploads/courses/{courseId})
         const dir = path.dirname(fullPath);

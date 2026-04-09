@@ -94,7 +94,10 @@ export async function PUT(
         // DELETE OLD FILE
         // =============================
         if (oldRelativePath && oldRelativePath.startsWith("/uploads")) {
-          const oldFullPath = path.join("/var/www", oldRelativePath);
+          const basePath = process.env.NODE_ENV === "development"
+            ? path.join(process.cwd(), "public")
+            : "/var/www";
+          const oldFullPath = path.join(basePath, oldRelativePath);
 
           try {
             if (fs.existsSync(oldFullPath)) {
@@ -115,7 +118,10 @@ export async function PUT(
           Date.now() + "-" + file.name.replaceAll(" ", "_");
 
         const relativePath = `/uploads/courses/${id}/${subfolder}/${sanitizedFileName}`;
-        const fullPath = path.join("/var/www", relativePath);
+        const basePath = process.env.NODE_ENV === "development"
+          ? path.join(process.cwd(), "public")
+          : "/var/www";
+        const fullPath = path.join(basePath, relativePath);
 
         const dir = path.dirname(fullPath);
         if (!fs.existsSync(dir)) {
@@ -250,7 +256,10 @@ export async function DELETE(
 
     for (const fileRelPath of filesToDelete) {
       if (fileRelPath && fileRelPath.startsWith("/uploads")) {
-        const fullPath = path.join("/var/www", fileRelPath);
+        const basePath = process.env.NODE_ENV === "development"
+          ? path.join(process.cwd(), "public")
+          : "/var/www";
+        const fullPath = path.join(basePath, fileRelPath);
 
         try {
           if (fs.existsSync(fullPath)) {
