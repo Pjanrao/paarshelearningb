@@ -13,6 +13,8 @@ import SessionProviderComp from "@/components/nextauth/SessionProvider";
 import ReduxProvider from "@/components/ReduxProvider";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor } from "@/redux/store";
+import PageTracker from "@/components/common/PageTracker";
+
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -82,7 +84,9 @@ export default function RootLayout({
       <body className={`${inter.className} ${inter.variable}`} suppressHydrationWarning>
         <NextTopLoader />
         <SessionProviderComp>
+          <PageTracker />
           <ReduxProvider>
+
             <ThemeProvider
               attribute="class"
               enableSystem={false}

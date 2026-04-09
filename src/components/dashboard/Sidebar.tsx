@@ -21,6 +21,7 @@ import {
   PanelLeftOpen,
   Video,
   Gift,
+  Clock,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 // import Image from "next/image";
@@ -95,6 +96,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     { name: "Industry Partners", path: "/admin/industry-partners", icon: Briefcase },
     { name: "Referral", path: "/admin/referral", icon: Gift },
     { name: "Withdrawals", path: "/admin/withdrawals", icon: CreditCard },
+    { name: "Track Time", path: "/admin/track-time", icon: Clock },
     { name: "Settings", path: "/admin/settings", icon: Settings },
   ];
 
