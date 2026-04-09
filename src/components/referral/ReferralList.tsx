@@ -24,7 +24,7 @@ export default function ReferralList() {
             </h2>
 
             {/* Tabs */}
-            <div className="flex gap-6 border-b mb-4 justify-center">
+            <div className="flex flex-wrap gap-4 sm:gap-6 border-b mb-4 justify-center">
                 <button
                     onClick={() => setActiveTab("pending")}
                     className={`pb-2 ${activeTab === "pending"
@@ -52,7 +52,7 @@ export default function ReferralList() {
                 </div>
             ) : (
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm min-w-[600px]">
                         <thead className="text-gray-500 text-left border-b">
                             <tr>
                                 <th className="py-3">Name</th>

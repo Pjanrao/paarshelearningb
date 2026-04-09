@@ -74,16 +74,16 @@ export default function ReferralTable() {
         <div className="bg-white p-5 rounded-2xl shadow">
 
             {/* HEADER */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
 
                 <h2 className="text-lg font-semibold">Referral Users</h2>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
 
                     {/* SORT */}
                     <select
                         onChange={(e) => setSortType(e.target.value)}
-                        className="border px-3 py-2 rounded-lg text-sm"
+                        className="border px-3 py-2 rounded-lg text-sm flex-1 sm:flex-none"
                     >
                         <option value="none">Sort</option>
                         <option value="name">Name</option>
@@ -93,7 +93,7 @@ export default function ReferralTable() {
                     {/* EXPORT */}
                     <button
                         onClick={handleExport}
-                        className="bg-gray-200 px-3 py-2 rounded-lg text-sm"
+                        className="bg-gray-200 px-3 py-2 rounded-lg text-sm flex-1 sm:flex-none"
                     >
                         Export
                     </button>
@@ -104,7 +104,7 @@ export default function ReferralTable() {
                         placeholder="Search..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="border px-3 py-2 rounded-lg text-sm"
+                        className="border px-3 py-2 rounded-lg text-sm w-full sm:w-auto"
                     />
 
                 </div>
@@ -116,7 +116,7 @@ export default function ReferralTable() {
             ) : (
                 <>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm border-separate border-spacing-y-2">
+                        <table className="w-full text-sm border-separate border-spacing-y-2 min-w-[1000px]">
 
                             {/* HEADER */}
                             <thead className="text-gray-500 text-left">
@@ -183,12 +183,15 @@ export default function ReferralTable() {
 
                                         {/* ACTION */}
                                         <td className="px-4 py-3 text-center">
-                                            <button
-                                                onClick={() => setSelectedUser(user._id)}
-                                                className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-2 rounded-full transition"
-                                            >
-                                                👁
-                                            </button>
+                                            <div className="flex items-center justify-center gap-2 whitespace-nowrap min-w-[120px]">
+                                                <button
+                                                    onClick={() => setSelectedUser(user._id)}
+                                                    className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-2 rounded-full transition"
+                                                    title="View Referral"
+                                                >
+                                                    👁
+                                                </button>
+                                            </div>
                                         </td>
 
                                     </tr>
@@ -199,19 +202,19 @@ export default function ReferralTable() {
                     </div>
 
                     {/* PAGINATION */}
-                    <div className="flex justify-between items-center mt-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3">
 
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 text-center sm:text-left">
                             Showing {startIndex + 1} to{" "}
                             {Math.min(startIndex + itemsPerPage, filteredData.length)} of{" "}
                             {filteredData.length}
                         </p>
 
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap justify-center gap-2">
                             <button
                                 onClick={() => setCurrentPage((p) => p - 1)}
                                 disabled={currentPage === 1}
-                                className="px-3 py-1 bg-gray-100 rounded"
+                                className="px-3 py-1 bg-gray-100 rounded disabled:opacity-50"
                             >
                                 Previous
                             </button>
@@ -223,7 +226,7 @@ export default function ReferralTable() {
                             <button
                                 onClick={() => setCurrentPage((p) => p + 1)}
                                 disabled={currentPage === totalPages}
-                                className="px-3 py-1 bg-gray-100 rounded"
+                                className="px-3 py-1 bg-gray-100 rounded disabled:opacity-50"
                             >
                                 Next
                             </button>

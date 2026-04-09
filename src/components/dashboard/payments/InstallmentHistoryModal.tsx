@@ -20,9 +20,9 @@ export default function InstallmentHistoryModal({ payment, close }: any) {
     ].filter(h => h.amount > 0);
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
 
-            <div className="bg-white p-6 rounded-xl w-[520px] relative max-h-[80vh] overflow-y-auto">
+            <div className="bg-white p-5 sm:p-6 rounded-xl w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
 
                 {/* CLOSE */}
                 <button
@@ -36,83 +36,85 @@ export default function InstallmentHistoryModal({ payment, close }: any) {
                     Payment History
                 </h2>
 
-                <table className="w-full text-sm border">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm border min-w-[500px]">
 
-                    <thead className="bg-gray-50">
-                        <tr>
-                            <th className="text-left p-2">Type</th>
-                            <th className="text-left p-2">Amount</th>
-                            <th className="text-left p-2">Mode</th>
-                            <th className="text-left p-2">Receipt</th>
-                            <th className="text-left p-2">Date</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {history.length === 0 && (
+                        <thead className="bg-gray-50">
                             <tr>
-                                <td colSpan={5} className="text-center p-4 text-gray-500">
-                                    No payment history
-                                </td>
+                                <th className="text-left p-2">Type</th>
+                                <th className="text-left p-2">Amount</th>
+                                <th className="text-left p-2">Mode</th>
+                                <th className="text-left p-2">Receipt</th>
+                                <th className="text-left p-2">Date</th>
                             </tr>
-                        )}
+                        </thead>
 
-                        {history.map((item: any, index: number) => (
+                        <tbody>
 
-                            <tr key={index} className="border-t">
+                            {history.length === 0 && (
+                                <tr>
+                                    <td colSpan={5} className="text-center p-4 text-gray-500">
+                                        No payment history
+                                    </td>
+                                </tr>
+                            )}
 
-                                <td className="p-2 font-medium">
-                                    {item.type}
-                                </td>
+                            {history.map((item: any, index: number) => (
 
-                                <td className="p-2">
-                                    ₹{item.amount}
-                                </td>
+                                <tr key={index} className="border-t">
 
-                                <td className="p-2">
-                                    {item.paymentMode}
-                                </td>
+                                    <td className="p-2 font-medium">
+                                        {item.type}
+                                    </td>
 
-                                <td className="p-2">
+                                    <td className="p-2">
+                                        ₹{item.amount}
+                                    </td>
 
-                                    {item.receipt ? (
+                                    <td className="p-2">
+                                        {item.paymentMode}
+                                    </td>
 
-                                        item.receipt.match(/\.(jpg|jpeg|png)$/) ? (
+                                    <td className="p-2">
 
-                                            <img
-                                                src={item.receipt}
-                                                className="h-10 w-10 object-cover rounded border cursor-pointer"
-                                                onClick={() => window.open(item.receipt, "_blank")}
-                                            />
+                                        {item.receipt ? (
 
-                                        ) : (
+                                            item.receipt.match(/\.(jpg|jpeg|png)$/) ? (
 
-                                            <a
-                                                href={item.receipt}
-                                                target="_blank"
-                                                className="text-blue-600 underline"
-                                            >
-                                                View
-                                            </a>
+                                                <img
+                                                    src={item.receipt}
+                                                    className="h-10 w-10 object-cover rounded border cursor-pointer"
+                                                    onClick={() => window.open(item.receipt, "_blank")}
+                                                />
 
-                                        )
+                                            ) : (
 
-                                    ) : "-"}
+                                                <a
+                                                    href={item.receipt}
+                                                    target="_blank"
+                                                    className="text-blue-600 underline"
+                                                >
+                                                    View
+                                                </a>
 
-                                </td>
+                                            )
 
-                                <td className="p-2">
-                                    {item.date ? new Date(item.date).toLocaleDateString() : "-"}
-                                </td>
+                                        ) : "-"}
 
-                            </tr>
+                                    </td>
 
-                        ))}
+                                    <td className="p-2">
+                                        {item.date ? new Date(item.date).toLocaleDateString() : "-"}
+                                    </td>
 
-                    </tbody>
+                                </tr>
 
-                </table>
+                            ))}
+
+                        </tbody>
+
+                    </table>
+                </div>
 
             </div>
 

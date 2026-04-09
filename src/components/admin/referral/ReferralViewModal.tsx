@@ -16,10 +16,10 @@ export default function ReferralViewModal({ userId, onClose }: any) {
     if (!userId) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center p-4 z-50">
 
             {/* MODAL BOX */}
-            <div className="bg-white rounded-2xl shadow-xl w-[900px] max-h-[85vh] flex flex-col">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col">
 
                 {/* HEADER */}
                 <div className="flex justify-between items-center px-6 py-4 border-b">
@@ -36,76 +36,77 @@ export default function ReferralViewModal({ userId, onClose }: any) {
                 </div>
 
                 {/* TABLE SCROLL AREA */}
-                <div className="overflow-y-auto px-6 py-4">
+                <div className="overflow-y-auto px-6 py-4 flex-1">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm min-w-[700px]">
 
-                    <table className="w-full text-sm">
-
-                        {/* TABLE HEADER */}
-                        <thead className="sticky top-0 bg-white border-b text-gray-600">
-                            <tr>
-                                <th className="py-3 text-left">#</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Courses</th>
-                                <th>Status</th>
-                                <th>Reward</th>
-                                <th>Amount</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-
-                        {/* TABLE BODY */}
-                        <tbody>
-                            {data?.referrals?.length === 0 ? (
+                            {/* TABLE HEADER */}
+                            <thead className="sticky top-0 bg-white border-b text-gray-600">
                                 <tr>
-                                    <td colSpan={8} className="text-center py-6 text-gray-400">
-                                        No referrals found
-                                    </td>
+                                    <th className="py-3 text-left">#</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Courses</th>
+                                    <th>Status</th>
+                                    <th>Reward</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
                                 </tr>
-                            ) : (
-                                data?.referrals?.map((r: any, i: number) => (
-                                    <tr key={r._id} className="border-b hover:bg-gray-50">
+                            </thead>
 
-                                        <td className="py-3">{i + 1}</td>
-
-                                        <td className="font-medium">{r.name}</td>
-
-                                        <td className="text-gray-600">{r.email}</td>
-
-                                        <td>{r.coursesPurchased}</td>
-
-                                        <td>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${r.status === "Completed"
-                                                ? "bg-green-100 text-green-700"
-                                                : "bg-yellow-100 text-yellow-700"
-                                                }`}>
-                                                {r.status}
-                                            </span>
+                            {/* TABLE BODY */}
+                            <tbody>
+                                {data?.referrals?.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} className="text-center py-6 text-gray-400">
+                                            No referrals found
                                         </td>
-
-                                        <td>
-                                            <span className={`text-xs font-medium ${r.rewardGiven === "Yes"
-                                                ? "text-green-600"
-                                                : "text-gray-500"
-                                                }`}>
-                                                {r.rewardGiven}
-                                            </span>
-                                        </td>
-
-                                        <td className="text-green-600 font-semibold">
-                                            ₹{r.amount}
-                                        </td>
-
-                                        <td className="text-gray-500">
-                                            {new Date(r.date).toLocaleDateString()}
-                                        </td>
-
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
+                                ) : (
+                                    data?.referrals?.map((r: any, i: number) => (
+                                        <tr key={r._id} className="border-b hover:bg-gray-50">
 
-                    </table>
+                                            <td className="py-3">{i + 1}</td>
+
+                                            <td className="font-medium">{r.name}</td>
+
+                                            <td className="text-gray-600">{r.email}</td>
+
+                                            <td>{r.coursesPurchased}</td>
+
+                                            <td>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${r.status === "Completed"
+                                                    ? "bg-green-100 text-green-700"
+                                                    : "bg-yellow-100 text-yellow-700"
+                                                    }`}>
+                                                    {r.status}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <span className={`text-xs font-medium ${r.rewardGiven === "Yes"
+                                                    ? "text-green-600"
+                                                    : "text-gray-500"
+                                                    }`}>
+                                                    {r.rewardGiven}
+                                                </span>
+                                            </td>
+
+                                            <td className="text-green-600 font-semibold">
+                                                ₹{r.amount}
+                                            </td>
+
+                                            <td className="text-gray-500">
+                                                {new Date(r.date).toLocaleDateString()}
+                                            </td>
+
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+
+                        </table>
+                    </div>
                 </div>
 
             </div>

@@ -96,7 +96,7 @@ export default function PaymentsPage() {
 
             {/* HEADER */}
 
-            <div className="flex justify-between mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
 
                 <h1 className="text-3xl font-bold text-[#2C4276]">
                     Payment Management
@@ -104,7 +104,7 @@ export default function PaymentsPage() {
 
                 <button
                     onClick={() => setOpen(true)}
-                    className="bg-[#2C4276] text-white px-5 py-2.5 rounded-xl hover:bg-opacity-90 transition-all flex items-center justify-center gap-2 shadow-md font-semibold active:scale-95 whitespace-nowrap"
+                    className="w-full md:w-auto bg-[#2C4276] text-white px-5 py-2.5 rounded-xl hover:bg-opacity-90 transition-all flex items-center justify-center gap-2 shadow-md font-semibold active:scale-95 whitespace-nowrap"
                 >
                     <Plus size={20} />
                     <span>Add Payment</span>
@@ -114,28 +114,28 @@ export default function PaymentsPage() {
 
             {/* SEARCH + FILTER */}
 
-            <div className="flex justify-between mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
 
                 <input
                     type="text"
                     placeholder="Search student, course or mode..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="border px-4 py-2 rounded-lg w-96"
+                    className="border px-4 py-2 rounded-lg w-full sm:w-96"
                 />
 
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
 
                     <button
                         onClick={exportCSV}
-                        className="bg-gray-200 px-4 py-2 rounded-lg"
+                        className="bg-gray-200 px-4 py-2 rounded-lg flex-1 sm:flex-none"
                     >
                         Export
                     </button>
 
                     <button
                         onClick={() => setShowFilter(!showFilter)}
-                        className="bg-orange-500 text-white px-4 py-2 rounded-lg"
+                        className="bg-orange-500 text-white px-4 py-2 rounded-lg flex-1 sm:flex-none"
                     >
                         Filter Date
                     </button>
@@ -223,13 +223,13 @@ export default function PaymentsPage() {
 
             {/* PAGINATION */}
 
-            <div className="flex justify-between items-center mt-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3">
 
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 text-center sm:text-left">
                     Showing {start + 1} to {Math.min(start + limit, total)} of {total} payments
                 </p>
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
 
                     <button
                         disabled={page === 1}

@@ -260,12 +260,12 @@ export default function AddPaymentModal({ close }: any) {
     };
     return (
 
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
 
             <Toaster position="top-right" richColors />
 
             {/* SCROLLABLE MODAL */}
-            <div className="bg-white p-6 rounded-xl w-[500px] max-h-[85vh] overflow-y-auto space-y-4 relative">
+            <div className="bg-white p-5 sm:p-6 rounded-xl w-full max-w-lg max-h-[85vh] overflow-y-auto space-y-4 relative">
                 {/* CLOSE BUTTON */}
                 <button
                     onClick={close}
