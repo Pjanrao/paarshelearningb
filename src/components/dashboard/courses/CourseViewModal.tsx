@@ -47,8 +47,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-
+      <DialogContent className="w-[95%] max-w-6xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
         {/* HEADER */}
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
@@ -59,16 +58,16 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
         <div className="space-y-10">
 
           {/* COURSE HEADER */}
-          <div className="flex gap-6 border-b pb-6">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 border-b pb-6">
 
             <img
               src={course.thumbnail}
-              className="w-56 h-32 rounded-lg object-cover border"
+              className="w-full sm:w-56 h-40 sm:h-32 rounded-lg object-cover border"
             />
 
             <div className="space-y-3">
 
-              <h2 className="text-2xl font-semibold text-gray-900">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">
                 {course.name}
               </h2>
 
@@ -76,7 +75,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
                 {course.shortDescription}
               </p>
 
-              <div className="flex gap-3 text-sm">
+              <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
 
                 <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">
                   {course.category?.name}
@@ -98,11 +97,11 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           {/* COURSE INFORMATION */}
           <div>
 
-            <h3 className="text-lg font-semibold mb-4">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">
               Course Information
             </h3>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
 
               <Info label="Difficulty" value={course.difficulty} />
               <Info label="Duration" value={`${course.duration} Days`} />
@@ -119,7 +118,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           {/* LANGUAGES */}
           <div>
 
-            <h3 className="text-lg font-semibold mb-3">
+            <h3 className="text-base sm:text-lg font-semibold mb-3">
               Languages
             </h3>
 
@@ -141,7 +140,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           {/* TAGS */}
           <div>
 
-            <h3 className="text-lg font-semibold mb-3">
+            <h3 className="text-base sm:text-lg font-semibold mb-3">
               Popular Tags
             </h3>
 
@@ -163,7 +162,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           {/* OVERVIEW */}
           <div>
 
-            <h3 className="text-lg font-semibold mb-3">
+            <h3 className="text-base sm:text-lg font-semibold mb-3">
               Course Overview
             </h3>
 
@@ -175,12 +174,12 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           </div>
 
           {/* MEDIA */}
-          <div className="grid grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-10">
 
             {/* VIDEO */}
             <div>
 
-              <h3 className="text-lg font-semibold mb-3">
+              <h3 className="text-base sm:text-lg font-semibold mb-3">
                 Introduction Video
               </h3>
 
@@ -188,7 +187,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
                 <video
                   src={course.introVideo}
                   controls
-                  className="rounded-lg border"
+                  className="rounded-lg border w-full"
                 />
               ) : (
                 <p className="text-gray-500 text-sm">No video uploaded</p>
@@ -199,7 +198,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
             {/* PDF */}
             <div>
 
-              <h3 className="text-lg font-semibold mb-3">
+              <h3 className="text-base sm:text-lg font-semibold mb-3">
                 Syllabus PDF
               </h3>
 
@@ -221,7 +220,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           {/* SYLLABUS */}
           <div>
 
-            <h3 className="text-lg font-semibold mb-4">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">
               Course Syllabus
             </h3>
 
@@ -249,7 +248,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           {/* WHY JOIN */}
           {/* <div>
 
-            <h3 className="text-lg font-semibold mb-4">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">
               Why Join This Program
             </h3>
 
@@ -277,11 +276,11 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           {/* BENEFITS */}
           <div>
 
-            <h3 className="text-lg font-semibold mb-4">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">
               Benefits
             </h3>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
               {course.benefits?.map((b: any, i: number) => (
                 <div
@@ -305,7 +304,7 @@ export default function CourseViewModal({ open, setOpen, course }: Props) {
           {/* TESTIMONIALS */}
           {/* <div>
 
-            <h3 className="text-lg font-semibold mb-4">
+            <h3 className="text-base sm:text-lg font-semibold mb-4">
               Student Testimonials
             </h3>
 

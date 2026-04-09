@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { logout } from "@/redux/authSlice";
+import { Menu } from "lucide-react";
 
 interface SearchResult {
   id: string;
@@ -13,8 +14,13 @@ interface SearchResult {
   subtitle: string;
   link: string;
 }
-
-export default function Topbar({ role }: { role: string }) {
+export default function Topbar({
+  role,
+  onToggle
+}: {
+  role: string;
+  onToggle: () => void;
+}) {
   const router = useRouter();
   const dispatch = useDispatch();
   const searchRef = useRef<HTMLDivElement>(null);
@@ -71,11 +77,11 @@ export default function Topbar({ role }: { role: string }) {
     // Clear cookies
     document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
     document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    
+
     // Clear localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    
+
     // Clear Redux state
     dispatch(logout());
 
@@ -91,7 +97,17 @@ export default function Topbar({ role }: { role: string }) {
                  flex items-center justify-between px-4 sm:px-8">
 
       {/* Logo */}
-      <div className="flex items-center shrink-0">
+      {/* Logo + Toggle */}
+      <div className="flex items-center gap-3 shrink-0">
+
+        {/* 🔥 Toggle Button */}
+        <button
+          onClick={onToggle}
+          className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 md:hidden"
+        >
+          <Menu size={20} />
+        </button>
+
         <Image
           src="/images/logo/logo-wide.webp"
           alt="Paarsh E-Learning"

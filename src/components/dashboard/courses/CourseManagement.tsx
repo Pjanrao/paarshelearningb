@@ -110,7 +110,7 @@ export default function CourseManagement() {
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter by Category" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="all">All</SelectItem>
 
               {categories.map((cat: any) => (
@@ -129,7 +129,7 @@ export default function CourseManagement() {
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Sort By" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="price_asc">Price: Low → High</SelectItem>
               <SelectItem value="price_desc">Price: High → Low</SelectItem>
               <SelectItem value="date_desc">Newest First</SelectItem>

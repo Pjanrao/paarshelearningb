@@ -115,110 +115,112 @@ export default function SubcategoryTable({
             <>
               {/* TABLE */}
               <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="overflow-x-auto">
 
-                <table className="w-full text-sm">
+                  <table className="w-full text-sm">
 
-                  <thead className="bg-gray-50 border-b text-gray-600 uppercase text-xs sticky top-0">
-                    <tr>
+                    <thead className="bg-gray-50 border-b text-gray-600 uppercase text-xs sticky top-0">
+                      <tr>
 
-                      <th className="p-4 text-left">ID</th>
+                        <th className="p-4 text-left">ID</th>
 
-                      <th className="p-4 text-left">
-                        Category
-                      </th>
+                        <th className="p-4 text-left">
+                          Category
+                        </th>
 
-                      <th className="p-4 text-left">
-                        Subcategory
-                      </th>
+                        <th className="p-4 text-left">
+                          Subcategory
+                        </th>
 
-                      <th className="p-4 text-left">
-                        Created
-                      </th>
+                        <th className="p-4 text-left">
+                          Created
+                        </th>
 
-                      <th className="p-4 text-left">
-                        Actions
-                      </th>
-
-                    </tr>
-                  </thead>
-
-                  <tbody className="divide-y divide-gray-200 bg-white">
-
-                    {paginated.map((sub, index) => (
-
-                      <tr key={sub._id} className="hover:bg-gray-50 transition">
-
-                        {/* ID */}
-                        <td className="p-4">
-                          {(page - 1) * ITEMS_PER_PAGE + index + 1}
-                        </td>
-
-                        {/* CATEGORY */}
-                        <td className="p-4 font-medium">
-                          {sub.category?.name}
-                        </td>
-
-                        {/* SUBCATEGORY */}
-                        <td className="p-4">
-
-                          <div className="flex items-center gap-3">
-
-                            <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white
- font-bold uppercase">
-                              {sub.name.charAt(0)}
-                            </div>
-
-                            <div className="text-sm font-bold text-gray-900">
-                              {sub.name}
-                            </div>
-
-                          </div>
-
-                        </td>
-
-                        {/* CREATED */}
-                        <td className="p-4">
-                          {new Date(sub.createdAt).toLocaleDateString()}
-                        </td>
-
-                        {/* ACTIONS */}
-                        <td className="p-4">
-
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => {
-                                setViewSubcategory(sub);
-                                setViewOpen(true);
-                              }}
-                              className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-                            >
-                              <Eye size={18} />
-                            </button>
-
-                            <button
-                              onClick={() => onEdit(sub)}
-                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                            >
-                              <Pencil size={18} />
-                            </button>
-
-                            <button
-                              onClick={() => onDelete(sub._id)}
-                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                            >
-                              <Trash2 size={18} />
-                            </button>
-
-                          </div>
-
-                        </td>
+                        <th className="p-4 text-left">
+                          Actions
+                        </th>
 
                       </tr>
+                    </thead>
 
-                    ))}
+                    <tbody className="divide-y divide-gray-200 bg-white">
 
-                  </tbody>
-                </table>
+                      {paginated.map((sub, index) => (
+
+                        <tr key={sub._id} className="hover:bg-gray-50 transition">
+
+                          {/* ID */}
+                          <td className="p-4">
+                            {(page - 1) * ITEMS_PER_PAGE + index + 1}
+                          </td>
+
+                          {/* CATEGORY */}
+                          <td className="p-4 font-medium">
+                            {sub.category?.name}
+                          </td>
+
+                          {/* SUBCATEGORY */}
+                          <td className="p-4">
+
+                            <div className="flex items-center gap-3">
+
+                              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white
+ font-bold uppercase">
+                                {sub.name.charAt(0)}
+                              </div>
+
+                              <div className="text-sm font-bold text-gray-900">
+                                {sub.name}
+                              </div>
+
+                            </div>
+
+                          </td>
+
+                          {/* CREATED */}
+                          <td className="p-4">
+                            {new Date(sub.createdAt).toLocaleDateString()}
+                          </td>
+
+                          {/* ACTIONS */}
+                          <td className="p-4">
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  setViewSubcategory(sub);
+                                  setViewOpen(true);
+                                }}
+                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                              >
+                                <Eye size={18} />
+                              </button>
+
+                              <button
+                                onClick={() => onEdit(sub)}
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                              >
+                                <Pencil size={18} />
+                              </button>
+
+                              <button
+                                onClick={() => onDelete(sub._id)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+
+                            </div>
+
+                          </td>
+
+                        </tr>
+
+                      ))}
+
+                    </tbody>
+                  </table>
+                </div>
 
               </div>
 

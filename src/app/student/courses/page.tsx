@@ -101,13 +101,11 @@ export default function AvailableCoursesPage() {
     };
 
     return (
-        <div className="pb-12">
-
+        <div className="px-4 sm:px-6 lg:px-8 pb-12">
             {/* Page Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold text-[#1e293b]">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-[#1e293b]">
                         Available Courses
                     </h1>
                     <p className="text-gray-500 text-sm">
@@ -116,16 +114,14 @@ export default function AvailableCoursesPage() {
                 </div>
 
                 {/* Search + Filter */}
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
 
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 shadow-sm">
-                        <Filter size={16} /> Filters
+                    <button className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-50 shadow-sm w-full sm:w-auto">                        <Filter size={16} /> Filters
                     </button>
 
-                    <div className="relative">
+                    <div className="relative w-full">
                         <Search
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                            size={16}
+                            className="pl-9 pr-4 py-2 text-sm w-full bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2B4276]/20 focus:border-[#2B4276] outline-none shadow-sm" size={16}
                         />
 
                         <input
@@ -145,7 +141,7 @@ export default function AvailableCoursesPage() {
             {/* Courses Grid */}
             {isLoading ? (
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
 
                     {[...Array(8)].map((_, i) => (
 
@@ -201,8 +197,7 @@ export default function AvailableCoursesPage() {
             {/* Empty State */}
             {!isLoading && courses.length === 0 && (
 
-                <div className="text-center py-20">
-
+                <div className="text-center py-16 sm:py-20 px-4">
                     <BookOpen className="mx-auto text-gray-300 mb-4" size={50} />
 
                     <h3 className="font-bold text-lg text-gray-700">

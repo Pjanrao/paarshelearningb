@@ -104,10 +104,13 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
   return (
     <motion.div
       initial={false}
-      animate={{ width: collapsed ? 64 : 256 }}
       transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="bg-white border-r border-gray-200 shadow-sm flex flex-col h-full relative z-30 overflow-hidden flex-shrink-0 shadow-lg"
-    >
+      className={`
+  fixed md:relative top-0 left-0 h-full z-50 bg-white border-r border-gray-200 shadow-lg
+  flex flex-col overflow-hidden flex-shrink-0
+  transition-all duration-300
+  ${collapsed ? "-translate-x-full md:translate-x-0 md:w-16" : "translate-x-0 w-64"}
+`}>
       {/* Logo / Brand
       <div className={`flex items-center border-b border-gray-100 flex-shrink-0 transition-all duration-250 ${collapsed ? "justify-center px-2 py-4" : "gap-2 px-4 py-4"}`}>
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-400 flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -258,7 +261,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
       </div>
 
       {/* Footer with Toggle Button */}
-      <div className={`border-t border-gray-200 flex-shrink-0 transition-all duration-250 ${collapsed ? "px-2 py-3 flex justify-center" : "px-4 py-3"}`}>
+      {/* <div className={`border-t border-gray-200 flex-shrink-0 transition-all duration-250 ${collapsed ? "px-2 py-3 flex justify-center" : "px-4 py-3"}`}>
         {collapsed ? (
           <button
             onClick={onToggle}
@@ -282,7 +285,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
             </button>
           </div>
         )}
-      </div>
+      </div> */}
     </motion.div>
   );
 }
