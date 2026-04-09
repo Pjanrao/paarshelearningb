@@ -9,9 +9,11 @@ import {
     Mail,
     Search,
     Loader2,
-    X
+    X,
+    Info
 } from "lucide-react";
 import { toast } from "sonner";
+import EntranceExamGuide from "@/components/practice-test/admin/EntranceExamGuide";
 import {
     useFetchEntranceCollegesQuery,
     useCreateEntranceCollegeMutation,
@@ -38,6 +40,7 @@ export default function EntranceCollegesPage() {
     const [updateCollege, { isLoading: isUpdating }] = useUpdateEntranceCollegeMutation();
     const [deleteCollege] = useDeleteEntranceCollegeMutation();
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [guideOpen, setGuideOpen] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState("");
     const [startDate, setStartDate] = useState("");
@@ -125,6 +128,13 @@ export default function EntranceCollegesPage() {
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                     <h1 className="text-2xl sm:text-3xl font-bold text-[#2C4276]">College Management</h1>
                     <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                        <button
+                            onClick={() => setGuideOpen(true)}
+                            className="border-[#2C4276] text-[#2C4276] hover:bg-blue-50 border-2 px-5 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm font-bold active:scale-95 whitespace-nowrap"
+                        >
+                            <Info size={20} />
+                            <span>How it Works</span>
+                        </button>
                         <div className="relative w-full sm:w-64">
                             <input
                                 type="text"
@@ -301,6 +311,8 @@ export default function EntranceCollegesPage() {
                     </div>
                 </div>
             )}
+
+            <EntranceExamGuide open={guideOpen} onOpenChange={setGuideOpen} />
         </div>
     );
 }

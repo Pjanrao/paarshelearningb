@@ -10,6 +10,8 @@ import {
     useUpdateEntranceTestMutation,
     useDeleteEntranceTestMutation,
 } from "@/redux/api/entranceTestApi";
+import { Info } from "lucide-react";
+import EntranceExamGuide from "@/components/practice-test/admin/EntranceExamGuide";
 
 interface Test {
     testId: string;
@@ -45,6 +47,7 @@ const EntranceExamManagement = () => {
 
     const [deleteTestDialogOpen, setDeleteTestDialogOpen] = useState(false);
     const [testToDelete, setTestToDelete] = useState<{ testId: string; collegeId: string } | null>(null);
+    const [guideOpen, setGuideOpen] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
     const [testsPerPage] = useState<number>(10);
@@ -244,6 +247,13 @@ const EntranceExamManagement = () => {
                         <p className="text-gray-500 text-sm mt-1">Configure and manage entrance tests for colleges</p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
+                        <button
+                            onClick={() => setGuideOpen(true)}
+                            className="border-[#2C4276] text-[#2C4276] hover:bg-blue-50 border-2 px-5 py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm font-bold active:scale-95 whitespace-nowrap"
+                        >
+                            <Info size={20} />
+                            <span>How it Works</span>
+                        </button>
                         <div className="relative w-full sm:w-64">
                             <input
                                 type="text"
@@ -498,6 +508,8 @@ const EntranceExamManagement = () => {
                     </div>
                 </div>
             )}
+
+            <EntranceExamGuide open={guideOpen} onOpenChange={setGuideOpen} />
         </div>
     );
 };

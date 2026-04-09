@@ -25,7 +25,9 @@ import {
 import AddTestModal from "./AddTestModal";
 import EditTestModal from "./EditTestModal";
 import DeleteTestDialog from "./DeleteTestDialog";
+import PracticeTestGuide from "./PracticeTestGuide";
 import Link from "next/link";
+import { Info } from "lucide-react";
 
 export default function TestManagement() {
   const [page, setPage] = useState(1);
@@ -35,6 +37,7 @@ export default function TestManagement() {
   const [editOpen, setEditOpen] = useState(false);
   const [editingTest, setEditingTest] = useState<any>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const { data, isLoading } = useGetPracticeTestsQuery({
     page,
@@ -58,6 +61,13 @@ export default function TestManagement() {
           </p>
         </div>
         <div className="flex items-center gap-3 w-full md:w-auto">
+          <Button
+            onClick={() => setGuideOpen(true)}
+            variant="outline"
+            className="border-[#2C4276] text-[#2C4276] hover:bg-blue-50 flex items-center gap-2 px-4 h-11 rounded-xl font-bold transition-all active:scale-95"
+          >
+            <Info size={18} /> How it Works
+          </Button>
           <Button
             onClick={() => setAddOpen(true)}
             className="bg-[#2C4276] hover:bg-[#1e2e52] text-white flex items-center gap-2 px-6 h-11 rounded-xl shadow-md font-bold transition-all active:scale-95"
@@ -256,6 +266,7 @@ export default function TestManagement() {
       <AddTestModal open={addOpen} setOpen={setAddOpen} />
       <EditTestModal open={editOpen} setOpen={setEditOpen} test={editingTest} />
       <DeleteTestDialog deleteId={deleteId} setDeleteId={setDeleteId} />
+      <PracticeTestGuide open={guideOpen} onOpenChange={setGuideOpen} />
     </div>
   );
 }

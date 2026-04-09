@@ -105,7 +105,7 @@ const Header: React.FC = () => {
 
               <button
                 onClick={() => router.push("/student")}
-                className="hidden sm:inline-flex px-5 py-2.5 rounded-full bg-primary text-white shadow-md"
+                className="flex px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-primary text-white shadow-md text-sm sm:text-base"
               >
                 Dashboard
               </button>
