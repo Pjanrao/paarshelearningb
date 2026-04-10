@@ -46,6 +46,9 @@
 import CourseDetails from "./CourseDetails";
 import { Metadata } from "next";
 import { coursesData } from "@/data/coursesData";
+import { connectDB } from "@/lib/db";
+import Course from "@/models/Course";
+import mongoose from "mongoose";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -59,9 +62,29 @@ export default async function BlogDetailPage({ params }: Props) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  
+  // Try finding in static data first for speed
+  let courseName = coursesData.find((c) => c.slug === slug)?.name;
+
+  // If not found in static data, try database
+  if (!courseName) {
+    try {
+      await connectDB();
+      const isObjectId = mongoose.Types.ObjectId.isValid(slug);
+      const dbCourse = isObjectId 
+        ? await Course.findById(slug) 
+        : await Course.findOne({ slug: slug });
+      
+      if (dbCourse) {
+        courseName = dbCourse.name;
+      }
+    } catch (error) {
+      console.error("Error fetching course for metadata:", error);
+    }
+  }
 
   return {
-    title: `Course: ${slug}`,
+    title: courseName ? `${courseName} | Paarsh Academy` : `Course: ${slug}`,
   };
 }
 
