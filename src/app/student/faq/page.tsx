@@ -9,6 +9,7 @@ import {
     Info,
     ArrowRight
 } from "lucide-react";
+import Link from "next/link";
 
 interface FAQItem {
     id: number;
@@ -163,10 +164,10 @@ export default function FAQPage() {
                             </p>
                         </div>
                     </div>
-                    <button className="bg-white text-[#2C4276] px-10 py-4 rounded-2xl text-sm font-black tracking-widest transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/10 flex items-center gap-2">
+                    <Link href="/contact-us" className="bg-white text-[#2C4276] px-10 py-4 rounded-2xl text-sm font-black tracking-widest transition-all hover:scale-105 active:scale-95 shadow-xl shadow-black/10 flex items-center gap-2">
                         CONTACT SUPPORT
                         <ArrowRight size={18} />
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>

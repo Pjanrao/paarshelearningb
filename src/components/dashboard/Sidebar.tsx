@@ -96,7 +96,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     { name: "Industry Partners", path: "/admin/industry-partners", icon: Briefcase },
     { name: "Referral", path: "/admin/referral", icon: Gift },
     { name: "Withdrawals", path: "/admin/withdrawals", icon: CreditCard },
-    { name: "Track Time", path: "/admin/track-time", icon: Clock },
+    { name: "Footprints", path: "/admin/footprints", icon: Clock },
     { name: "Settings", path: "/admin/settings", icon: Settings },
   ];
 
