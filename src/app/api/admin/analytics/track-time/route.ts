@@ -13,11 +13,10 @@ export async function GET(req: Request) {
         
         // 1. Verify session using NextAuth OR Cookies (Fallback for custom admin login)
         const session = await getServerSession(authOptions);
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const cookieRole = cookieStore.get("role")?.value;
         const cookieToken = cookieStore.get("token")?.value;
-
-        let isAdmin = session?.user?.role === "admin" || cookieRole === "admin";
+        let isAdmin = (session?.user as any)?.role === "admin" || cookieRole === "admin";
 
         // Optional: extra check for token validity if needed
         if (!isAdmin && cookieToken) {
