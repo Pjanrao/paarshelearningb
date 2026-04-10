@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
         await connectDB();
         const session = await getServerSession(authOptions);
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const token = cookieStore.get("token")?.value;
         
         let userId = session?.user?.id || null;

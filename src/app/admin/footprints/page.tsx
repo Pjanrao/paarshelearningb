@@ -91,11 +91,11 @@ export default function TrackTimePage() {
     };
 
     return (
-        <div className="bg-gray-50 h-full p-4 md:p-6">
+        <div className="bg-gray-50 h-full">
             <div className="mb-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-[#2C4276]">Track Time</h1>
+                        <h1 className="text-3xl font-bold text-[#2C4276]">Footprints</h1>
                         <p className="text-gray-500 mt-1">Monitor user engagement and time spent on pages</p>
                     </div>
                     <div className="relative w-full md:w-auto">
