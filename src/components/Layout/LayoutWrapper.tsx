@@ -4,6 +4,7 @@ import React from "react";
 import { usePathname } from "next/navigation";
 import Header from "./Header";
 import Footer from "./Footer";
+import SessionValidator from "@/components/auth/SessionValidator";
 
 const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
@@ -19,6 +20,7 @@ const LayoutWrapper = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <>
+            <SessionValidator />
             {!isAuthRoute && <Header />}
             {children}
             {!isAuthRoute && <Footer />}

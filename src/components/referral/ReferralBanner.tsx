@@ -46,7 +46,7 @@ export default function ReferralBanner() {
                         Refer Friends, Earn Rewards!
                     </h1>
                     <p className="text-sm sm:text-base mt-1 opacity-85 max-w-md">
-                        Share the gift of learning and be rewarded! Invite your friends to PaarshEdu
+                        Share the gift of learning and be rewarded! Invite your friends to PaarshElearning
                         and both of you will receive exclusive benefits.
                     </p>
                 </div>
