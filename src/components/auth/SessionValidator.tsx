@@ -14,7 +14,7 @@ export default function SessionValidator() {
 
     // List of safe paths where we don't immediately redirect but just allow the check, 
     // or paths where we shouldn't even check session
-    const publicPaths = ["/signin", "/signup", "/forgot-password", "/reset-password", "/"];
+    const publicPaths = ["/signin", "/signup", "/forgot-password", "/reset-password", "/", "/admin/signin", "/admin/signin/"];
 
     useEffect(() => {
         const checkSession = async () => {
@@ -57,7 +57,7 @@ export default function SessionValidator() {
                     localStorage.removeItem("user");
                     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                     document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                    
+
                     toast.error("You have been signed out because your account was accessed from another device.", { duration: 5000 });
                     router.push("/signin");
                 }

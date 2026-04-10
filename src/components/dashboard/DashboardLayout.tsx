@@ -5,7 +5,7 @@ import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function DashboardLayout({
   children,
@@ -13,6 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     if (window.innerWidth < 768) {
@@ -24,6 +25,11 @@ export default function DashboardLayout({
   const router = useRouter();
 
   useEffect(() => {
+    // If on admin sign in, do not redirect
+    if (pathname === "/admin/signin" || pathname === "/admin/signin/") {
+      return;
+    }
+
     if (!token && !role) {
       // Small timeout to allow hydration if it hasn't finished (should be fast though)
       const timer = setTimeout(() => {
@@ -33,7 +39,12 @@ export default function DashboardLayout({
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [token, role, router]);
+  }, [token, role, router, pathname]);
+
+  // BYPASS DASHBOARD SHELL FOR ADMIN SIGN IN PAGE
+  if (pathname === "/admin/signin" || pathname === "/admin/signin/") {
+    return <>{children}</>;
+  }
 
   if (!role) {
     return (
