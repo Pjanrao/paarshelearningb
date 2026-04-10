@@ -8,7 +8,6 @@ import HeaderLink from '../Header/Navigation/HeaderLink'
 import MobileHeaderLink from '../Header/Navigation/MobileHeaderLink'
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from '@/redux/authSlice'
-import { useTheme } from 'next-themes'
 
 const Header: React.FC = () => {
   const router = useRouter()
@@ -42,10 +41,6 @@ const Header: React.FC = () => {
   }
 
   const handleLogout = () => {
-    // Clear cookies
-    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("user");

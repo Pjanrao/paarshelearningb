@@ -81,7 +81,6 @@ export default function Topbar({
     // Clear localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("role");
-    localStorage.removeItem("user");
 
     // Clear Redux state
     dispatch(logout());
