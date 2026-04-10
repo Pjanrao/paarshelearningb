@@ -15,12 +15,13 @@ export function middleware(req: NextRequest) {
         path === "" ||
         path === "/" ||
         path === "/signin" ||
+        path === "/admin/signin" ||
         path === "/signup" ||
         path === "/forgot-password" ||
         path === "/reset-password" ||
         path.startsWith("/about-us") ||
         path.startsWith("/contact-us") ||
-        path.startsWith("/Course") || 
+        path.startsWith("/Course") ||
         path.startsWith("/courses") ||
         path.startsWith("/digital-marketing-course-nashik") ||
         path.startsWith("/seo-training-course") ||

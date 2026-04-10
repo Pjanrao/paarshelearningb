@@ -80,91 +80,85 @@ const Header: React.FC = () => {
   return (
     <>
       <header className={`fixed top-0 z-999 w-full transition-all duration-300 ${sticky
-          ? 'py-2 bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100'
-          : 'py-4 bg-transparent shadow-none'
+        ? 'py-2 bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100'
+        : 'py-4 bg-transparent shadow-none'
         }`}>
 
-      <div className='container mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 lg:px-8'>
+        <div className='container mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 lg:px-8'>
 
-        <Logo />
+          <Logo />
 
-        {/* Desktop Menu */}
-        <nav className='hidden lg:flex items-center justify-center gap-8 flex-1'>
-          {headerData.map((item, index) => (
-            <HeaderLink key={index} item={item} />
-          ))}
-        </nav>
+          {/* Desktop Menu */}
+          <nav className='hidden lg:flex items-center justify-center gap-8 flex-1'>
+            {headerData.map((item, index) => (
+              <HeaderLink key={index} item={item} />
+            ))}
+          </nav>
 
-        {/* Right Section */}
-        <div className='flex items-center gap-3 relative'>
+          {/* Right Section */}
+          <div className='flex items-center gap-3 relative'>
 
-          {role ? (
-            <div className="flex items-center gap-3 relative">
-              {role === "student" && (
+            {role === "student" ? (
+              <div className="flex items-center gap-3 relative">
                 <button
                   onClick={() => router.push("/student")}
                   className="flex px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-primary text-white shadow-md text-sm sm:text-base transition hover:bg-primary/90"
                 >
                   Dashboard
                 </button>
-              )}
 
-              {role !== "admin" && (
-                <>
-                  <div
-                    onClick={() => setProfileOpen(!profileOpen)}
-                    className="w-10 h-10 rounded-full bg-gradient-to-r from-[#2C4276] to-blue-500 text-white flex items-center justify-center font-semibold shadow-md hover:scale-105 transition cursor-pointer"
-                  >
-                    {user?.name
-                      ?.split(" ")
-                      .map((n: string) => n[0])
-                      .join("")
-                      .toUpperCase() || "U"}
+                <div
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="w-10 h-10 rounded-full bg-gradient-to-r from-[#2C4276] to-blue-500 text-white flex items-center justify-center font-semibold shadow-md hover:scale-105 transition cursor-pointer"
+                >
+                  {user?.name
+                    ?.split(" ")
+                    .map((n: string) => n[0])
+                    .join("")
+                    .toUpperCase() || "U"}
+                </div>
+
+                {profileOpen && (
+                  <div className="absolute right-2 top-12 w-64 bg-white shadow-xl dark:bg-gray-800 border dark:border-gray-700 p-4 rounded-xl z-50 animate-in fade-in slide-in-from-top-2">
+                    <p className="font-bold text-gray-900 dark:text-white truncate">{user?.name || "User"}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user?.email || ""}</p>
+                    <div className="my-3 border-t dark:border-gray-700" />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-semibold transition shadow-md active:scale-95"
+                    >
+                      Logout
+                    </button>
                   </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link
+                  href='/signin'
+                  className='hidden sm:inline-flex px-5 py-2.5 rounded-full text-primary hover:bg-primary/5 font-semibold'>
+                  Sign In
+                </Link>
 
-                  {profileOpen && (
-                    <div className="absolute right-2 top-12 w-64 bg-white shadow-xl dark:bg-gray-800 border dark:border-gray-700 p-4 rounded-xl z-50 animate-in fade-in slide-in-from-top-2">
-                      <p className="font-bold text-gray-900 dark:text-white truncate">{user?.name || "User"}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user?.email || ""}</p>
-                      <div className="my-3 border-t dark:border-gray-700" />
-                      <button
-                        onClick={handleLogout}
-                        className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-semibold transition shadow-md active:scale-95"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          ) : (
-            <>
-              <Link
-                href='/signin'
-                className='hidden sm:inline-flex px-5 py-2.5 rounded-full text-primary hover:bg-primary/5 font-semibold'>
-                Sign In
-              </Link>
+                <Link
+                  href='/signup'
+                  className='hidden sm:inline-flex px-6 py-2.5 rounded-full bg-primary text-white shadow-md font-semibold hover:bg-primary/90 active:scale-95 transition-all'>
+                  Sign Up
+                </Link>
+              </>
+            )}
 
-              <Link
-                href='/signup'
-                className='hidden sm:inline-flex px-6 py-2.5 rounded-full bg-primary text-white shadow-md font-semibold hover:bg-primary/90 active:scale-95 transition-all'>
-                Sign Up
-              </Link>
-            </>
-          )}
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setNavbarOpen(!navbarOpen)}
+              className='lg:hidden p-2 rounded-xl bg-gray-50'
+            >
+              ☰
+            </button>
 
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setNavbarOpen(!navbarOpen)}
-            className='lg:hidden p-2 rounded-xl bg-gray-50'
-          >
-            ☰
-          </button>
-
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
 
       {/* Mobile Menu */}
       {navbarOpen && (
@@ -192,31 +186,27 @@ const Header: React.FC = () => {
           ))}
 
           <div className='pt-8 mt-4 border-t dark:border-gray-800 flex flex-col gap-4'>
-            {role ? (
+            {role === "student" ? (
               <>
-                {role === "student" && (
-                  <button
-                    onClick={() => {
-                      router.push("/student");
-                      setNavbarOpen(false);
-                    }}
-                    className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl bg-primary text-white shadow-lg transition-all active:scale-95"
-                  >
-                    Dashboard
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    router.push("/student");
+                    setNavbarOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl bg-primary text-white shadow-lg transition-all active:scale-95"
+                >
+                  Dashboard
+                </button>
 
-                {role !== "admin" && (
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setNavbarOpen(false);
-                    }}
-                    className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/5 transition-all"
-                  >
-                    Logout
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setNavbarOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/5 transition-all"
+                >
+                  Logout
+                </button>
               </>
             ) : (
               <>

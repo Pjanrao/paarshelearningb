@@ -48,10 +48,10 @@ export default function StudentLayout({
             setIsMobile(mobile);
             if (mobile) setIsCollapsed(true);
         };
-        
+
         // Initial check
         handleResize();
-        
+
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
@@ -105,7 +105,7 @@ export default function StudentLayout({
             {/* Top Header */}
             <header className="bg-white border-b border-gray-100 p-2 sm:p-3 flex items-center justify-between z-20 shadow-sm flex-shrink-0 w-full h-[72px]">
                 {/* Left side: Logo */}
-                <div className="flex items-center px-2 sm:px-4 flex-shrink-0">
+                <Link href="/" className="flex items-center px-2 sm:px-4 flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer">
                     <div className="bg-white p-1 rounded-lg">
                         <Image
                             src="/images/logo/logo-wide.webp"
@@ -115,7 +115,7 @@ export default function StudentLayout({
                             className="w-auto h-10"
                         />
                     </div>
-                </div>
+                </Link>
 
                 {/* Right side: Search & Profile */}
                 <div className="flex flex-1 items-center justify-between px-2 sm:px-4">
@@ -143,7 +143,7 @@ export default function StudentLayout({
                 {/* Mobile Overlay backdrop */}
                 <AnimatePresence>
                     {isMobile && !isCollapsed && (
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -154,9 +154,9 @@ export default function StudentLayout({
                 </AnimatePresence>
 
                 {/* Sidebar */}
-                <motion.aside 
+                <motion.aside
                     initial={false}
-                    animate={{ 
+                    animate={{
                         width: isCollapsed ? (isMobile ? 70 : 80) : 240,
                         x: 0
                     }}
@@ -178,7 +178,7 @@ export default function StudentLayout({
                                         : "hover:bg-white/5 text-blue-100/80 hover:text-white"
                                         } ${isCollapsed ? "justify-center px-2" : ""}`}
                                 >
-                                    <item.icon size={20} className="flex-shrink-0" /> 
+                                    <item.icon size={20} className="flex-shrink-0" />
                                     {!isCollapsed && <span className="whitespace-nowrap transition-opacity duration-300">{item.label}</span>}
                                 </Link>
                             );
@@ -203,8 +203,8 @@ export default function StudentLayout({
                                     </div>
                                 )}
                             </div>
-                            
-                            <button 
+
+                            <button
                                 onClick={() => setIsCollapsed(!isCollapsed)}
                                 className={`p-2 hover:bg-white/10 rounded-lg transition-colors text-blue-100 ${isCollapsed ? "" : "ml-2"}`}
                                 title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
