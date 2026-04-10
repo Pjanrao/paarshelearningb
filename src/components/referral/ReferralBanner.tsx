@@ -15,7 +15,10 @@ export default function ReferralBanner() {
     }, []);
 
     const referralCode = data?.referralCode ?? "";
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl =
+        typeof window !== "undefined"
+            ? window.location.origin
+            : (process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000");
     const link = referralCode ? `${baseUrl}/signup?ref=${referralCode}` : baseUrl;
 
     const handleShare = async () => {

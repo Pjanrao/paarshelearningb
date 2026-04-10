@@ -19,7 +19,10 @@ export default function ReferralLinkCard() {
     if (isLoading) return <p className="text-gray-500 text-sm text-center py-4">Loading...</p>;
 
     const referralCode = data?.referralCode ?? "----";
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const baseUrl =
+        typeof window !== "undefined"
+            ? window.location.origin
+            : (process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000");
     const link = `${baseUrl}/signup?ref=${referralCode}`;
     const message = `Join using my referral link and get rewards 🎁\n${link}`;
 
