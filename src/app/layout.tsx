@@ -13,7 +13,7 @@ import SessionProviderComp from "@/components/nextauth/SessionProvider";
 import ReduxProvider from "@/components/ReduxProvider";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor } from "@/redux/store";
-import PageTracker from "@/components/common/PageTracker";
+import PageTracker from "@/components/Common/PageTracker";
 
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });

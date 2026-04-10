@@ -20,8 +20,8 @@ export async function POST(req: Request) {
         const cookieStore = await cookies();
         const token = cookieStore.get("token")?.value;
         
-        let userId = session?.user?.id || null;
-        let role = session?.user?.role || null;
+        let userId = (session?.user as any)?.id || null;
+        let role = (session?.user as any)?.role || null;
 
         // If no NextAuth session, try to get user from custom JWT token
         if (!userId && token) {

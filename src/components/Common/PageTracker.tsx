@@ -30,7 +30,7 @@ export default function PageTracker() {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; role=`);
         const cookieRole = parts.length === 2 ? parts.pop()?.split(';').shift() : null;
-        return session?.user?.role === 'admin' || cookieRole === 'admin';
+        return (session?.user as any)?.role === 'admin' || cookieRole === 'admin';
     };
 
     const sendTrackingData = (url: string, title: string, start: number, end: number) => {
