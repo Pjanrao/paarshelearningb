@@ -251,6 +251,8 @@ import { useGetCourseByIdQuery } from "@/redux/api/courseApi";
 import toast, { Toaster } from 'react-hot-toast';
 import { useGetCoursesQuery } from "@/redux/api/courseApi";
 import CourseCard from "@/components/SharedComponent/Course/CourseCard"; // adjust path
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 
 // import VideoPlayer from '@/components/SharedComponent/Course/VideoPlayer';
@@ -371,9 +373,105 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
   // Syllabus Modal State
   const [isSyllabusModalOpen, setIsSyllabusModalOpen] = useState(false);
+  const [isInterestedModalOpen, setIsInterestedModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', countryCode: '+91' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [agreeTnc, setAgreeTnc] = useState(false);
+
+  // Redux state
+  const user = useSelector((state: RootState) => state.auth.user);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [enrollmentLoading, setEnrollmentLoading] = useState(false);
+
+  // Check enrollment
+  useEffect(() => {
+    const checkEnrollment = async () => {
+      if (user?._id && course?._id) {
+        setEnrollmentLoading(true);
+        try {
+          const response = await fetch(`/api/enrollment/check?userId=${user._id}&courseId=${course._id}`);
+          const data = await response.json();
+          if (data.isEnrolled) {
+            setIsEnrolled(true);
+          }
+        } catch (error) {
+          console.error("Error checking enrollment:", error);
+        } finally {
+          setEnrollmentLoading(false);
+        }
+      }
+    };
+
+    checkEnrollment();
+  }, [user, course]);
+
+  // Handle Dynamic Enrollment Button Click
+  const handleEnrollClick = () => {
+    if (!user) {
+      // Guest: Open modal with empty fields
+      setFormData({ name: '', email: '', phone: '', countryCode: '+91' });
+      setIsInterestedModalOpen(true);
+    } else if (isEnrolled) {
+      // Enrolled: Redirect to learning
+      router.push('/student/my-courses');
+    } else {
+      // Logged in but not enrolled: Open modal prefilled
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.contact || user.phone || '',
+        countryCode: '+91'
+      });
+      setIsInterestedModalOpen(true);
+    }
+  };
+
+  const handleInterestedSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agreeTnc) {
+      toast.error("Please agree to our Privacy Policy");
+      return;
+    }
+
+    const getCleanPhone = formData.phone.trim().replace(/\D/g, "");
+    if (getCleanPhone.length !== 10) {
+      toast.error("Phone number must be exactly 10 digits");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: getCleanPhone,
+          course: course.name,
+          courseId: course._id,
+          userId: user?._id || null,
+          message: `Interested in course: ${course.name}`,
+          type: "Course Inquiry",
+          source: "Website - Course Detail Page",
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit inquiry");
+      }
+
+      toast.success("Thank you for your interest! Our team will contact you shortly.");
+      setIsInterestedModalOpen(false);
+      setFormData({ name: '', email: '', phone: '', countryCode: '+91' });
+      setAgreeTnc(false);
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Helper: check if user is authenticated via the custom cookie-based auth
   const isAuthenticated = () => {
@@ -800,10 +898,17 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                   </div>
                 )} */}
                 <button
-                  onClick={() => router.push('/signup')}
-                  className="w-fit p-3 py-3.5 bg-[#01A0E2] hover:bg-[#2B4278] text-white font-black text-base rounded-xl shadow-lg shadow-[#01A0E2]/30 transition-all hover:scale-[1.02] active:scale-95 mb-4"
+                  onClick={handleEnrollClick}
+                  disabled={enrollmentLoading}
+                  className="w-fit p-3 py-3.5 bg-[#01A0E2] hover:bg-[#2B4278] text-white font-black text-base rounded-xl shadow-lg shadow-[#01A0E2]/30 transition-all hover:scale-[1.02] active:scale-95 mb-4 disabled:opacity-70 flex items-center justify-center min-w-[140px]"
                 >
-                  Enroll Now
+                  {enrollmentLoading ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : isEnrolled ? (
+                    "Start Learning"
+                  ) : (
+                    "Enroll Now"
+                  )}
                 </button>
                 {/* <div className="text-center text-xs text-gray-400 font-medium mb-8">100% Money-Back Guarantee</div> */}
 
@@ -923,10 +1028,17 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             </p>
             <div className="flex flex-col md:flex-row items-start md:items-center justify-start md:justify-center gap-4 pt-4">
               <button
-                onClick={() => router.push('/signup')}
-                className="px-6 py-3 bg-white text-blue-900 font-black rounded-xl hover:bg-blue-50 transition-all shadow-xl shadow-white/5 active:scale-95 w-full sm:w-auto text-sm md:text-base"
+                onClick={handleEnrollClick}
+                disabled={enrollmentLoading}
+                className="px-6 py-3 bg-white text-blue-900 font-black rounded-xl hover:bg-blue-50 transition-all shadow-xl shadow-white/5 active:scale-95 w-full sm:w-auto text-sm md:text-base flex items-center justify-center min-w-[140px] disabled:opacity-70"
               >
-                Enroll Today
+                {enrollmentLoading ? (
+                  <div className="w-5 h-5 border-2 border-blue-900 border-t-transparent rounded-full animate-spin"></div>
+                ) : isEnrolled ? (
+                  "Start Learning"
+                ) : (
+                  "Enroll Today"
+                )}
               </button>
               {course.syllabusPdf ? (
                 <button
@@ -967,6 +1079,113 @@ const CourseDetails = ({ slug }: { slug: string }) => {
           </div>
         </div>
       </section>
+
+      {/* I'm Interested Modal */}
+      {isInterestedModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl w-full max-w-[500px] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="p-6 md:p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white text-center flex-1 ml-6">
+                  Check Your Interest
+                </h3>
+                <button
+                  onClick={() => setIsInterestedModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1"
+                >
+                  <Icon icon="mdi:close" width="24" />
+                </button>
+              </div>
+
+              <form onSubmit={handleInterestedSubmit} className="space-y-4">
+                <div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-[#01A0E2]/50 outline-none transition-all placeholder:text-gray-400 font-medium"
+                  />
+                </div>
+
+                <div>
+                  <input
+                    type="email"
+                    required
+                    placeholder="Email Address"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-[#01A0E2]/50 outline-none transition-all placeholder:text-gray-400 font-medium"
+                  />
+                </div>
+
+                <div className="flex w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden focus-within:ring-2 focus-within:ring-[#01A0E2]/50 transition-all">
+                  <div className="relative border-r border-gray-200 dark:border-gray-700 shrink-0">
+                    <select
+                      value={formData.countryCode}
+                      onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
+                      className="appearance-none bg-transparent pl-4 pr-8 py-3 outline-none cursor-pointer text-base w-full h-full font-medium min-w-[70px]"
+                    >
+                      {COUNTRY_CODES.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.country}
+                        </option>
+                      ))}
+                    </select>
+                    <Icon icon="solar:alt-arrow-down-linear" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" width="16" />
+                  </div>
+                  <div className="shrink-0 flex items-center justify-center px-3 bg-gray-50 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 font-semibold border-r border-gray-200 dark:border-gray-700">
+                    {formData.countryCode}
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Mobile Number"
+                    value={formData.phone}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                      setFormData({ ...formData, phone: val });
+                    }}
+                    maxLength={10}
+                    className="w-full px-4 py-3 bg-transparent outline-none font-medium placeholder:text-gray-400"
+                  />
+                </div>
+
+                <div className="flex items-start gap-3 pt-2">
+                  <div className="flex items-center h-6">
+                    <input
+                      id="agreeTncInterested"
+                      type="checkbox"
+                      checked={agreeTnc}
+                      onChange={(e) => setAgreeTnc(e.target.checked)}
+                      className="w-5 h-5 rounded border-gray-300 text-[#01A0E2] focus:ring-[#01A0E2] cursor-pointer"
+                    />
+                  </div>
+                  <label htmlFor="agreeTncInterested" className="text-sm text-gray-700 dark:text-gray-300 leading-snug cursor-pointer">
+                    By providing your contact details, you agree to our{' '}
+                    <span className="text-[#01A0E2] hover:underline">Privacy Policy</span>
+                  </label>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-[#01A0E2] hover:bg-[#2B4278] text-white font-bold rounded-xl shadow-lg shadow-[#01A0E2]/30 transition-all disabled:opacity-70 flex items-center justify-center gap-2 text-lg active:scale-[0.98]"
+                  >
+                    {isSubmitting ? (
+                      <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      "I'm Interested"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Syllabus Download Modal */}
       {isSyllabusModalOpen && (

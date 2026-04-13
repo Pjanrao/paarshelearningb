@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // Destructure payload
-    const { name, email, phone, message, course, type, status, source, education, college, country } = body;
+    const { name, email, phone, message, course, courseId, userId, type, status, source, education, college, country } = body;
 
     // Basic validation
     if (!name || !email || !phone || !message || !type) {
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
     }
 
     // Validate type
-    if (!["Contact Form", "Inquiry Form"].includes(type)) {
+    if (!["Contact Form", "Inquiry Form", "Course Inquiry"].includes(type)) {
       return NextResponse.json(
         { error: "Invalid inquiry type" },
         { status: 400 }
@@ -121,6 +121,8 @@ export async function POST(request: Request) {
       phone,
       message,
       course: course || "Not Specified",
+      courseId: courseId || null,
+      userId: userId || null,
       type,
       status: status || "New",
       source: source || "Website",

@@ -29,16 +29,11 @@ export const sendConfirmationEmail = async (email: string, name: string, type: s
     const transporter = createTransporter();
 
     try {
-        const subject = type === "Inquiry Form"
+        let subject = type === "Inquiry Form"
             ? "Inquiry Received - Paarsh Infotech"
             : "Thank you for contacting Paarsh Infotech";
 
-        const mailOptions = {
-            from: `"Paarsh Infotech" <${user}>`,
-            to: email,
-            subject: subject,
-            replyTo: user,
-            html: `
+        let messageBody = `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #007bff;">Hello ${name},</h2>
           <p>Thank you for reaching out to <strong>Paarsh Infotech</strong>!</p>
@@ -50,7 +45,31 @@ export const sendConfirmationEmail = async (email: string, name: string, type: s
             <a href="https://paarshinfotech.com" style="color: #007bff; text-decoration: none;">paarshinfotech.com</a>
           </p>
         </div>
-      `,
+      `;
+
+        if (type === "Course Inquiry") {
+            subject = "Course Inquiry Received";
+            messageBody = `
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+              <h2 style="color: #007bff;">Hello ${name},</h2>
+              <p>Thank you for your interest in this course.</p>
+              <p>Our team will contact you shortly.</p>
+              <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+              <p style="font-size: 0.9em; color: #777;">
+                Best Regards,<br />
+                <strong>The Paarsh Infotech Team</strong><br />
+                <a href="https://paarshinfotech.com" style="color: #007bff; text-decoration: none;">paarshinfotech.com</a>
+              </p>
+            </div>
+            `;
+        }
+
+        const mailOptions = {
+            from: `"Paarsh Infotech" <${user}>`,
+            to: email,
+            subject: subject,
+            replyTo: user,
+            html: messageBody,
         };
 
         console.log(`[Email] Sending confirmation mail via Gmail SMTP...`);

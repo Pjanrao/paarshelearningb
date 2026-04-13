@@ -27,6 +27,16 @@ const InquirySchema = new mongoose.Schema(
             type: String,
             default: "Not Specified",
         },
+        courseId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Course",
+            default: null,
+        },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null,
+        },
         status: {
             type: String,
             enum: ["New", "Contacted", "Enrolled", "Cancelled"],
@@ -47,7 +57,7 @@ const InquirySchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["Contact Form", "Inquiry Form"],
+            enum: ["Contact Form", "Inquiry Form", "Course Inquiry"],
             required: [true, "Please specify the type of inquiry"],
             default: "Contact Form",
         },
