@@ -25,7 +25,7 @@ export async function POST(req: Request) {
             const decodedToken = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET });
             if (decodedToken) {
                 userId = decodedToken.id || null;
-                role = decodedToken.role || role;
+                role = (decodedToken.role as string) || role;
             }
         } catch (e) {
             console.warn("getToken error:", e);
