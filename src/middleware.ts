@@ -2,13 +2,28 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-    const token = req.cookies.get("token")?.value;
-    const role = req.cookies.get("role")?.value;
+    // Legacy Token
+    const legacyToken = req.cookies.get("token")?.value;
+    const legacyRole = req.cookies.get("role")?.value;
+
+    // Segregated Tokens
+    const adminToken = req.cookies.get("adminToken")?.value;
+    const adminRole = req.cookies.get("adminRole")?.value;
+
+    const studentToken = req.cookies.get("studentToken")?.value;
+    const studentRole = req.cookies.get("studentRole")?.value;
+
     const rawPath = req.nextUrl.pathname;
-    // Normalize path: Remove trailing slash if it exists (except for root "/")
     const path = rawPath.length > 1 && rawPath.endsWith("/") ? rawPath.slice(0, -1) : rawPath;
 
-    console.log(`Middleware running: ${rawPath} (normalized: ${path}) | Token: ${token ? 'exists' : 'missing'} | Role: ${role}`);
+    // Resolve active credentials using fallback logic
+    const activeAdminToken = adminToken || legacyToken;
+    const activeAdminRole = adminRole || legacyRole;
+
+    const activeStudentToken = studentToken || legacyToken;
+    const activeStudentRole = studentRole || legacyRole;
+
+    console.log(`Middleware running: ${rawPath} | adminToken: ${activeAdminToken ? 'yes' : 'no'} | studentToken: ${activeStudentToken ? 'yes' : 'no'}`);
 
     // 1. Allow root and public auth paths
     if (
@@ -42,25 +57,26 @@ export function middleware(req: NextRequest) {
         return NextResponse.next();
     }
 
-    // If no token or invalid token, redirect to sign-in
-    if (!token || token === "undefined" || token === "null" || token.length < 10) {
-        // Only redirect if it's a page request, not an API request
-        if (!path.startsWith("/api")) {
+    // Check admin session if on admin path
+    if (path.startsWith("/admin")) {
+        if (!activeAdminToken || activeAdminToken === "undefined" || activeAdminToken === "null" || activeAdminToken.length < 10 || activeAdminRole !== "admin") {
             return NextResponse.redirect(new URL("/signin", req.url));
         }
-    }
+    } else {
+        // Website / student paths
+        if (!activeStudentToken || activeStudentToken === "undefined" || activeStudentToken === "null" || activeStudentToken.length < 10) {
+            if (!path.startsWith("/api")) {
+                return NextResponse.redirect(new URL("/signin", req.url));
+            }
+        }
 
-    // 3. Route protection
-    if (path.startsWith("/admin") && role !== "admin") {
-        return NextResponse.redirect(new URL("/signin", req.url));
-    }
+        if (path.startsWith("/teacher") && activeStudentRole !== "teacher") {
+            return NextResponse.redirect(new URL("/signin", req.url));
+        }
 
-    if (path.startsWith("/teacher") && role !== "teacher") {
-        return NextResponse.redirect(new URL("/signin", req.url));
-    }
-
-    if (path.startsWith("/student") && role !== "student") {
-        return NextResponse.redirect(new URL("/signin", req.url));
+        if (path.startsWith("/student") && activeStudentRole !== "student") {
+            return NextResponse.redirect(new URL("/signin", req.url));
+        }
     }
 
     return NextResponse.next();

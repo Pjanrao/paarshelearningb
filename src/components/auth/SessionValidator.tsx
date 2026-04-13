@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { logout } from "@/redux/authSlice";
+import { logout, logoutAdmin, logoutStudent } from "@/redux/authSlice";
 import toast from "react-hot-toast";
 
 export default function SessionValidator() {
@@ -27,16 +27,37 @@ export default function SessionValidator() {
 
             try {
                 // We'll read the token manually from cookie or localStorage
-                // The API needs the token to verify it
                 const cookieToken = document.cookie
                     .split("; ")
                     .find(row => row.startsWith("token="))
                     ?.split("=")[1];
 
-                const localToken = localStorage.getItem("token");
-                const token = cookieToken || localToken;
+                const adminCookieToken = document.cookie
+                    .split("; ")
+                    .find(row => row.startsWith("adminToken="))
+                    ?.split("=")[1];
 
-                if (!token || token === "undefined") {
+                const studentCookieToken = document.cookie
+                    .split("; ")
+                    .find(row => row.startsWith("studentToken="))
+                    ?.split("=")[1];
+
+                const localToken = localStorage.getItem("token");
+                const localAdminToken = localStorage.getItem("adminToken");
+                const localStudentToken = localStorage.getItem("studentToken");
+
+                const baseToken = cookieToken || localToken;
+
+                let activeToken = baseToken;
+                let isAdminRoute = pathname.startsWith("/admin");
+
+                if (isAdminRoute) {
+                    activeToken = adminCookieToken || localAdminToken || baseToken;
+                } else {
+                    activeToken = studentCookieToken || localStudentToken || baseToken;
+                }
+
+                if (!activeToken || activeToken === "undefined") {
                     isChecking.current = false;
                     return;
                 }
@@ -46,17 +67,46 @@ export default function SessionValidator() {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ token }),
+                    body: JSON.stringify({ token: activeToken }),
                 });
 
                 if (res.status === 401) {
-                    // Session is invalid (e.g., token expired or loginToken changed)
-                    dispatch(logout());
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("role");
-                    localStorage.removeItem("user");
-                    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                    document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    // Session is invalid
+                    if (isAdminRoute) {
+                        dispatch(logoutAdmin());
+                        localStorage.removeItem("adminToken");
+                        localStorage.removeItem("adminRole");
+                        localStorage.removeItem("adminUser");
+                        document.cookie = "adminToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        document.cookie = "adminRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+                        // Clean legacy if on admin
+                        if (!localAdminToken) {
+                            dispatch(logout());
+                            localStorage.removeItem("token");
+                            localStorage.removeItem("role");
+                            localStorage.removeItem("user");
+                            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                            document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        }
+                    } else {
+                        dispatch(logoutStudent());
+                        localStorage.removeItem("studentToken");
+                        localStorage.removeItem("studentRole");
+                        localStorage.removeItem("studentUser");
+                        document.cookie = "studentToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        document.cookie = "studentRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+
+                        // Clean legacy on student side
+                        if (!localStudentToken) {
+                            dispatch(logout());
+                            localStorage.removeItem("token");
+                            localStorage.removeItem("role");
+                            localStorage.removeItem("user");
+                            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                            document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        }
+                    }
 
                     toast.error("You have been signed out because your account was accessed from another device.", { duration: 5000 });
                     router.push("/signin");

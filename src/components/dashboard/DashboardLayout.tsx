@@ -21,8 +21,30 @@ export default function DashboardLayout({
     }
   }, []);
 
-  const { token, role } = useSelector((state: RootState) => state.auth);
+  const authState = useSelector((state: RootState) => state.auth);
   const router = useRouter();
+
+  const isAdminRoute = pathname.startsWith("/admin");
+
+  const legacyToken = authState.token;
+  const legacyRole = authState.role;
+
+  const adminToken = authState.adminToken;
+  const adminRole = authState.adminRole;
+
+  const studentToken = authState.studentToken;
+  const studentRole = authState.studentRole;
+
+  let activeToken = legacyToken;
+  let activeRole = legacyRole;
+
+  if (isAdminRoute) {
+    activeToken = adminToken || legacyToken;
+    activeRole = adminRole || legacyRole;
+  } else {
+    activeToken = studentToken || legacyToken;
+    activeRole = studentRole || legacyRole;
+  }
 
   useEffect(() => {
     // If on admin sign in, do not redirect
@@ -30,23 +52,23 @@ export default function DashboardLayout({
       return;
     }
 
-    if (!token && !role) {
+    if (!activeToken && !activeRole) {
       // Small timeout to allow hydration if it hasn't finished (should be fast though)
       const timer = setTimeout(() => {
-        if (!token && !role) {
+        if (!activeToken && !activeRole) {
           router.push("/signin");
         }
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [token, role, router, pathname]);
+  }, [activeToken, activeRole, router, pathname]);
 
   // BYPASS DASHBOARD SHELL FOR ADMIN SIGN IN PAGE
   if (pathname === "/admin/signin" || pathname === "/admin/signin/") {
     return <>{children}</>;
   }
 
-  if (!role) {
+  if (!activeRole) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2C4276]"></div>
@@ -58,14 +80,14 @@ export default function DashboardLayout({
     <div className="flex flex-col h-screen overflow-hidden bg-gray-50">
       {/* Full-width header on top */}
       <Topbar
-        role={role}
+        role={activeRole}
         onToggle={() => setIsCollapsed(!isCollapsed)}
       />
 
       {/* Sidebar + Content below header */}
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
-          role={role}
+          role={activeRole}
           collapsed={isCollapsed}
           onToggle={() => setIsCollapsed(!isCollapsed)}
         />

@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { validateEmail } from "@/utils/validation";
 import { useDispatch } from "react-redux";
-import { setAuth } from "@/redux/authSlice";
+import { setAuth, setAdminAuth, setStudentAuth } from "@/redux/authSlice";
 
 interface SignInFormProps {
   isAdmin?: boolean;
@@ -70,17 +70,31 @@ export default function SignInForm({ isAdmin = false }: SignInFormProps) {
 
       toast.success(`${isAdmin ? "Admin login" : "Login"} successful!`);
 
-      dispatch(setAuth({
-        token: data.token,
-        role: data.role,
-        user: { name: data.name, email: data.email, contact: data.contact, image: data.image }
-      }));
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("user", JSON.stringify({ name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
+      if (isAdmin) {
+        dispatch(setAdminAuth({
+          token: data.token,
+          role: data.role,
+          user: { name: data.name, email: data.email, contact: data.contact, image: data.image }
+        }));
+        localStorage.setItem("adminToken", data.token);
+        localStorage.setItem("adminRole", data.role);
+        localStorage.setItem("adminUser", JSON.stringify({ name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
 
-      document.cookie = `token=${data.token}; path=/; Max-Age=86400`;
-      document.cookie = `role=${data.role}; path=/; Max-Age=86400`;
+        document.cookie = `adminToken=${data.token}; path=/; Max-Age=86400`;
+        document.cookie = `adminRole=${data.role}; path=/; Max-Age=86400`;
+      } else {
+        dispatch(setStudentAuth({
+          token: data.token,
+          role: data.role,
+          user: { name: data.name, email: data.email, contact: data.contact, image: data.image }
+        }));
+        localStorage.setItem("studentToken", data.token);
+        localStorage.setItem("studentRole", data.role);
+        localStorage.setItem("studentUser", JSON.stringify({ name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
+
+        document.cookie = `studentToken=${data.token}; path=/; Max-Age=86400`;
+        document.cookie = `studentRole=${data.role}; path=/; Max-Age=86400`;
+      }
 
       if (returnUrl) {
         router.push(returnUrl);
