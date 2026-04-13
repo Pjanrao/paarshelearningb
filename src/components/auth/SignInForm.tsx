@@ -70,7 +70,6 @@ export default function SignInForm({ isAdmin = false }: SignInFormProps) {
 
       toast.success(`${isAdmin ? "Admin login" : "Login"} successful!`);
 
-<<<<<<< Updated upstream
       if (isAdmin) {
         dispatch(setAdminAuth({
           token: data.token,
@@ -80,16 +79,14 @@ export default function SignInForm({ isAdmin = false }: SignInFormProps) {
         localStorage.setItem("adminToken", data.token);
         localStorage.setItem("adminRole", data.role);
         localStorage.setItem("adminUser", JSON.stringify({ name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
-=======
-      dispatch(setAuth({
-        token: data.token,
-        role: data.role,
-        user: { _id: data._id, name: data.name, email: data.email, contact: data.contact, image: data.image }
-      }));
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
-      localStorage.setItem("user", JSON.stringify({ _id: data._id, name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
->>>>>>> Stashed changes
+        dispatch(setAuth({
+          token: data.token,
+          role: data.role,
+          user: { _id: data._id, name: data.name, email: data.email, contact: data.contact, image: data.image }
+        }));
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("user", JSON.stringify({ _id: data._id, name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
 
         document.cookie = `adminToken=${data.token}; path=/; Max-Age=86400`;
         document.cookie = `adminRole=${data.role}; path=/; Max-Age=86400`;
