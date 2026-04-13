@@ -109,7 +109,11 @@ export default function SessionValidator() {
                     }
 
                     toast.error("You have been signed out because your account was accessed from another device.", { duration: 5000 });
-                    router.push("/signin");
+                    if (isAdminRoute) {
+                        router.push("/admin/signin");
+                    } else {
+                        router.push("/signin");
+                    }
                 }
             } catch (error) {
                 console.error("Session verification failed", error);

@@ -56,7 +56,11 @@ export default function DashboardLayout({
       // Small timeout to allow hydration if it hasn't finished (should be fast though)
       const timer = setTimeout(() => {
         if (!activeToken && !activeRole) {
-          router.push("/signin");
+          if (isAdminRoute) {
+            router.push("/admin/signin");
+          } else {
+            router.push("/signin");
+          }
         }
       }, 500);
       return () => clearTimeout(timer);
