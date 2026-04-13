@@ -23,7 +23,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { logout as logoutAction } from "@/redux/authSlice";
+import { logout as logoutAction, logoutAdmin, logoutStudent } from "@/redux/authSlice";
 import Cookies from "js-cookie";
 import { signOut } from "next-auth/react";
 import ProfileDropdown from "@/components/dashboard/ProfileDropdown";
@@ -39,7 +39,7 @@ export default function StudentLayout({
     const pathname = usePathname();
     const router = useRouter();
     const dispatch = useDispatch();
-    const user = useSelector((state: RootState) => state.auth.user);
+    const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser || state.auth.adminUser);
 
     // Monitor screen size changes
     useEffect(() => {
@@ -69,17 +69,35 @@ export default function StudentLayout({
             // Priority 2: NextAuth SignOut (clears session cookies)
             await signOut({ redirect: false });
 
-            // Priority 3: Bulletproof client-side clearing
             Cookies.remove("token", { path: '/' });
             Cookies.remove("role", { path: '/' });
-            document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            Cookies.remove("adminToken", { path: '/' });
+            Cookies.remove("adminRole", { path: '/' });
+            Cookies.remove("studentToken", { path: '/' });
+            Cookies.remove("studentRole", { path: '/' });
+
+            const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
+            document.cookie = `token=; path=/; expires=${pastDate}`;
+            document.cookie = `role=; path=/; expires=${pastDate}`;
+            document.cookie = `adminToken=; path=/; expires=${pastDate}`;
+            document.cookie = `adminRole=; path=/; expires=${pastDate}`;
+            document.cookie = `studentToken=; path=/; expires=${pastDate}`;
+            document.cookie = `studentRole=; path=/; expires=${pastDate}`;
 
             // LocalStorage and Redux
             localStorage.removeItem("token");
             localStorage.removeItem("role");
             localStorage.removeItem("user");
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminRole");
+            localStorage.removeItem("adminUser");
+            localStorage.removeItem("studentToken");
+            localStorage.removeItem("studentRole");
+            localStorage.removeItem("studentUser");
+
             dispatch(logoutAction());
+            dispatch(logoutAdmin());
+            dispatch(logoutStudent());
 
             // Use hard redirect to ensure cookies are strictly updated in the next request
             window.location.href = "/";

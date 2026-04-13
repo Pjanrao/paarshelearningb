@@ -4,7 +4,7 @@ import { Search, Loader2, ArrowRight, User, GraduationCap, BookOpen, FileText, L
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { logout } from "@/redux/authSlice";
+import { logout, logoutAdmin, logoutStudent } from "@/redux/authSlice";
 import { Menu } from "lucide-react";
 
 interface SearchResult {
@@ -74,16 +74,27 @@ export default function Topbar({
   };
 
   const handleLogout = () => {
-    // Clear cookies
-    document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-    document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = `token=; path=/; expires=${pastDate}`;
+    document.cookie = `role=; path=/; expires=${pastDate}`;
+    document.cookie = `adminToken=; path=/; expires=${pastDate}`;
+    document.cookie = `adminRole=; path=/; expires=${pastDate}`;
+    document.cookie = `studentToken=; path=/; expires=${pastDate}`;
+    document.cookie = `studentRole=; path=/; expires=${pastDate}`;
 
-    // Clear localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminRole");
+    localStorage.removeItem("adminUser");
+    localStorage.removeItem("studentToken");
+    localStorage.removeItem("studentRole");
+    localStorage.removeItem("studentUser");
 
-    // Clear Redux state
     dispatch(logout());
+    dispatch(logoutAdmin());
+    dispatch(logoutStudent());
 
     // Redirect to home or sign-in
     window.location.href = "/";

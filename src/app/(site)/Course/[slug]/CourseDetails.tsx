@@ -379,7 +379,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
   const [agreeTnc, setAgreeTnc] = useState(false);
 
   // Redux state
-  const user = useSelector((state: RootState) => state.auth.user);
+  const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser || state.auth.adminUser);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [enrollmentLoading, setEnrollmentLoading] = useState(false);
 

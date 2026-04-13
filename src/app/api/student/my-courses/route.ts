@@ -4,29 +4,19 @@ import Payment from "@/models/Payment";
 import "@/models/User";
 import Course from "@/models/Course";
 import "@/models/Teachers";
-import { verifyToken } from "@/lib/jwt";
-import { cookies } from "next/headers";
+import { getAuthUser } from "@/lib/api-auth";
 
 export async function GET(req: Request) {
     try {
         await connectDB();
 
-        // const cookieStore = cookies();
-        const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
+        const authUser = await getAuthUser();
 
-        if (!token) {
+        if (!authUser) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        let decoded: any;
-        try {
-            decoded = verifyToken(token);
-        } catch (err) {
-            return NextResponse.json({ message: "Invalid token" }, { status: 401 });
-        }
-
-        const userId = decoded.id;
+        const userId = authUser.id;
 
         const payments = await Payment.find({ studentId: userId })
             .populate({

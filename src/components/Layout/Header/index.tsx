@@ -7,18 +7,18 @@ import Logo from './Logo'
 import HeaderLink from '../Header/Navigation/HeaderLink'
 import MobileHeaderLink from '../Header/Navigation/MobileHeaderLink'
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from '@/redux/authSlice'
+import { logout, logoutAdmin, logoutStudent } from '@/redux/authSlice'
 
 const Header: React.FC = () => {
   const router = useRouter()
   const dispatch = useDispatch()
 
-  const reduxUser = useSelector((state: any) => state.auth.user);
+  const reduxUser = useSelector((state: any) => state.auth.studentUser || state.auth.adminUser || state.auth.user);
 
   const user =
     reduxUser ||
     (typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("user") || "null")
+      ? JSON.parse(localStorage.getItem("studentUser") || localStorage.getItem("adminUser") || localStorage.getItem("user") || "null")
       : null);
 
   const role =
@@ -44,8 +44,25 @@ const Header: React.FC = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("user");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminRole");
+    localStorage.removeItem("adminUser");
+    localStorage.removeItem("studentToken");
+    localStorage.removeItem("studentRole");
+    localStorage.removeItem("studentUser");
+
+    const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = `token=; path=/; expires=${pastDate}`;
+    document.cookie = `role=; path=/; expires=${pastDate}`;
+    document.cookie = `adminToken=; path=/; expires=${pastDate}`;
+    document.cookie = `adminRole=; path=/; expires=${pastDate}`;
+    document.cookie = `studentToken=; path=/; expires=${pastDate}`;
+    document.cookie = `studentRole=; path=/; expires=${pastDate}`;
 
     dispatch(logout());
+    dispatch(logoutAdmin());
+    dispatch(logoutStudent());
+
     router.push("/");
     window.location.href = "/";
   };
@@ -98,10 +115,14 @@ const Header: React.FC = () => {
           {/* Right Section */}
           <div className='flex items-center gap-3 relative'>
 
-            {role === "student" ? (
+            {user ? (
               <div className="flex items-center gap-3 relative">
                 <button
-                  onClick={() => router.push("/student")}
+                  onClick={() => {
+                    if (role === 'admin') router.push('/admin')
+                    else if (role === 'teacher') router.push('/teacher')
+                    else router.push('/student')
+                  }}
                   className="flex px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-primary text-white shadow-md text-sm sm:text-base transition hover:bg-primary/90"
                 >
                   Dashboard
@@ -186,11 +207,13 @@ const Header: React.FC = () => {
           ))}
 
           <div className='pt-8 mt-4 border-t dark:border-gray-800 flex flex-col gap-4'>
-            {role === "student" ? (
+            {user ? (
               <>
                 <button
                   onClick={() => {
-                    router.push("/student");
+                    if (role === 'admin') router.push('/admin')
+                    else if (role === 'teacher') router.push('/teacher')
+                    else router.push('/student')
                     setNavbarOpen(false);
                   }}
                   className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl bg-primary text-white shadow-lg transition-all active:scale-95"

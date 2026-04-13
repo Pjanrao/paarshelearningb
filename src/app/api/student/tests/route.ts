@@ -6,40 +6,22 @@ import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
+import { getAuthUser } from "@/lib/api-auth";
+
 export async function GET(req: any) {
   try {
     await connectDB();
     
-    // 1. Get raw cookie from header
-    const cookieHeader = req.headers.get("cookie") || "";
-    const cookies = Object.fromEntries(
-        cookieHeader.split(";").map((c: string) => {
-            const [name, ...rest] = c.trim().split("=");
-            return [name, rest.join("=")];
-        })
-    );
+    const authUser = await getAuthUser();
 
-    const token = cookies["token"];
-    const role = cookies["role"];
-
-    let studentId: string | null = null;
-
-    if (token) {
-        try {
-            const decoded: any = jwt.verify(token, process.env.JWT_SECRET || "default_secret");
-            studentId = decoded.id;
-            console.log("DEBUG [Student Tests]: Resolved ID from custom token:", studentId);
-        } catch (err) {
-            console.error("DEBUG [Student Tests]: JWT Verification Failed:", err);
-        }
-    }
-
-    if (!studentId || role !== "student") {
+    if (!authUser || (authUser.role !== "student" && authUser.decoded.role !== "student")) {
         return NextResponse.json({ 
-            message: "Unauthorized: Invalid or missing custom token",
-            debug: { hasToken: !!token, role }
+            message: "Unauthorized: Student access required",
         }, { status: 401 });
     }
+
+    const studentId = authUser.id;
+    console.log("DEBUG [Student Tests]: Resolved ID from auth helper:", studentId);
 
     // Resolve Student Identity
     let studentIdObj: mongoose.Types.ObjectId | null = null;

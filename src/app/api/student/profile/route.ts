@@ -6,6 +6,8 @@ import { authOptions } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 
+import { getAuthUser } from "@/lib/api-auth";
+
 // Helper: Get user ID from session or JWT token
 async function getUserFromAuth() {
     // Try next-auth session first
@@ -15,19 +17,11 @@ async function getUserFromAuth() {
         if (user) return user;
     }
 
-    // Fallback: JWT token from cookies
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-    if (token) {
-        try {
-            const decoded: any = verifyToken(token);
-            if (decoded?.id) {
-                const user = await User.findById(decoded.id);
-                if (user) return user;
-            }
-        } catch (err) {
-            console.error("JWT verification error:", err);
-        }
+    // Fallback: Using centralized JWT auth helper
+    const authUser = await getAuthUser();
+    if (authUser?.id) {
+        const user = await User.findById(authUser.id);
+        if (user) return user;
     }
 
     return null;

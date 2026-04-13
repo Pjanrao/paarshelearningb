@@ -5,7 +5,7 @@ import { User, LogOut, Settings, Key, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { logout as logoutAction } from "@/redux/authSlice";
+import { logout as logoutAction, logoutAdmin, logoutStudent } from "@/redux/authSlice";
 import Cookies from "js-cookie";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 export default function ProfileDropdown() {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const user = useSelector((state: RootState) => state.auth.user);
+    const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser || state.auth.adminUser);
     const dispatch = useDispatch();
     const router = useRouter();
 
@@ -35,13 +35,32 @@ export default function ProfileDropdown() {
 
             Cookies.remove("token", { path: '/' });
             Cookies.remove("role", { path: '/' });
-            document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-            document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            Cookies.remove("adminToken", { path: '/' });
+            Cookies.remove("adminRole", { path: '/' });
+            Cookies.remove("studentToken", { path: '/' });
+            Cookies.remove("studentRole", { path: '/' });
+
+            const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
+            document.cookie = `token=; path=/; expires=${pastDate}`;
+            document.cookie = `role=; path=/; expires=${pastDate}`;
+            document.cookie = `adminToken=; path=/; expires=${pastDate}`;
+            document.cookie = `adminRole=; path=/; expires=${pastDate}`;
+            document.cookie = `studentToken=; path=/; expires=${pastDate}`;
+            document.cookie = `studentRole=; path=/; expires=${pastDate}`;
 
             localStorage.removeItem("token");
             localStorage.removeItem("role");
             localStorage.removeItem("user");
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminRole");
+            localStorage.removeItem("adminUser");
+            localStorage.removeItem("studentToken");
+            localStorage.removeItem("studentRole");
+            localStorage.removeItem("studentUser");
+
             dispatch(logoutAction());
+            dispatch(logoutAdmin());
+            dispatch(logoutStudent());
 
             window.location.href = "/";
         } catch (error) {

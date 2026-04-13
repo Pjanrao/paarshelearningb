@@ -8,6 +8,8 @@ import "@/models/Teachers";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 
+import { getAuthUser } from "@/lib/api-auth";
+
 // ✅ IMPORTANT: disable caching (FIX for updated meetings not showing)
 export const dynamic = "force-dynamic";
 
@@ -15,21 +17,13 @@ export async function GET(req: Request) {
     try {
         await connectDB();
 
-        const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
+        const authUser = await getAuthUser();
 
-        if (!token) {
+        if (!authUser) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        let decoded: any;
-        try {
-            decoded = verifyToken(token);
-        } catch (err) {
-            return NextResponse.json({ message: "Invalid token" }, { status: 401 });
-        }
-
-        const userId = decoded.id;
+        const userId = authUser.id;
 
         // ✅ Get assigned courses
         const payments = await Payment.find({ studentId: userId })

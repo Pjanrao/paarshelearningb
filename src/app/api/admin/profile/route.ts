@@ -2,26 +2,18 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
-import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/jwt";
+import { getAuthUser } from "@/lib/api-auth";
 
 export async function GET() {
     try {
         await connectDB();
-        const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
+        
+        const authUser = await getAuthUser();
 
-        if (token) {
-            try {
-                const decoded: any = verifyToken(token);
-                if (decoded && decoded.id) {
-                    const user = await User.findById(decoded.id).select("-password");
-                    if (user) {
-                        return NextResponse.json(user);
-                    }
-                }
-            } catch (jwtErr) {
-                console.error("JWT Verification Error:", jwtErr);
+        if (authUser?.id) {
+            const user = await User.findById(authUser.id).select("-password");
+            if (user) {
+                return NextResponse.json(user);
             }
         }
 
@@ -36,22 +28,18 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         await connectDB();
-        const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
+        
+        const authUser = await getAuthUser();
 
-        if (!token) {
+        if (!authUser) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const decoded: any = verifyToken(token);
-        if (!decoded || !decoded.id) {
-            return NextResponse.json({ error: "Invalid token" }, { status: 401 });
-        }
-
+        const userId = authUser.id;
         const body = await request.json();
         const { name, email, contact, designation, avatar, currentPassword, newPassword } = body;
 
-        const user = await User.findById(decoded.id);
+        const user = await User.findById(userId);
         if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
