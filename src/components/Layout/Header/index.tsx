@@ -13,19 +13,16 @@ const Header: React.FC = () => {
   const router = useRouter()
   const dispatch = useDispatch()
 
-  const reduxUser = useSelector((state: any) => state.auth.studentUser || state.auth.adminUser || state.auth.user);
+  const reduxUser = useSelector((state: any) => state.auth.studentUser || (state.auth.user?.role === 'student' ? state.auth.user : null));
 
   const user =
     reduxUser ||
     (typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("studentUser") || localStorage.getItem("adminUser") || localStorage.getItem("user") || "null")
+      ? JSON.parse(localStorage.getItem("studentUser") || "null") || 
+        (localStorage.getItem("role") === "student" ? JSON.parse(localStorage.getItem("user") || "null") : null)
       : null);
 
-  const role =
-    user?.role ||
-    (typeof window !== "undefined"
-      ? localStorage.getItem("role")
-      : null);
+  const role = user?.role;
 
 
   // const role = user?.role;
