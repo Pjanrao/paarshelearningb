@@ -1,20 +1,23 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 
+import { getToken } from "next-auth/jwt";
 import { getAuthUser } from "@/lib/api-auth";
 
 // Helper: Get user ID from session or JWT token
-async function getUserFromAuth() {
-    // Try next-auth session first
-    const session = await getServerSession(authOptions);
-    if (session?.user?.email) {
-        const user = await User.findOne({ email: session.user.email });
-        if (user) return user;
+async function getUserFromAuth(req: Request) {
+    // Try next-auth session first using getToken which is safe in Next 15 API routes
+    try {
+        const decodedToken = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET });
+        if (decodedToken?.email) {
+            const user = await User.findOne({ email: decodedToken.email });
+            if (user) return user;
+        }
+    } catch (e) {
+        console.warn("getToken error:", e);
     }
 
     // Fallback: Using centralized JWT auth helper
@@ -30,7 +33,7 @@ async function getUserFromAuth() {
 export async function PUT(req: Request) {
     try {
         await connectDB();
-        const dbUser = await getUserFromAuth();
+        const dbUser = await getUserFromAuth(req);
 
         if (!dbUser) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -66,7 +69,7 @@ export async function PUT(req: Request) {
 export async function GET(req: Request) {
     try {
         await connectDB();
-        const dbUser = await getUserFromAuth();
+        const dbUser = await getUserFromAuth(req);
 
         if (!dbUser) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
