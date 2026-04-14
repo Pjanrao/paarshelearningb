@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 
+import TestAttempt from "@/models/TestAttempt";
+import Batch from "@/models/Batch";
+
 /* ================= DELETE ================= */
 export async function DELETE(
   req: Request,
@@ -19,10 +22,17 @@ export async function DELETE(
       );
     }
 
-    const deleted = await User.findByIdAndUpdate(id, {
-      status: "deleted",
-      deletionReason: "Deleted by Admin",
-    }, { new: true });
+    // 1. Remove student from all batches
+    await Batch.updateMany(
+      { students: id },
+      { $pull: { students: id } }
+    );
+
+    // 2. Delete all test attempts associated with the student (using userId as per model)
+    await TestAttempt.deleteMany({ userId: id });
+
+    // 3. Hard delete the user record
+    const deleted = await User.findByIdAndDelete(id);
 
     if (!deleted) {
       return NextResponse.json(
@@ -32,10 +42,11 @@ export async function DELETE(
     }
 
     return NextResponse.json({
-      message: "Student deleted successfully",
+      message: "Student and associated data deleted successfully",
     });
 
   } catch (error: any) {
+    console.error("Error in student deletion:", error);
     return NextResponse.json(
       { error: error.message },
       { status: 500 }
