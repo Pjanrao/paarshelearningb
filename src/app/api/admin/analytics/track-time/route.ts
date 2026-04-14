@@ -1,48 +1,48 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import PageVisit from "@/models/PageVisit";
 import User from "@/models/User";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { getToken } from "next-auth/jwt";
 
 export async function GET(req: Request) {
     try {
         await connectDB();
         
-        // 1. Verify session using NextAuth OR Cookies (Fallback for custom admin login)
-        const session = await getServerSession(authOptions);
-        const cookieStore = await cookies();
-        const cookieRole = cookieStore.get("role")?.value;
-        const cookieToken = cookieStore.get("token")?.value;
-        let isAdmin = (session?.user as any)?.role === "admin" || cookieRole === "admin";
+        let isAdmin = false;
+        try {
+            const token = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET });
+            if (token?.role === "admin") isAdmin = true;
+        } catch (e) {
+            console.warn("getToken error:", e);
+        }
 
-        // Optional: extra check for token validity if needed
-        if (!isAdmin && cookieToken) {
+        const cookieStore = await cookies();
+        const cookieRole = cookieStore.get("role")?.value || cookieStore.get("adminRole")?.value;
+        const cookieToken = cookieStore.get("token")?.value || cookieStore.get("adminToken")?.value;
+        
+        if (cookieRole === "admin" || cookieRole === "teacher") isAdmin = true;
+
+        if (!isAdmin && cookieToken && cookieToken !== "undefined" && cookieToken !== "null" && cookieToken.length > 10) {
             try {
                 const decoded: any = jwt.verify(cookieToken, process.env.JWT_SECRET || "default_secret");
-                if (decoded.role === "admin") isAdmin = true;
-            } catch (e) {
-                // Invalid token
-            }
+                if (decoded.role === "admin" || decoded.role === "teacher") isAdmin = true;
+            } catch (e) { }
         }
 
         if (!isAdmin) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
         }
 
-        const { searchParams } = new URL(req.url);
+        const { searchParams } = new URL(req.url, `http://${req.headers.get('host') || 'localhost'}`);
         const page = parseInt(searchParams.get("page") || "1");
         const limit = parseInt(searchParams.get("limit") || "10");
         const search = searchParams.get("search") || "";
 
         const skip = (page - 1) * limit;
 
-        // Build query
         let query: any = {};
-        
-        // If there's a search, we might need to find users first or match path
         if (search) {
             const users = await User.find({
                 $or: [
@@ -52,7 +52,6 @@ export async function GET(req: Request) {
             }).select("_id");
             
             const userIds = users.map(u => u._id);
-            
             query = {
                 $or: [
                     { userId: { $in: userIds } },
@@ -80,6 +79,6 @@ export async function GET(req: Request) {
         });
     } catch (error: any) {
         console.error("Admin Analytics Error:", error);
-        return NextResponse.json({ message: error.message || "Internal Server Error" }, { status: 500 });
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }

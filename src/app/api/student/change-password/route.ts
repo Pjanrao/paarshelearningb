@@ -2,21 +2,24 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
+import { getToken } from "next-auth/jwt";
 
 // Helper: Get user from auth (same pattern as profile API)
-async function getUserFromAuth() {
-    const session = await getServerSession(authOptions);
-    if (session?.user?.email) {
-        const user = await User.findOne({ email: session.user.email }).select("+password");
-        if (user) return user;
+async function getUserFromAuth(req: Request) {
+    try {
+        const tokenData = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET });
+        if (tokenData?.email) {
+            const user = await User.findOne({ email: tokenData.email }).select("+password");
+            if (user) return user;
+        }
+    } catch (e) {
+        console.warn("getToken error:", e);
     }
 
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("token")?.value || cookieStore.get("studentToken")?.value || cookieStore.get("adminToken")?.value;
     if (token) {
         try {
             const decoded: any = verifyToken(token);
@@ -35,7 +38,7 @@ async function getUserFromAuth() {
 export async function POST(req: Request) {
     try {
         await connectDB();
-        const dbUser = await getUserFromAuth();
+        const dbUser = await getUserFromAuth(req);
 
         if (!dbUser) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

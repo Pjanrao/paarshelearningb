@@ -60,7 +60,7 @@ export function middleware(req: NextRequest) {
     // Check admin session if on admin path
     if (path.startsWith("/admin")) {
         if (!activeAdminToken || activeAdminToken === "undefined" || activeAdminToken === "null" || activeAdminToken.length < 10 || activeAdminRole !== "admin") {
-            return NextResponse.redirect(new URL("/signin", req.url));
+            return NextResponse.redirect(new URL("/admin/signin", req.url));
         }
     } else {
         // Website / student paths

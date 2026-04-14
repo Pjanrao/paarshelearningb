@@ -18,6 +18,8 @@ export default function ViewPaymentModal({ payment, close }: any) {
         }))
     ];
 
+    const totalPaid = installmentHistory.reduce((sum, inst) => sum + (inst.amount || 0), 0);
+
     return (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
@@ -62,10 +64,10 @@ export default function ViewPaymentModal({ payment, close }: any) {
                             </div>
 
                             <div className="p-2 border-b font-medium text-gray-500">
-                                Paid Amount
+                                Total Paid Amount
                             </div>
                             <div className="p-2 border-b">
-                                ₹{payment.paidAmount}
+                                ₹{totalPaid}
                             </div>
 
                             <div className="p-2 border-b font-medium text-gray-500">

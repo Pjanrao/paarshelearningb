@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import PageVisit from "@/models/PageVisit";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
+import { getToken } from "next-auth/jwt";
 
 export async function POST(req: Request) {
     try {
@@ -15,13 +14,22 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "Invalid tracking data" }, { status: 400 });
         }
 
-        await connectDB();
-        const session = await getServerSession(authOptions);
         const cookieStore = await cookies();
-        const token = cookieStore.get("token")?.value;
-        
-        let userId = (session?.user as any)?.id || null;
-        let role = (session?.user as any)?.role || null;
+        const token = cookieStore.get("token")?.value || cookieStore.get("adminToken")?.value || cookieStore.get("studentToken")?.value;
+        const cookieRole = cookieStore.get("role")?.value || cookieStore.get("adminRole")?.value || cookieStore.get("studentRole")?.value;
+
+        let userId = null;
+        let role = cookieRole || null;
+
+        try {
+            const decodedToken = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET });
+            if (decodedToken) {
+                userId = decodedToken.id || null;
+                role = (decodedToken.role as string) || role;
+            }
+        } catch (e) {
+            console.warn("getToken error:", e);
+        }
 
         // If no NextAuth session, try to get user from custom JWT token
         if (!userId && token) {
@@ -34,7 +42,7 @@ export async function POST(req: Request) {
             }
         }
 
-        // ❌ STRICT EXCLUSION: Do not track admins
+        // STRICT EXCLUSION: Do not track admins
         if (role === 'admin') {
             return NextResponse.json({ success: true, message: "Admin tracking skipped" }, { status: 200 });
         }
