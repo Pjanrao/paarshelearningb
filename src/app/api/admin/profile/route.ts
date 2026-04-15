@@ -37,9 +37,11 @@ export async function POST(request: Request) {
 
         const userId = authUser.id;
         const body = await request.json();
-        const { name, email, contact, designation, avatar, currentPassword, newPassword } = body;
+        let { name, email, contact, designation, avatar, currentPassword, newPassword } = body;
 
-        const user = await User.findById(userId);
+        if (email) email = email.trim().toLowerCase();
+
+        const user = await User.findById(userId).select("+password");
         if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }

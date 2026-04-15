@@ -7,7 +7,8 @@ import User from "@/models/User";
 export async function POST(req: Request) {
     try {
         await connectDB();
-        const { email, password } = await req.json();
+        let { email, password } = await req.json();
+        email = email.trim().toLowerCase();
 
         // 1. Find user and include password field (which is select: false)
         let user = await User.findOne({ email }).select("+password");
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
         // 3. Generate JWT
         const token = jwt.sign(
             { id: user._id, role: user.role, loginToken },
-            process.env.JWT_SECRET || "default_secret",
+            process.env.JWT_SECRET || "paarsh_super_secret_key_123",
             { expiresIn: "1d" }
         );
 

@@ -274,7 +274,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
@@ -304,6 +304,22 @@ const ContactPage = () => {
   });
   const [activeMap, setActiveMap] = useState("Pune");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [settings, setSettings] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        if (response.ok) {
+          const data = await response.json();
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const mapLocations = {
     Pune: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.364426543!2d73.7424911751936!3d18.602177473215277!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2bb926f4327fd%3A0xc392db26998d30e8!2sPaarsh%20Infotech%20Pvt%20Ltd!5e0!3m2!2sen!2sin!4v1707222100000!5m2!1sen!2sin",
@@ -453,8 +469,8 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Call Us</p>
-                    <Link href="tel:+919075201033" className="text-[#2B4278] dark:text-white">
-                      +91 90752 01033
+                    <Link href={`tel:${settings?.contactDetails?.phone?.replace(/\s/g, "") || "+919075201033"}`} className="text-[#2B4278] dark:text-white">
+                      {settings?.contactDetails?.phone || "+91 90752 01033"}
                     </Link>
                   </div>
                 </div>
@@ -465,8 +481,8 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Email Us</p>
-                    <Link href="mailto:info@paarshelearning.com" className="text-[#2B4278] dark:text-white">
-                      paarshelearning@gmail.com
+                    <Link href={`mailto:${settings?.contactDetails?.email || "paarshelearning@gmail.com"}`} className="text-[#2B4278] dark:text-white">
+                      {settings?.contactDetails?.email || "paarshelearning@gmail.com"}
                     </Link>
                   </div>
                 </div>
@@ -478,7 +494,7 @@ const ContactPage = () => {
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Pune Office</p>
                     <p className="text-[#2B4278] dark:text-white">
-                      Second Floor, Wisteriaa Fortune, Wakad, Maharashtra 411057
+                      {settings?.contactDetails?.puneAddress || "Second Floor, Wisteriaa Fortune, Wakad, Maharashtra 411057"}
                     </p>
                   </div>
                 </div>
@@ -490,7 +506,7 @@ const ContactPage = () => {
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Nashik Office</p>
                     <p className="text-[#2B4278] dark:text-white">
-                      Bhakti Apartment, Suchita Nagar, Mumbai Naka, Nashik
+                      {settings?.contactDetails?.nashikAddress || "Bhakti Apartment, Suchita Nagar, Mumbai Naka, Nashik"}
                     </p>
                   </div>
                 </div>
@@ -502,7 +518,7 @@ const ContactPage = () => {
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Open Hours</p>
                     <p className="text-[#2B4278] dark:text-white">
-                      Mon - Fri, 9:30 AM - 7:30 PM
+                      {settings?.contactDetails?.openHours || "Mon - Fri, 9:30 AM - 7:30 PM"}
                     </p>
                   </div>
                 </div>
