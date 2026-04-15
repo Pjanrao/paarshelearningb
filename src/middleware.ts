@@ -42,6 +42,9 @@ export function middleware(req: NextRequest) {
         path.startsWith("/seo-training-course") ||
         path.startsWith("/internship-digital-marketing") ||
         path.startsWith("/blog") ||
+        path.startsWith("/workshops") ||
+        path.startsWith("/workshop") ||
+        path.startsWith("/career") ||
         path.startsWith("/documentation") ||
         path.startsWith("/inquiry") ||
         path.startsWith("/portfolio") ||

@@ -83,6 +83,22 @@ export default function WorkshopManagement() {
         fetchWorkshops();
     };
 
+    const handleDelete = async (id: string) => {
+        if (!confirm("Are you sure you want to delete this workshop?")) return;
+        try {
+            const res = await fetch(`/api/workshops?id=${id}`, {
+                method: "DELETE",
+            });
+            if (res.ok) {
+                fetchWorkshops();
+            } else {
+                alert("Failed to delete workshop");
+            }
+        } catch (error) {
+            console.error("Delete error:", error);
+        }
+    };
+
     return (
         <div className="bg-gray-50 h-full p-4">
 
@@ -242,6 +258,7 @@ export default function WorkshopManagement() {
                                         </button>
 
                                         <button
+                                            onClick={() => handleDelete(w._id!)}
                                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
                                         >
                                             <Trash2 size={18} />
