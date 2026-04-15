@@ -57,12 +57,18 @@ export async function POST(req: Request) {
             );
         }
 
-        // Generate a new loginToken
-        const loginToken = crypto.randomUUID();
-        
-        // Update user in DB with the new token
-        user.loginToken = loginToken;
-        await user.save();
+        // For students: generate a new loginToken (invalidates previous sessions).
+        // For admins: skip overwriting so multiple concurrent sessions are allowed.
+        let loginToken: string | null = null;
+
+        if (user.role !== "admin") {
+            loginToken = crypto.randomUUID();
+            user.loginToken = loginToken;
+            await user.save();
+        } else {
+            // Keep existing loginToken for admin (no single-session restriction)
+            loginToken = user.loginToken || null;
+        }
 
         // 3. Generate JWT
         const token = jwt.sign(

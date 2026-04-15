@@ -34,8 +34,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ message: "User not found" }, { status: 404 });
         }
 
-        // Compare the loginToken in the DB against the one provided in the JWT
-        if (user.loginToken !== loginToken) {
+        // For students: compare the loginToken in the DB against the one in the JWT
+        // For admins: skip check — multiple concurrent sessions are allowed
+        if (user.role !== "admin" && user.loginToken !== loginToken) {
             return NextResponse.json(
                 { message: "Session expired due to another login" },
                 { status: 401 }
