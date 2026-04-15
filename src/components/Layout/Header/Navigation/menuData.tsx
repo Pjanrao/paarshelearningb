@@ -3,14 +3,14 @@ import { HeaderItem } from "@/types/menu";
 export const headerData: HeaderItem[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about-us" },
-  { 
-    label: "Courses", 
+  {
+    label: "Courses",
     href: "/Course",
     // submenu: [
     //   { label: "Course List", href: "/Course" },
     //   { label: "Course Details", href: "/Course/Course_1" },
     // ],
-   },
+  },
   // {
   //   label: "Blog",
   //   href: "/blog",
@@ -19,6 +19,6 @@ export const headerData: HeaderItem[] = [
   //   //   { label: "Blog Details", href: "/blog/Blog_1" },
   //   // ],
   // },
+  { label: "Careers", href: "/careers" },
   { label: "Contact", href: "/contact-us" },
-  // { label: "Explore", href: "/explore" },
 ];

@@ -30,6 +30,7 @@ import "./api/referralApi"; // ✅ NEW
 import "./api/practiceTestApi";
 import "./api/questionApi";
 import "./api/attemptApi";
+import "./api/jobApi";
 
 // ✅ combine reducers (NO API CHANGE)
 const rootReducer = combineReducers({

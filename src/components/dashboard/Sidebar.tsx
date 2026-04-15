@@ -95,6 +95,14 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     // { name: "Workshops", path: "/admin/workshops", icon: BookOpen },
     { name: "Industry Partners", path: "/admin/industry-partners", icon: Briefcase },
     { name: "Referral", path: "/admin/referral", icon: Gift },
+    {
+      name: "Careers",
+      icon: Briefcase,
+      subItems: [
+        { name: "Jobs", path: "/admin/jobs" },
+        { name: "Applications", path: "/admin/applications" },
+      ],
+    },
     { name: "Withdrawals", path: "/admin/withdrawals", icon: CreditCard },
     { name: "Footprints", path: "/admin/footprints", icon: Clock },
     { name: "Settings", path: "/admin/settings", icon: Settings },
