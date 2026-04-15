@@ -301,7 +301,7 @@ export default function BlogsPage() {
                                     {blogs.map((blog, index) => (
                                         <tr key={blog._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                                {(currentPage - 1) * blogsPerPage + index + 1}
+                                                {(currentPage - 1) * (blogsPerPage as number) + index + 1}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden border border-gray-200">
@@ -369,7 +369,7 @@ export default function BlogsPage() {
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
                             <div className="flex items-center gap-3 font-medium order-2 md:order-1">
                                 <div className="text-sm text-gray-600">
-                                    Showing <span className="font-bold text-gray-900">{(currentPage - 1) * blogsPerPage + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * blogsPerPage, total)}</span> of <span className="font-bold text-gray-900">{total}</span> blogs
+                                    Showing <span className="font-bold text-gray-900">{(currentPage - 1) * (blogsPerPage as number) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * (blogsPerPage as number), total)}</span> of <span className="font-bold text-gray-900">{total}</span> blogs
                                 </div>
                                 <div className="flex items-center gap-1 text-sm text-gray-500">
                                     <span>Show:</span>

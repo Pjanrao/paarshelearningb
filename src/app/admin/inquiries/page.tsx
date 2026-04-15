@@ -364,7 +364,7 @@ export default function InquiriesManagementPage() {
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
                                 <div className="text-sm text-gray-600">
-                                    Showing <span className="font-medium">{(currentPage - 1) * inquiriesPerPage + 1}</span> to <span className="font-medium">{Math.min(currentPage * inquiriesPerPage, total)}</span> of <span className="font-medium">{total}</span> leads
+                                    Showing <span className="font-medium">{(currentPage - 1) * (inquiriesPerPage as number) + 1}</span> to <span className="font-medium">{Math.min(currentPage * (inquiriesPerPage as number), total)}</span> of <span className="font-medium">{total}</span> leads
                                 </div>
                                 <div className="flex items-center gap-1 text-sm text-gray-500">
                                     <span>Show:</span>

@@ -242,7 +242,7 @@ export default function AdmintestimonialPage() {
                                     {testimonials.map((t, index) => (
                                         <tr key={t._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                                {(currentPage - 1) * testimonialsPerPage + index + 1}
+                                                {(currentPage - 1) * (testimonialsPerPage as number) + index + 1}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
@@ -302,7 +302,7 @@ export default function AdmintestimonialPage() {
                                     "Showing 0 to 0 of 0 testimonials"
                                 ) : (
                                     <>
-                                        Showing <span className="font-bold text-gray-900">{(currentPage - 1) * testimonialsPerPage + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * testimonialsPerPage, total)}</span> of <span className="font-bold text-gray-900">{total}</span> testimonials
+                                        Showing <span className="font-bold text-gray-900">{(currentPage - 1) * (testimonialsPerPage as number) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * (testimonialsPerPage as number), total)}</span> of <span className="font-bold text-gray-900">{total}</span> testimonials
                                     </>
                                 )}
                                 </div>

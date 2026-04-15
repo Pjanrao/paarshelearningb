@@ -281,7 +281,7 @@ export default function StudentsPage() {
                                     {students.map((student, index) => (
                                         <tr key={student._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                                {(currentPage - 1) * studentsPerPage + index + 1}
+                                                {(currentPage - 1) * (studentsPerPage as number) + index + 1}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
@@ -332,8 +332,8 @@ export default function StudentsPage() {
                                         "Showing 0 to 0 of 0 students"
                                     ) : (
                                         <>
-                                            Showing <span className="font-medium">{(currentPage - 1) * studentsPerPage + 1}</span> to{" "}
-                                            <span className="font-medium">{Math.min(currentPage * studentsPerPage, total)}</span> of{" "}
+                                            Showing <span className="font-medium">{(currentPage - 1) * (studentsPerPage as number) + 1}</span> to{" "}
+                                            <span className="font-medium">{Math.min(currentPage * (studentsPerPage as number), total)}</span> of{" "}
                                             <span className="font-medium">{total}</span> students
                                         </>
                                     )}

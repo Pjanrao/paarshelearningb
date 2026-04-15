@@ -332,7 +332,7 @@ export default function TeachersPage() {
                                     {teachers.map((teacher, index) => (
                                         <tr key={teacher._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                                {(currentPage - 1) * teachersPerPage + index + 1}
+                                                {(currentPage - 1) * (teachersPerPage as number) + index + 1}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
@@ -400,7 +400,7 @@ export default function TeachersPage() {
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
                             <div className="flex items-center gap-3 font-medium order-2 md:order-1">
                                 <div className="text-sm text-gray-600">
-                                    Showing <span className="font-bold text-gray-900">{(currentPage - 1) * teachersPerPage + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * teachersPerPage, total)}</span> of <span className="font-bold text-gray-900">{total}</span> teachers
+                                    Showing <span className="font-bold text-gray-900">{(currentPage - 1) * (teachersPerPage as number) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * (teachersPerPage as number), total)}</span> of <span className="font-bold text-gray-900">{total}</span> teachers
                                 </div>
                                 <div className="flex items-center gap-1 text-sm text-gray-500">
                                     <span>Show:</span>

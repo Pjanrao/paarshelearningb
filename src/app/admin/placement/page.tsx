@@ -302,7 +302,7 @@ export default function PlacementPage() {
                     <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-3 text-sm font-medium order-2 md:order-1">
                             <div className="text-gray-600">
-                                Showing {data?.total > 0 ? (currentPage - 1) * (placementsPerPage === "all" ? data.total : placementsPerPage) + 1 : 0} to {Math.min(currentPage * (placementsPerPage === "all" ? data.total : placementsPerPage), data?.total || 0)} of {data?.total || 0} records
+                                Showing {(data?.total ?? 0) > 0 ? (currentPage - 1) * (placementsPerPage === "all" ? (data?.total ?? 0) : placementsPerPage) + 1 : 0} to {Math.min(currentPage * (placementsPerPage === "all" ? (data?.total ?? 0) : placementsPerPage), data?.total || 0)} of {data?.total || 0} records
                             </div>
                             <div className="flex items-center gap-1 text-gray-500">
                                 <span>Show:</span>
@@ -352,11 +352,11 @@ export default function PlacementPage() {
                                 })}
                             </div>
                             <div className="sm:hidden text-sm font-bold px-3 py-2 border rounded-lg bg-white">
-                                {currentPage} / {Math.ceil((data?.total || 0) / placementsPerPage) || 1}
+                                {currentPage} / {Math.ceil((data?.total || 0) / (placementsPerPage === "all" ? (data?.total || 1) : placementsPerPage)) || 1}
                             </div>
                             <button
-                                onClick={() => setCurrentPage(Math.min(Math.ceil((data?.total || 0) / placementsPerPage), currentPage + 1))}
-                                disabled={data && currentPage * placementsPerPage >= data.total}
+                                onClick={() => setCurrentPage(Math.min(Math.ceil((data?.total || 0) / (placementsPerPage === "all" ? (data?.total || 1) : placementsPerPage)), currentPage + 1))}
+                                disabled={!!(data && currentPage * (placementsPerPage === "all" ? (data?.total ?? 0) : (placementsPerPage as number)) >= (data?.total ?? 0))}
                                 className="px-4 py-2 text-sm font-bold rounded-lg border bg-white hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm active:scale-95"
                             >
                                 Next
