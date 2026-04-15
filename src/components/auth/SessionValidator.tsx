@@ -111,12 +111,28 @@ export default function SessionValidator() {
                         }
                     }
 
-                    toast.error("You have been signed out because your account was accessed from another device.", { duration: 5000 });
-                    if (isAdminRoute) {
-                        router.push("/admin/signin");
-                    } else {
-                        router.push("/signin");
-                    }
+                    const redirectTarget = isAdminRoute ? "/admin/signin" : "/signin";
+
+                    // Show warning BEFORE redirecting so user can read it
+                    toast(
+                        "⚠️ Your account was signed in on another device. You have been logged out here.",
+                        {
+                            duration: 5000,
+                            icon: "🔐",
+                            style: {
+                                background: "#fff3cd",
+                                color: "#856404",
+                                border: "1px solid #ffc107",
+                                fontWeight: "600",
+                                maxWidth: "420px",
+                            },
+                        }
+                    );
+
+                    // Wait 4 seconds so the user can read the warning, then redirect
+                    setTimeout(() => {
+                        router.push(redirectTarget);
+                    }, 4000);
                 }
             } catch (error) {
                 console.error("Session verification failed", error);
