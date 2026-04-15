@@ -63,11 +63,20 @@ export async function POST(req: Request) {
             );
         }
 
-        // ✅ CHECK USER EXISTS
+        // ✅ CHECK USER EXISTS BY EMAIL
         const userExists = await User.findOne({ email });
         if (userExists) {
             return NextResponse.json(
-                { message: "User already exists" },
+                { message: "An account with this email already exists." },
+                { status: 400 }
+            );
+        }
+
+        // ✅ CHECK DUPLICATE CONTACT NUMBER
+        const contactExists = await User.findOne({ contact });
+        if (contactExists) {
+            return NextResponse.json(
+                { message: "An account with this contact number already exists." },
                 { status: 400 }
             );
         }

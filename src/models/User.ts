@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema(
         contact: {
             type: String,
             required: [true, "Please provide a contact number"],
+            unique: true,
         },
         password: {
             type: String,
