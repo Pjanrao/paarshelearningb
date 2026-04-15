@@ -14,7 +14,7 @@ interface Props {
   onDelete: (id: string) => void;
 }
 
-const ITEMS_PER_PAGE = 5;
+
 
 export default function SubcategoryTable({
   subcategories,
@@ -26,6 +26,7 @@ export default function SubcategoryTable({
 
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number | "all">(10);
   const [viewOpen, setViewOpen] = useState(false);
   const [viewSubcategory, setViewSubcategory] = useState<Subcategory | null>(null);
 
@@ -35,11 +36,12 @@ export default function SubcategoryTable({
     );
   }, [subcategories, searchQuery]);
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const effectiveLimit = itemsPerPage === "all" ? filtered.length : itemsPerPage;
+  const totalPages = itemsPerPage === "all" ? 1 : Math.ceil(filtered.length / effectiveLimit);
 
   const paginated = filtered.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE
+    (page - 1) * (itemsPerPage === "all" ? filtered.length : itemsPerPage),
+    page * (itemsPerPage === "all" ? filtered.length : itemsPerPage)
   );
 
   return (
@@ -151,7 +153,7 @@ export default function SubcategoryTable({
 
                           {/* ID */}
                           <td className="p-4">
-                            {(page - 1) * ITEMS_PER_PAGE + index + 1}
+                            {(page - 1) * (itemsPerPage === "all" ? filtered.length : itemsPerPage) + index + 1}
                           </td>
 
                           {/* CATEGORY */}
@@ -227,10 +229,29 @@ export default function SubcategoryTable({
               {/* PAGINATION */}
               <div className="px-6 py-4 border-t bg-gray-50 flex items-center justify-between">
 
-                <div className="text-sm text-gray-600">
-                  Showing {(page - 1) * ITEMS_PER_PAGE + 1} to{" "}
-                  {Math.min(page * ITEMS_PER_PAGE, filtered.length)} of{" "}
-                  {filtered.length}
+                <div className="flex items-center gap-3">
+                  <div className="text-sm text-gray-600">
+                    Showing {(page - 1) * (itemsPerPage === "all" ? filtered.length : itemsPerPage) + (paginated.length > 0 ? 1 : 0)} to{" "}
+                    {Math.min(page * (itemsPerPage === "all" ? filtered.length : itemsPerPage), filtered.length)} of{" "}
+                    {filtered.length}
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <span>Show:</span>
+                    <select
+                      value={itemsPerPage}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setItemsPerPage(val === "all" ? "all" : Number(val));
+                        setPage(1);
+                      }}
+                      className="border px-2 py-1 rounded-lg text-sm bg-white"
+                    >
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                      <option value="all">All</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2">

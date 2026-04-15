@@ -112,6 +112,7 @@ export default function StudentLayout({
         { icon: Home, label: "Home", href: "/" },
         { icon: BookOpen, label: "My Courses", href: "/student/my-courses" },
         { icon: ClipboardCheck, label: "Practice Tests", href: "/student/tests" },
+        { icon: Award, label: "Certificates", href: "/student/certificates" },
         { icon: Video, label: "Meeting Links", href: "/student/meetings" },
         { icon: Gift, label: "Refer & Earn", href: "/student/refer-earn" },
         { icon: Wallet, label: "Wallet", href: "/student/wallet" },

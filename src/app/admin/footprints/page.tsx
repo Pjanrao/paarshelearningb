@@ -26,7 +26,7 @@ export default function TrackTimePage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
-    const visitsPerPage = 10;
+    const [visitsPerPage, setVisitsPerPage] = useState<number | "all">(10);
     const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>({});
 
     const groupedVisits = useMemo(() => {
@@ -48,8 +48,9 @@ export default function TrackTimePage() {
     const fetchVisits = async () => {
         try {
             setLoading(true);
+            const limit = visitsPerPage === "all" ? 10000 : visitsPerPage;
             const response = await fetch(
-                `/api/admin/analytics/track-time?search=${searchQuery}&page=${currentPage}&limit=${visitsPerPage}`
+                `/api/admin/analytics/track-time?search=${searchQuery}&page=${currentPage}&limit=${limit}`
             );
 
             if (!response.ok) throw new Error("Failed to fetch tracking data");
@@ -71,7 +72,7 @@ export default function TrackTimePage() {
         }, 300);
 
         return () => clearTimeout(debounceTimer);
-    }, [searchQuery, currentPage]);
+    }, [searchQuery, currentPage, visitsPerPage]);
 
     const formatDuration = (seconds: number) => {
         if (seconds < 60) return `${seconds}s`;
@@ -235,9 +236,28 @@ export default function TrackTimePage() {
                         </div>
 
                         <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <span className="text-sm text-gray-500 font-medium">
-                                Showing <span className="text-gray-900">{visits.length}</span> of <span className="text-gray-900">{total}</span> records
-                            </span>
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm text-gray-500 font-medium">
+                                    Showing <span className="text-gray-900">{visits.length}</span> of <span className="text-gray-900">{total}</span> records
+                                </span>
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                    <span>Show:</span>
+                                    <select
+                                        value={visitsPerPage}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setVisitsPerPage(val === "all" ? "all" : Number(val));
+                                            setCurrentPage(1);
+                                        }}
+                                        className="border px-2 py-1 rounded-lg text-sm bg-white"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}

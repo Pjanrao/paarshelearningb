@@ -74,11 +74,11 @@ export default function SignInForm({ isAdmin = false }: SignInFormProps) {
         dispatch(setAdminAuth({
           token: data.token,
           role: data.role,
-          user: { name: data.name, email: data.email, contact: data.contact, image: data.image }
+          user: { _id: data._id, name: data.name, email: data.email, contact: data.contact, image: data.image }
         }));
         localStorage.setItem("adminToken", data.token);
         localStorage.setItem("adminRole", data.role);
-        localStorage.setItem("adminUser", JSON.stringify({ name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
+        localStorage.setItem("adminUser", JSON.stringify({ _id: data._id, name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
 
         document.cookie = `adminToken=${data.token}; path=/; Max-Age=86400`;
         document.cookie = `adminRole=${data.role}; path=/; Max-Age=86400`;
@@ -86,11 +86,11 @@ export default function SignInForm({ isAdmin = false }: SignInFormProps) {
         dispatch(setStudentAuth({
           token: data.token,
           role: data.role,
-          user: { name: data.name, email: data.email, contact: data.contact, image: data.image }
+          user: { _id: data._id, name: data.name, email: data.email, contact: data.contact, image: data.image }
         }));
         localStorage.setItem("studentToken", data.token);
         localStorage.setItem("studentRole", data.role);
-        localStorage.setItem("studentUser", JSON.stringify({ name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
+        localStorage.setItem("studentUser", JSON.stringify({ _id: data._id, name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
 
         document.cookie = `studentToken=${data.token}; path=/; Max-Age=86400`;
         document.cookie = `studentRole=${data.role}; path=/; Max-Age=86400`;

@@ -421,8 +421,9 @@ const Footer = () => {
         <div className="border-t border-white/10 mt-8 pt-4 flex flex-col sm:flex-row justify-between items-center text-sm text-white/60 gap-2">
           <p>© {new Date().getFullYear()} Paarsh E-Learning. All rights reserved.</p>
           <p className="flex gap-9">
-            <Link href="">Terms & Conditions</Link>
-            <Link href="">Privacy Policy</Link>
+            <Link href="/return-policy" className="hover:text-secondary transition-colors">Return Policy</Link>
+            <Link href="/terms-and-conditions" className="hover:text-secondary transition-colors">Terms & Conditions</Link>
+            <Link href="/privacy-policy" className="hover:text-secondary transition-colors">Privacy Policy</Link>
           </p>
         </div>
       </div>

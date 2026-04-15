@@ -39,7 +39,7 @@ export default function StudentsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
-    const studentsPerPage = 10;
+    const [studentsPerPage, setStudentsPerPage] = useState<number | "all">(10);
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -61,8 +61,9 @@ export default function StudentsPage() {
         try {
             setLoading(true);
             setErrorMsg(null);
+            const limit = studentsPerPage === "all" ? 99999 : studentsPerPage;
             const response = await fetch(
-                `/api/students?search=${searchQuery}&page=${currentPage}&limit=${studentsPerPage}`
+                `/api/students?search=${searchQuery}&page=${currentPage}&limit=${limit}`
             );
 
             if (!response.ok) {
@@ -88,7 +89,7 @@ export default function StudentsPage() {
         }, 300);
 
         return () => clearTimeout(debounceTimer);
-    }, [searchQuery, currentPage]);
+    }, [searchQuery, currentPage, studentsPerPage]);
 
     const handleAddStudent = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -325,16 +326,35 @@ export default function StudentsPage() {
                         </div>
 
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div className="text-sm text-gray-600">
-                                {total === 0 ? (
-                                    "Showing 0 to 0 of 0 students"
-                                ) : (
-                                    <>
-                                        Showing <span className="font-medium">{(currentPage - 1) * studentsPerPage + 1}</span> to{" "}
-                                        <span className="font-medium">{Math.min(currentPage * studentsPerPage, total)}</span> of{" "}
-                                        <span className="font-medium">{total}</span> students
-                                    </>
-                                )}
+                            <div className="flex items-center gap-3">
+                                <div className="text-sm text-gray-600">
+                                    {total === 0 ? (
+                                        "Showing 0 to 0 of 0 students"
+                                    ) : (
+                                        <>
+                                            Showing <span className="font-medium">{(currentPage - 1) * studentsPerPage + 1}</span> to{" "}
+                                            <span className="font-medium">{Math.min(currentPage * studentsPerPage, total)}</span> of{" "}
+                                            <span className="font-medium">{total}</span> students
+                                        </>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                    <span>Show:</span>
+                                    <select
+                                        value={studentsPerPage}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setStudentsPerPage(val === "all" ? "all" : Number(val));
+                                            setCurrentPage(1);
+                                        }}
+                                        className="border px-2 py-1 rounded-lg text-sm bg-white"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button

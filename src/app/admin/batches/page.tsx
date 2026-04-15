@@ -22,7 +22,7 @@ export default function Page() {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
 
-    const limit = 5;
+    const [itemsPerPage, setItemsPerPage] = useState<number | "all">(10);
 
     // ✅ REDUX DATA
     const { data = [], refetch } = useGetBatchesQuery();
@@ -45,8 +45,9 @@ export default function Page() {
     }
 
     // ✅ PAGINATION
-    const paginated = filtered.slice((page - 1) * limit, page * limit);
-    const totalPages = Math.ceil(filtered.length / limit);
+    const effectiveLimit = itemsPerPage === "all" ? filtered.length : itemsPerPage;
+    const paginated = filtered.slice((page - 1) * effectiveLimit, page * effectiveLimit);
+    const totalPages = itemsPerPage === "all" ? 1 : Math.ceil(filtered.length / effectiveLimit);
 
     // ✅ DELETE (FIXED)
     const deleteBatch = async (id: string) => {
@@ -265,12 +266,30 @@ export default function Page() {
                 </div>
             </div>
 
-            {/* PAGINATION */}
             <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3 px-2 pb-4">
-                <p className="text-sm text-gray-500 text-center sm:text-left">
-                    Showing {(page - 1) * limit + 1} to{" "}
-                    {Math.min(page * limit, filtered.length)} of {filtered.length}
-                </p>
+                <div className="flex items-center gap-3">
+                    <p className="text-sm text-gray-500 text-center sm:text-left">
+                        Showing {filtered.length > 0 ? (page - 1) * effectiveLimit + 1 : 0} to{" "}
+                        {Math.min(page * effectiveLimit, filtered.length)} of {filtered.length}
+                    </p>
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                        <span>Show:</span>
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setItemsPerPage(val === "all" ? "all" : Number(val));
+                                setPage(1);
+                            }}
+                            className="border px-2 py-1 rounded-lg text-sm bg-white"
+                        >
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                            <option value="all">All</option>
+                        </select>
+                    </div>
+                </div>
                 <div className="flex flex-wrap justify-center gap-2">
                     <button
                         onClick={() => setPage((p) => p - 1)}

@@ -40,7 +40,7 @@ export default function EntranceStudentsLogs() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const studentsPerPage = 10;
+    const [itemsPerPage, setItemsPerPage] = useState<number | "all">(10);
     const [filters, setFilters] = useState({ college: "all" });
 
     const { data: studentsData, isLoading: studentsLoading } = useFetchEntranceStudentsQuery(undefined);
@@ -70,9 +70,10 @@ export default function EntranceStudentsLogs() {
         return true;
     });
 
-    const totalPages = Math.max(1, Math.ceil(filteredStudents.length / studentsPerPage));
-    const startIndex = (currentPage - 1) * studentsPerPage;
-    const displayedStudents = filteredStudents.slice(startIndex, startIndex + studentsPerPage);
+    const effectiveLimit = itemsPerPage === "all" ? filteredStudents.length : itemsPerPage;
+    const totalPages = itemsPerPage === "all" ? 1 : Math.max(1, Math.ceil(filteredStudents.length / effectiveLimit));
+    const startIndex = (currentPage - 1) * effectiveLimit;
+    const displayedStudents = filteredStudents.slice(startIndex, startIndex + effectiveLimit);
 
     const handleConfirmDelete = async () => {
         if (!studentToDelete) return;
@@ -205,8 +206,8 @@ export default function EntranceStudentsLogs() {
                                         <tr key={student._id} className="hover:bg-gray-50/50 transition-colors border-b last:border-0 border-gray-100">
                                             <td className="px-6 py-6 whitespace-nowrap">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#2C4276] shadow-sm border border-indigo-100">
-                                                        <User className="opacity-70" size={24} />
+                                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-[#2C4276] shadow-sm border border-indigo-100 font-bold uppercase">
+                                                        {student.name.charAt(0)}
                                                     </div>
                                                     <div className="space-y-1">
                                                         <div className="text-base font-bold text-[#2C4276]">{student.name}</div>
@@ -253,8 +254,27 @@ export default function EntranceStudentsLogs() {
 
                         {/* Pagination */}
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="text-sm text-gray-600 font-medium order-2 md:order-1">
-                                Showing <span className="font-bold text-gray-900">{startIndex + 1}</span> to <span className="font-bold text-gray-900">{Math.min(startIndex + studentsPerPage, filteredStudents.length)}</span> of <span className="font-bold text-gray-900">{filteredStudents.length}</span> students
+                            <div className="flex items-center gap-3 order-2 md:order-1">
+                                <div className="text-sm text-gray-600 font-medium whitespace-nowrap">
+                                    Showing <span className="font-bold text-gray-900">{filteredStudents.length > 0 ? startIndex + 1 : 0}</span> to <span className="font-bold text-gray-900">{Math.min(startIndex + effectiveLimit, filteredStudents.length)}</span> of <span className="font-bold text-gray-900">{filteredStudents.length}</span> students
+                                </div>
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                    <span>Show:</span>
+                                    <select
+                                        value={itemsPerPage}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setItemsPerPage(val === "all" ? "all" : Number(val));
+                                            setCurrentPage(1);
+                                        }}
+                                        className="border px-2 py-1 rounded-lg text-sm bg-white"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="flex items-center gap-2 order-1 md:order-2">
                                 <button

@@ -22,6 +22,7 @@ import {
   Video,
   Gift,
   Clock,
+  Award,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 // import Image from "next/image";
@@ -78,6 +79,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     { name: "Payments", path: "/admin/payments", icon: CreditCard },
     { name: "Teachers", path: "/admin/teachers", icon: Users },
     { name: "Batches", path: "/admin/batches", icon: Users },
+    { name: "Certificates", path: "/admin/certificates", icon: Award },
     // { name: "Group Consent", path: "/admin/group-management", icon: ClipboardCheck },
     { name: "Blogs", path: "/admin/blogs", icon: FileText },
     // { name: "Placement", path: "/admin/placement", icon: Briefcase },

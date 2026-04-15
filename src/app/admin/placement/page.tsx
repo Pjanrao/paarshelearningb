@@ -78,6 +78,7 @@ export default function PlacementPage() {
     const [viewingPlacement, setViewingPlacement] = useState<any>(null);
     const [deleteId, setDeleteId] = useState<{ id: string, name: string } | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [placementsPerPage, setPlacementsPerPage] = useState<number | "all">(10);
 
     // RTK Query hooks
     const { data: statsData, isLoading: statsLoading } = useGetPlacementStatsQuery();
@@ -85,7 +86,7 @@ export default function PlacementPage() {
         search: searchQuery,
         status: activeTab,
         page: currentPage,
-        limit: 10
+        limit: placementsPerPage === "all" ? 10000 : placementsPerPage
     });
 
     const [createPlacement, { isLoading: isCreating }] = useCreatePlacementMutation();
@@ -299,8 +300,27 @@ export default function PlacementPage() {
                     </div>
 
                     <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
-                        <div className="text-sm text-gray-600 font-medium order-2 md:order-1">
-                            Showing <span className="font-bold text-gray-900">{(currentPage - 1) * 10 + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * 10, data?.total || 0)}</span> of <span className="font-bold text-gray-900">{data?.total || 0}</span> records
+                        <div className="flex items-center gap-3 text-sm font-medium order-2 md:order-1">
+                            <div className="text-gray-600">
+                                Showing {data?.total > 0 ? (currentPage - 1) * (placementsPerPage === "all" ? data.total : placementsPerPage) + 1 : 0} to {Math.min(currentPage * (placementsPerPage === "all" ? data.total : placementsPerPage), data?.total || 0)} of {data?.total || 0} records
+                            </div>
+                            <div className="flex items-center gap-1 text-gray-500">
+                                <span>Show:</span>
+                                <select
+                                    value={placementsPerPage}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setPlacementsPerPage(val === "all" ? "all" : Number(val));
+                                        setCurrentPage(1);
+                                    }}
+                                    className="border px-2 py-1 rounded-lg text-sm bg-white"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
+                                    <option value="all">All</option>
+                                </select>
+                            </div>
                         </div>
                         <div className="flex items-center gap-2 order-1 md:order-2">
                             <button
@@ -311,8 +331,8 @@ export default function PlacementPage() {
                                 Previous
                             </button>
                             <div className="hidden sm:flex items-center gap-1">
-                                {Array.from({ length: Math.min(Math.ceil((data?.total || 0) / 10), 5) }, (_, i) => {
-                                    const totalPages = Math.ceil((data?.total || 0) / 10);
+                                {Array.from({ length: Math.min(Math.ceil((data?.total || 0) / (placementsPerPage === "all" ? (data?.total || 1) : placementsPerPage)), 5) }, (_, i) => {
+                                    const totalPages = Math.ceil((data?.total || 0) / (placementsPerPage === "all" ? (data?.total || 1) : placementsPerPage));
                                     let pageNum;
                                     if (totalPages <= 5) pageNum = i + 1;
                                     else if (currentPage <= 3) pageNum = i + 1;
@@ -332,11 +352,11 @@ export default function PlacementPage() {
                                 })}
                             </div>
                             <div className="sm:hidden text-sm font-bold px-3 py-2 border rounded-lg bg-white">
-                                {currentPage} / {Math.ceil((data?.total || 0) / 10) || 1}
+                                {currentPage} / {Math.ceil((data?.total || 0) / placementsPerPage) || 1}
                             </div>
                             <button
-                                onClick={() => setCurrentPage(Math.min(Math.ceil((data?.total || 0) / 10), currentPage + 1))}
-                                disabled={data && currentPage * 10 >= data.total}
+                                onClick={() => setCurrentPage(Math.min(Math.ceil((data?.total || 0) / placementsPerPage), currentPage + 1))}
+                                disabled={data && currentPage * placementsPerPage >= data.total}
                                 className="px-4 py-2 text-sm font-bold rounded-lg border bg-white hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm active:scale-95"
                             >
                                 Next

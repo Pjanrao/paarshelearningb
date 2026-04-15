@@ -17,14 +17,13 @@ export default function WithdrawalTable() {
     const [search, setSearch] = useState("");
     const [filterStatus, setFilterStatus] = useState("all");
     const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState<number | "all">(10);
     
     // Modal States
     const [viewOpen, setViewOpen] = useState(false);
     const [editOpen, setOpenEdit] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [selectedWithdrawal, setSelectedWithdrawal] = useState<any | null>(null);
-
-    const itemsPerPage = 10;
 
     // FILTER
     let filteredData = data.filter((w: any) => {
@@ -44,15 +43,16 @@ export default function WithdrawalTable() {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [search, filterStatus]);
+    }, [search, filterStatus, itemsPerPage]);
 
     // PAGINATION
-    const startIndex = (currentPage - 1) * itemsPerPage;
+    const effectiveLimit = itemsPerPage === "all" ? filteredData.length : itemsPerPage;
+    const startIndex = (currentPage - 1) * effectiveLimit;
     const paginatedData = filteredData.slice(
         startIndex,
-        startIndex + itemsPerPage
+        startIndex + effectiveLimit
     );
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const totalPages = itemsPerPage === "all" ? 1 : Math.ceil(filteredData.length / effectiveLimit);
 
 
     // STATUS BADGE
@@ -145,6 +145,24 @@ export default function WithdrawalTable() {
                             <option value="approved">Approved</option>
                             <option value="rejected">Rejected</option>
                         </select>
+
+                        <div className="flex items-center gap-1">
+                            <label className="text-sm text-gray-500">Show:</label>
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setItemsPerPage(val === "all" ? "all" : Number(val));
+                                    setCurrentPage(1);
+                                }}
+                                className="border px-2 py-2 rounded-lg text-sm"
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={50}>50</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
 
                         <button
                             onClick={handleExport}
@@ -284,7 +302,7 @@ export default function WithdrawalTable() {
                             <p className="text-sm text-gray-500">
                                 Showing {startIndex + 1} to{" "}
                                 {Math.min(
-                                    startIndex + itemsPerPage,
+                                    startIndex + effectiveLimit,
                                     filteredData.length
                                 )}{" "}
                                 of {filteredData.length}

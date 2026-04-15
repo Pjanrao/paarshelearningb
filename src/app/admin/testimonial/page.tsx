@@ -40,7 +40,7 @@ export default function AdmintestimonialPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
-    const testimonialsPerPage = 10;
+    const [testimonialsPerPage, setTestimonialsPerPage] = useState<number | "all">(10);
     const [deleteId, setDeleteId] = useState<{ id: string, name: string } | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -57,7 +57,8 @@ export default function AdmintestimonialPage() {
     const fetchTestimonials = async () => {
         try {
             setLoading(true);
-            const res = await fetch(`/api/testimonial?admin=true&status=all&page=${currentPage}&limit=${testimonialsPerPage}&search=${searchQuery}`);
+            const limit = testimonialsPerPage === "all" ? 99999 : testimonialsPerPage;
+            const res = await fetch(`/api/testimonial?admin=true&status=all&page=${currentPage}&limit=${limit}&search=${searchQuery}`);
             const result = await res.json();
 
             if (res.ok) {
@@ -79,7 +80,7 @@ export default function AdmintestimonialPage() {
             fetchTestimonials();
         }, 300);
         return () => clearTimeout(timeoutId);
-    }, [currentPage, searchQuery]);
+    }, [currentPage, searchQuery, testimonialsPerPage]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -295,7 +296,8 @@ export default function AdmintestimonialPage() {
                         </div>
 
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
-                             <div className="text-sm text-gray-600 font-medium order-2 md:order-1">
+                         <div className="flex items-center gap-3 text-sm text-gray-600 font-medium order-2 md:order-1">
+                                <div>
                                 {total === 0 ? (
                                     "Showing 0 to 0 of 0 testimonials"
                                 ) : (
@@ -303,6 +305,24 @@ export default function AdmintestimonialPage() {
                                         Showing <span className="font-bold text-gray-900">{(currentPage - 1) * testimonialsPerPage + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * testimonialsPerPage, total)}</span> of <span className="font-bold text-gray-900">{total}</span> testimonials
                                     </>
                                 )}
+                                </div>
+                                <div className="flex items-center gap-1 text-gray-500">
+                                    <span>Show:</span>
+                                    <select
+                                        value={testimonialsPerPage}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setTestimonialsPerPage(val === "all" ? "all" : Number(val));
+                                            setCurrentPage(1);
+                                        }}
+                                        className="border px-2 py-1 rounded-lg text-sm bg-white"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="flex items-center gap-2 order-1 md:order-2">
                                 <button

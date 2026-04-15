@@ -12,10 +12,9 @@ export default function ReferralTable() {
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [itemsPerPage, setItemsPerPage] = useState<number | "all">(10);
 
     const [sortType, setSortType] = useState("none"); // name | amount
-
-    const itemsPerPage = 5;
 
     // 🔍 SEARCH
     let filteredData = data.filter((user: any) =>
@@ -39,16 +38,17 @@ export default function ReferralTable() {
     // 🔄 RESET PAGE
     useEffect(() => {
         setCurrentPage(1);
-    }, [search, sortType]);
+    }, [search, sortType, itemsPerPage]);
 
     // 📄 PAGINATION
-    const startIndex = (currentPage - 1) * itemsPerPage;
+    const effectiveLimit = itemsPerPage === "all" ? filteredData.length : itemsPerPage;
+    const startIndex = (currentPage - 1) * effectiveLimit;
     const paginatedData = filteredData.slice(
         startIndex,
-        startIndex + itemsPerPage
+        startIndex + effectiveLimit
     );
 
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const totalPages = itemsPerPage === "all" ? 1 : Math.ceil(filteredData.length / effectiveLimit);
 
     // 📥 EXPORT CSV
     const handleExport = () => {
@@ -89,6 +89,25 @@ export default function ReferralTable() {
                         <option value="name">Name</option>
                         <option value="amount">Amount</option>
                     </select>
+
+                    {/* SHOW PER PAGE */}
+                    <div className="flex items-center gap-1">
+                        <label className="text-sm text-gray-500">Show:</label>
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setItemsPerPage(val === "all" ? "all" : Number(val));
+                                setCurrentPage(1);
+                            }}
+                            className="border px-2 py-2 rounded-lg text-sm"
+                        >
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                            <option value="all">All</option>
+                        </select>
+                    </div>
 
                     {/* EXPORT */}
                     <button
@@ -206,7 +225,7 @@ export default function ReferralTable() {
 
                         <p className="text-sm text-gray-500 text-center sm:text-left">
                             Showing {startIndex + 1} to{" "}
-                            {Math.min(startIndex + itemsPerPage, filteredData.length)} of{" "}
+                            {Math.min(startIndex + effectiveLimit, filteredData.length)} of{" "}
                             {filteredData.length}
                         </p>
 

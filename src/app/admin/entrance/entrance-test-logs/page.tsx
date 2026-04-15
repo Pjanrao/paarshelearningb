@@ -23,7 +23,7 @@ interface TestSession {
 const EntranceLogsPage = () => {
     const [selectedCollegeFilter, setSelectedCollegeFilter] = useState<string>("all");
     const [page, setPage] = useState(1);
-    const [limit] = useState(20);
+    const [limit, setLimit] = useState<number | "all">(20);
     const [selectedSession, setSelectedSession] = useState<TestSession | null>(null);
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -39,7 +39,7 @@ const EntranceLogsPage = () => {
 
     const queryParams = useMemo(() => ({
         page,
-        limit,
+        limit: limit === "all" ? 10000 : limit,
         collegeId: selectedCollegeFilter !== "all" ? selectedCollegeFilter : undefined,
         studentName: filters.studentName || undefined,
         testId: filters.testId || undefined,
@@ -296,10 +296,28 @@ const EntranceLogsPage = () => {
                             </table>
                         </div>
 
-                        {/* Pagination */}
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
-                            <div className="text-sm text-gray-600">
-                                Showing <span className="font-bold text-gray-900">{(page - 1) * limit + (sessions.length > 0 ? 1 : 0)}</span> to <span className="font-bold text-gray-900">{Math.min(page * limit, pagination.totalRecords)}</span> of <span className="font-bold text-gray-900">{pagination.totalRecords}</span> exams
+                            <div className="flex items-center gap-3">
+                                <div className="text-sm text-gray-600">
+                                    Showing <span className="font-bold text-gray-900">{(page - 1) * (limit === "all" ? pagination.totalRecords : limit) + (sessions.length > 0 ? 1 : 0)}</span> to <span className="font-bold text-gray-900">{Math.min(page * (limit === "all" ? pagination.totalRecords : limit), pagination.totalRecords)}</span> of <span className="font-bold text-gray-900">{pagination.totalRecords}</span> exams
+                                </div>
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                    <span>Show:</span>
+                                    <select
+                                        value={limit}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setLimit(val === "all" ? "all" : Number(val));
+                                            setPage(1);
+                                        }}
+                                        className="border px-2 py-1 rounded-lg text-sm bg-white"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
