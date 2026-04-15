@@ -50,7 +50,7 @@ const EntranceExamManagement = () => {
     const [guideOpen, setGuideOpen] = useState(false);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [testsPerPage] = useState<number>(10);
+    const [testsPerPage, setTestsPerPage] = useState<number | "all">(10);
 
     const [testForm, setTestForm] = useState({
         collegeId: "",
@@ -101,8 +101,9 @@ const EntranceExamManagement = () => {
             test.batchName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const totalPages = Math.max(1, Math.ceil(filteredTests.length / testsPerPage));
-    const displayedTests = filteredTests.slice((currentPage - 1) * testsPerPage, currentPage * testsPerPage);
+    const effectiveLimit = testsPerPage === "all" ? filteredTests.length : testsPerPage;
+    const totalPages = testsPerPage === "all" ? 1 : Math.max(1, Math.ceil(filteredTests.length / effectiveLimit));
+    const displayedTests = filteredTests.slice((currentPage - 1) * effectiveLimit, currentPage * effectiveLimit);
 
     const handleOpenCreate = () => {
         setEditingTest(null);
@@ -309,7 +310,7 @@ const EntranceExamManagement = () => {
                                 <tbody className="divide-y divide-gray-50 bg-white">
                                     {displayedTests.map((test, idx) => (
                                         <tr key={test.testId} className="hover:bg-blue-50/30 transition-all group">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 font-mono">{(currentPage - 1) * testsPerPage + idx + 1}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 font-mono">{(currentPage - 1) * effectiveLimit + idx + 1}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200 uppercase transform group-hover:scale-110 transition-transform">
@@ -350,8 +351,27 @@ const EntranceExamManagement = () => {
                         </div>
 
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="text-sm text-gray-600 font-medium order-2 md:order-1">
-                                Showing <span className="font-bold text-gray-900">{(currentPage - 1) * testsPerPage + (displayedTests.length > 0 ? 1 : 0)}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * testsPerPage, filteredTests.length)}</span> of <span className="font-bold text-gray-900">{filteredTests.length}</span> exams
+                            <div className="flex items-center gap-3 order-2 md:order-1">
+                                <div className="text-sm text-gray-600 font-medium whitespace-nowrap">
+                                    Showing <span className="font-bold text-gray-900">{(currentPage - 1) * effectiveLimit + (displayedTests.length > 0 ? 1 : 0)}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * effectiveLimit, filteredTests.length)}</span> of <span className="font-bold text-gray-900">{filteredTests.length}</span> exams
+                                </div>
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                    <span>Show:</span>
+                                    <select
+                                        value={testsPerPage}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setTestsPerPage(val === "all" ? "all" : Number(val));
+                                            setCurrentPage(1);
+                                        }}
+                                        className="border px-2 py-1 rounded-lg text-sm bg-white"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="flex items-center gap-2 order-1 md:order-2">
                                 <button

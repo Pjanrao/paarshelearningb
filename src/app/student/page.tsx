@@ -94,16 +94,16 @@ export default function StudentDashboard() {
                 >
                     <div className="p-5 flex-1 flex flex-col items-center justify-center text-center">
                         <div className="mb-2 bg-white/20 p-3 rounded-full">
-                            <Wallet size={30} />
+                            <Award size={30} />
                         </div>
-                        <h3 className="font-bold text-lg mb-1">My Wallet</h3>
-                        <p className="text-xs text-purple-50/80 font-medium">View your balance & rewards</p>
+                        <h3 className="font-bold text-lg mb-1">My Certificates</h3>
+                        <p className="text-xs text-purple-50/80 font-medium">View & download your certificates</p>
                     </div>
                     <Link
-                        href="/student/wallet"
+                        href="/student/certificates"
                         className="bg-black/10 py-2 text-sm font-bold hover:bg-black/20 transition-colors border-t border-white/10 uppercase tracking-wider text-center"
                     >
-                        Explore &rarr;
+                        View &rarr;
                     </Link>
                 </motion.div>
 

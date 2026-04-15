@@ -17,7 +17,7 @@ export async function POST(req: Request) {
         const cookieStore = await cookies();
         const token = cookieStore.get("token")?.value || cookieStore.get("adminToken")?.value || cookieStore.get("studentToken")?.value;
         const cookieRole = cookieStore.get("role")?.value || cookieStore.get("adminRole")?.value || cookieStore.get("studentRole")?.value;
-        
+
         let userId = null;
         let role = cookieRole || null;
 
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
             }
         }
 
-        // ❌ STRICT EXCLUSION: Do not track admins
+        // STRICT EXCLUSION: Do not track admins
         if (role === 'admin') {
             return NextResponse.json({ success: true, message: "Admin tracking skipped" }, { status: 200 });
         }

@@ -29,7 +29,7 @@ const SEOTrainingCourse = () => {
             <li>High-Quality Backlink Generation (Off-Page SEO)</li>
             <li>Local SEO and Google My Business Optimization</li>
           </ul>
-
+           
           <h2 className="text-2xl font-bold text-blue-950 dark:text-white mb-4 border-b pb-2 border-gray-200 dark:border-gray-700">
             Placement Guarantee Course
           </h2>

@@ -273,6 +273,23 @@ import Image from "next/image";
 import { getImgPath } from "@/utils/image";
 
 const Footer = () => {
+  const [settings, setSettings] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        if (response.ok) {
+          const data = await response.json();
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
+
   return (
     <footer className="bg-darkmode border-t border-dark_border pt-10 pb-6 mt-0">
       <div className="container mx-auto max-w-6xl px-4">
@@ -302,8 +319,10 @@ const Footer = () => {
               <li><Link href="/#" className="hover:text-secondary transition">Home</Link></li>
               <li><Link href="/about-us" className="hover:text-secondary transition">About</Link></li>
               <li><Link href="/Course" className="hover:text-secondary transition">Courses</Link></li>
+              <li><Link href="/workshops" className="hover:text-secondary transition">Workshops</Link></li>
               <li><Link href="/blog" className="hover:text-secondary transition">Blogs</Link></li>
               <li><Link href="/inquiry" className="hover:text-secondary transition">Inquiry</Link></li>
+              <li><Link href="/career" className="hover:text-secondary transition">Career</Link></li>
               <li><Link href="/contact-us" className="hover:text-secondary transition">Contact</Link></li>
             </ul>
           </div>
@@ -315,35 +334,21 @@ const Footer = () => {
                 <svg className="w-4 h-4 text-white/70" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1v3.5a1 1 0 01-1 1C9.16 22 2 14.84 2 5.5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.26 2.67.76 3.88.15.33.07.72-.21 1.11l-2.2 2.2z" />
                 </svg>
-                +91 90752 01035
-              </li>
-              <li className="flex items-center justify-start gap-2 hover:text-secondary transition cursor-pointer">
-                <svg className="w-4 h-4 text-white/70" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21c1.21.49 2.53.76 3.88.76a1 1 0 011 1v3.5a1 1 0 01-1 1C9.16 22 2 14.84 2 5.5a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.26 2.67.76 3.88.15.33.07.72-.21 1.11l-2.2 2.2z" />
-                </svg>
-                +91 98600 98343
+                {settings?.contactDetails?.phone || "+91 90752 01035"}
               </li>
               <li className="flex items-center justify-start gap-2 hover:text-secondary transition cursor-pointer">
                 <svg className="w-4 h-4 text-white/70" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm.5 10.5h4v-1h-3V7h-1v5.5z" />
                 </svg>
-                (09:30 AM - 07:30 PM)
+                {settings?.contactDetails?.openHours || "(09:30 AM - 07:30 PM)"}
               </li>
               <li className="flex items-center justify-start gap-2 hover:text-secondary transition cursor-pointer">
-                <a href="mailto:info@paarshelearning.com" className="flex items-center gap-2">
+                <Link href={`mailto:${settings?.contactDetails?.email || "info@paarshelearning.com"}`} className="flex items-center gap-2">
                   <svg className="w-4 h-4 text-white/70" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 18V8l8 5 8-5v10H4z" />
                   </svg>
-                  info@paarshelearning.com
-                </a>
-              </li>
-              <li className="flex items-center justify-start gap-2 hover:text-secondary transition cursor-pointer">
-                <a href="mailto:info@paarshelearning.com" className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-white/70" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 18V8l8 5 8-5v10H4z" />
-                  </svg>
-                  paarshelaraning@gmail.com
-                </a>
+                  {settings?.contactDetails?.email || "info@paarshelearning.com"}
+                </Link>
               </li>
 
               <ul className="flex items-center justify-start gap-4 mt-8 lg:mt-5">
@@ -421,8 +426,9 @@ const Footer = () => {
         <div className="border-t border-white/10 mt-8 pt-4 flex flex-col sm:flex-row justify-between items-center text-sm text-white/60 gap-2">
           <p>© {new Date().getFullYear()} Paarsh E-Learning. All rights reserved.</p>
           <p className="flex gap-9">
-            <Link href="">Terms & Conditions</Link>
-            <Link href="">Privacy Policy</Link>
+            <Link href="/return-policy" className="hover:text-secondary transition-colors">Return Policy</Link>
+            <Link href="/terms-and-conditions" className="hover:text-secondary transition-colors">Terms & Conditions</Link>
+            <Link href="/privacy-policy" className="hover:text-secondary transition-colors">Privacy Policy</Link>
           </p>
         </div>
       </div>

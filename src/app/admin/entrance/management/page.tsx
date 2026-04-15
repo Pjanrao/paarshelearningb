@@ -56,14 +56,14 @@ export default function EntranceCollegesPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
-    const collegesPerPage = 10;
+    const [collegesPerPage, setCollegesPerPage] = useState<number | "all">(10);
 
 
     const fetchColleges = async () => {
         try {
             setIsLoadingState(true);
             const response = await fetch(
-                `/api/entrance-college?search=${searchQuery}&page=${currentPage}&limit=${collegesPerPage}&startDate=${startDate}&endDate=${endDate}`
+                `/api/entrance-college?search=${searchQuery}&page=${currentPage}&limit=${collegesPerPage === "all" ? 10000 : collegesPerPage}&startDate=${startDate}&endDate=${endDate}`
             );
             const data = await response.json();
 
@@ -191,7 +191,7 @@ export default function EntranceCollegesPage() {
                                 <tbody className="divide-y divide-gray-200 bg-white">
                                     {filteredColleges.map((c: College, index: number) => (
                                         <tr key={c._id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{(currentPage - 1) * collegesPerPage + index + 1}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">{(currentPage - 1) * (collegesPerPage === "all" ? total : collegesPerPage) + index + 1}</td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white font-bold shadow-inner uppercase">
@@ -220,8 +220,27 @@ export default function EntranceCollegesPage() {
                         </div>
 
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="text-sm text-gray-600 font-medium order-2 md:order-1">
-                                Showing <span className="font-bold text-gray-900">{(currentPage - 1) * collegesPerPage + (filteredColleges.length > 0 ? 1 : 0)}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * collegesPerPage, total || filteredColleges.length)}</span> of <span className="font-bold text-gray-900">{total || filteredColleges.length}</span> colleges
+                            <div className="flex items-center gap-3 order-2 md:order-1">
+                                <div className="text-sm text-gray-600 font-medium whitespace-nowrap">
+                                    Showing <span className="font-bold text-gray-900">{(currentPage - 1) * (collegesPerPage === "all" ? total : collegesPerPage) + (filteredColleges.length > 0 ? 1 : 0)}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * (collegesPerPage === "all" ? total : collegesPerPage), total || filteredColleges.length)}</span> of <span className="font-bold text-gray-900">{total || filteredColleges.length}</span> colleges
+                                </div>
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                    <span>Show:</span>
+                                    <select
+                                        value={collegesPerPage}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setCollegesPerPage(val === "all" ? "all" : Number(val));
+                                            setCurrentPage(1);
+                                        }}
+                                        className="border px-2 py-1 rounded-lg text-sm bg-white"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="flex items-center gap-2 order-1 md:order-2">
                                 <button

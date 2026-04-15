@@ -4,16 +4,14 @@ import { useState, useEffect } from "react";
 import {
     User,
     Lock,
-    Bell,
-    Globe,
+    Phone,
+    Mail,
     Camera,
     Save,
     ShieldCheck,
-    Mail,
-    Phone,
-    Monitor,
-    Smartphone,
-    Loader2
+    Loader2,
+    Eye,
+    EyeOff
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -44,15 +42,12 @@ export default function SettingsPage() {
 
     // Application Settings State
     const [settings, setSettings] = useState({
-        platformName: "Paarsh E-Learning",
-        supportEmail: "support@paarsh.com",
-        darkMode: false,
-        defaultLanguage: "en",
-        notificationSettings: {
-            email: true,
-            browser: true,
-            courseUpdates: true,
-            studentEnquiries: true
+        contactDetails: {
+            phone: "",
+            email: "",
+            puneAddress: "",
+            nashikAddress: "",
+            openHours: ""
         }
     });
 
@@ -61,6 +56,12 @@ export default function SettingsPage() {
         currentPassword: "",
         newPassword: "",
         confirmPassword: ""
+    });
+
+    const [showPassword, setShowPassword] = useState({
+        current: false,
+        new: false,
+        confirm: false
     });
 
     useEffect(() => {
@@ -95,11 +96,7 @@ export default function SettingsPage() {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        if (!fetching) {
-            setTheme(settings.darkMode ? 'dark' : 'light');
-        }
-    }, [fetching, settings.darkMode, setTheme]);
+
 
     const validatePhone = (phone: string) => {
         const phoneRegex = /^\d{10}$/;
@@ -127,6 +124,8 @@ export default function SettingsPage() {
             });
 
             if (res.ok) {
+                const data = await res.json();
+                setProfile(data);
                 toast({
                     title: "Profile Updated",
                     description: "Your personal information has been saved successfully.",
@@ -148,6 +147,24 @@ export default function SettingsPage() {
 
     const handleSecuritySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!security.newPassword) {
+            toast({
+                title: "Error",
+                description: "New password cannot be empty.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        if (security.newPassword.length < 6) {
+            toast({
+                title: "Error",
+                description: "New password must be at least 6 characters.",
+                variant: "destructive"
+            });
+            return;
+        }
+
         if (security.newPassword !== security.confirmPassword) {
             toast({
                 title: "Error",
@@ -228,16 +245,6 @@ export default function SettingsPage() {
         }
     };
 
-    const handleNotificationToggle = (key: string, value: boolean) => {
-        setSettings(prev => ({
-            ...prev,
-            notificationSettings: {
-                ...prev.notificationSettings,
-                [key]: value
-            }
-        }));
-    };
-
     if (fetching) {
         return (
             <div className="flex items-center justify-center min-h-[calc(100vh-64px)] bg-[#fbfbfb]">
@@ -259,24 +266,20 @@ export default function SettingsPage() {
                 </div>
 
                 <Tabs defaultValue="profile" className="space-y-6">
-                    {/* <TabsList className="bg-white dark:bg-slate-900 p-1.5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 w-full lg:w-fit h-auto flex flex-col sm:flex-row gap-1 shadow-md">
+                    <TabsList className="bg-white dark:bg-slate-900 p-1.5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 w-full lg:w-fit h-auto flex flex-col sm:flex-row gap-1 shadow-md">
                         <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-[#2C4276] data-[state=active]:text-white data-[state=inactive]:text-gray-500 py-3 px-6 font-bold transition-all flex-1 text-sm sm:text-base">
                             <User className="h-4 w-4 mr-2" />
                             Profile
+                        </TabsTrigger>
+                        <TabsTrigger value="contact" className="rounded-lg data-[state=active]:bg-[#2C4276] data-[state=active]:text-white data-[state=inactive]:text-gray-500 py-3 px-6 font-bold transition-all flex-1 text-sm sm:text-base">
+                            <Phone className="h-4 w-4 mr-2" />
+                            Contact Details
                         </TabsTrigger>
                         <TabsTrigger value="security" className="rounded-lg data-[state=active]:bg-[#2C4276] data-[state=active]:text-white data-[state=inactive]:text-gray-500 py-3 px-6 font-bold transition-all flex-1 text-sm sm:text-base">
                             <Lock className="h-4 w-4 mr-2" />
                             Security
                         </TabsTrigger>
-                        <TabsTrigger value="notifications" className="rounded-lg data-[state=active]:bg-[#2C4276] data-[state=active]:text-white data-[state=inactive]:text-gray-500 py-3 px-6 font-bold transition-all flex-1 text-sm sm:text-base">
-                            <Bell className="h-4 w-4 mr-2" />
-                            Notifications
-                        </TabsTrigger>
-                        <TabsTrigger value="application" className="rounded-lg data-[state=active]:bg-[#2C4276] data-[state=active]:text-white data-[state=inactive]:text-gray-500 py-3 px-6 font-bold transition-all flex-1 text-sm sm:text-base">
-                            <Monitor className="h-4 w-4 mr-2" />
-                            Application
-                        </TabsTrigger>
-                    </TabsList> */}
+                    </TabsList>
 
                     {/* Profile Tab */}
                     <TabsContent value="profile" className="space-y-6">
@@ -361,6 +364,99 @@ export default function SettingsPage() {
                         </Card>
                     </TabsContent>
 
+                    {/* Contact Details Tab */}
+                    <TabsContent value="contact" className="space-y-6">
+                        <Card className="border-0 shadow-md rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
+                            <CardHeader className="bg-white dark:bg-slate-900 border-b border-gray-50 dark:border-slate-800 p-6 sm:p-8">
+                                <div className="flex flex-col sm:flex-row items-center gap-6">
+                                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
+                                        <Phone className="h-8 w-8 text-[#2C4276] dark:text-blue-400" />
+                                    </div>
+                                    <div className="text-center sm:text-left">
+                                        <CardTitle className="text-xl sm:text-2xl font-bold text-[#2C4276] dark:text-slate-100">Contact Details</CardTitle>
+                                        <CardDescription className="text-gray-500 dark:text-slate-400 font-medium mt-1">Manage the contact information displayed on the website.</CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-6 sm:p-8">
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-bold text-[#2C4276] dark:text-slate-300 ml-1">Phone Number</Label>
+                                            <Input
+                                                value={settings.contactDetails.phone}
+                                                onChange={(e) => setSettings({
+                                                    ...settings,
+                                                    contactDetails: { ...settings.contactDetails, phone: e.target.value }
+                                                })}
+                                                className="h-12 rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-[#3b82f6] transition-all dark:text-slate-100 font-medium"
+                                                placeholder="+91 XXXXX XXXXX"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-sm font-bold text-[#2C4276] dark:text-slate-300 ml-1">Email Address</Label>
+                                            <Input
+                                                value={settings.contactDetails.email}
+                                                onChange={(e) => setSettings({
+                                                    ...settings,
+                                                    contactDetails: { ...settings.contactDetails, email: e.target.value }
+                                                })}
+                                                className="h-12 rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-[#3b82f6] transition-all dark:text-slate-100 font-medium"
+                                                placeholder="example@gmail.com"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-bold text-[#2C4276] dark:text-slate-300 ml-1">Pune Office Address</Label>
+                                        <Textarea
+                                            value={settings.contactDetails.puneAddress}
+                                            onChange={(e) => setSettings({
+                                                ...settings,
+                                                contactDetails: { ...settings.contactDetails, puneAddress: e.target.value }
+                                            })}
+                                            className="min-h-[100px] rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-[#3b82f6] transition-all dark:text-slate-100 font-medium"
+                                            placeholder="Enter Pune office address..."
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-bold text-[#2C4276] dark:text-slate-300 ml-1">Nashik Office Address</Label>
+                                        <Textarea
+                                            value={settings.contactDetails.nashikAddress}
+                                            onChange={(e) => setSettings({
+                                                ...settings,
+                                                contactDetails: { ...settings.contactDetails, nashikAddress: e.target.value }
+                                            })}
+                                            className="min-h-[100px] rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-[#3b82f6] transition-all dark:text-slate-100 font-medium"
+                                            placeholder="Enter Nashik office address..."
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label className="text-sm font-bold text-[#2C4276] dark:text-slate-300 ml-1">Open Hours</Label>
+                                        <Input
+                                            value={settings.contactDetails.openHours}
+                                            onChange={(e) => setSettings({
+                                                ...settings,
+                                                contactDetails: { ...settings.contactDetails, openHours: e.target.value }
+                                            })}
+                                            className="h-12 rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-[#3b82f6] transition-all dark:text-slate-100 font-medium"
+                                            placeholder="Mon - Fri, 9:30 AM - 7:30 PM"
+                                        />
+                                    </div>
+
+                                    <div className="pt-4 flex justify-end">
+                                        <Button onClick={handleSettingsSave} disabled={loading} className="w-full sm:w-auto bg-[#2C4276] hover:bg-[#1e2e54] text-white h-12 px-8 rounded-xl font-bold shadow-md transition-all active:scale-95 flex items-center justify-center">
+                                            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                                            Save Contact Details
+                                        </Button>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
                     {/* Security Tab */}
                     <TabsContent value="security" className="space-y-6">
                         <Card className="border-none shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)] rounded-2xl bg-white dark:bg-slate-900 text-black dark:text-slate-100">
@@ -379,34 +475,61 @@ export default function SettingsPage() {
                                 <form onSubmit={handleSecuritySubmit} className="space-y-6 max-w-2xl">
                                     <div className="space-y-2">
                                         <Label className="text-sm font-bold text-[#233863] dark:text-slate-300 ml-1">Current Password</Label>
-                                        <Input
-                                            type="password"
-                                            required
-                                            value={security.currentPassword}
-                                            onChange={(e) => setSecurity({ ...security, currentPassword: e.target.value })}
-                                            className="h-12 rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 dark:text-slate-100"
-                                        />
+                                        <div className="relative">
+                                            <Input
+                                                type={showPassword.current ? "text" : "password"}
+                                                required
+                                                value={security.currentPassword}
+                                                onChange={(e) => setSecurity({ ...security, currentPassword: e.target.value })}
+                                                className="h-12 rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 dark:text-slate-100 pr-10"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(prev => ({ ...prev, current: !prev.current }))}
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                            >
+                                                {showPassword.current ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                            </button>
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <Label className="text-sm font-bold text-[#233863] dark:text-slate-300 ml-1">New Password</Label>
-                                            <Input
-                                                type="password"
-                                                required
-                                                value={security.newPassword}
-                                                onChange={(e) => setSecurity({ ...security, newPassword: e.target.value })}
-                                                className="h-12 rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 dark:text-slate-100"
-                                            />
+                                            <div className="relative">
+                                                <Input
+                                                    type={showPassword.new ? "text" : "password"}
+                                                    required
+                                                    value={security.newPassword}
+                                                    onChange={(e) => setSecurity({ ...security, newPassword: e.target.value })}
+                                                    className="h-12 rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 dark:text-slate-100 pr-10"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(prev => ({ ...prev, new: !prev.new }))}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                                >
+                                                    {showPassword.new ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                                </button>
+                                            </div>
                                         </div>
                                         <div className="space-y-2">
                                             <Label className="text-sm font-bold text-[#233863] dark:text-slate-300 ml-1">Confirm New Password</Label>
-                                            <Input
-                                                type="password"
-                                                required
-                                                value={security.confirmPassword}
-                                                onChange={(e) => setSecurity({ ...security, confirmPassword: e.target.value })}
-                                                className="h-12 rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 dark:text-slate-100"
-                                            />
+                                            <div className="relative">
+                                                <Input
+                                                    type={showPassword.confirm ? "text" : "password"}
+                                                    required
+                                                    value={security.confirmPassword}
+                                                    onChange={(e) => setSecurity({ ...security, confirmPassword: e.target.value })}
+                                                    className="h-12 rounded-xl bg-gray-50/50 dark:bg-slate-800/50 border-gray-200 dark:border-slate-700 dark:text-slate-100 pr-10"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowPassword(prev => ({ ...prev, confirm: !prev.confirm }))}
+                                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                                >
+                                                    {showPassword.confirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                     <Button disabled={loading} type="submit" className="w-full sm:w-auto bg-[#2C4276] hover:bg-[#1e2e54] text-white h-12 px-8 rounded-xl font-bold transition-all active:scale-95 flex items-center justify-center gap-2 shadow-md">
@@ -414,108 +537,6 @@ export default function SettingsPage() {
                                         Update Password
                                     </Button>
                                 </form>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    {/* Notifications Tab */}
-                    <TabsContent value="notifications" className="space-y-6">
-                        <Card className="border-none shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)] rounded-2xl bg-white dark:bg-slate-900 text-black dark:text-slate-100">
-                            <CardHeader className="p-8">
-                                <CardTitle className="text-2xl font-bold text-[#233863] dark:text-slate-100">Notification Preferences</CardTitle>
-                                <CardDescription className="text-[#64748b] dark:text-slate-400 font-medium mt-1">Choose how and when you want to be notified.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-8 pt-0 space-y-6">
-                                <div className="space-y-4">
-                                    {[
-                                        { id: 'email', title: "Email Notifications", desc: "Receive email updates about account activity.", icon: Mail, color: "text-blue-500", bg: "bg-blue-50" },
-                                        { id: 'browser', title: "Browser Notifications", desc: "Get real-time push notifications in your browser.", icon: Globe, color: "text-purple-500", bg: "bg-purple-50" },
-                                        { id: 'courseUpdates', title: "Course Updates", desc: "Notifications when a new course is added or updated.", icon: Monitor, color: "text-amber-500", bg: "bg-amber-50" },
-                                        { id: 'studentEnquiries', title: "Student Enquiries", desc: "Alerts for new student inquiry submissions.", icon: User, color: "text-emerald-500", bg: "bg-emerald-50" }
-                                    ].map((item, i) => (
-                                        <div key={i} className="flex items-center justify-between p-4 hover:bg-gray-50/50 dark:hover:bg-slate-800/50 rounded-xl transition-colors border border-transparent hover:border-gray-100 dark:hover:border-slate-800">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`p-2.5 ${item.bg} dark:bg-opacity-10 rounded-lg`}>
-                                                    <item.icon className={`h-5 w-5 ${item.color}`} />
-                                                </div>
-                                                <div>
-                                                    <p className="font-bold text-[#233863] dark:text-slate-200 text-sm">{item.title}</p>
-                                                    <p className="text-xs text-[#64748b] dark:text-slate-400">{item.desc}</p>
-                                                </div>
-                                            </div>
-                                            <Switch
-                                                checked={(settings.notificationSettings as any)[item.id]}
-                                                onCheckedChange={(val) => handleNotificationToggle(item.id, val)}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="pt-6 flex justify-end">
-                                    <Button onClick={handleSettingsSave} disabled={loading} className="w-full sm:w-auto bg-[#3b82f6] text-white h-12 px-8 rounded-xl font-bold active:scale-95 shadow-md flex items-center justify-center">
-                                        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                                        Save Notifications
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </TabsContent>
-
-                    {/* Application Tab */}
-                    <TabsContent value="application" className="space-y-6">
-                        <Card className="border-none shadow-[0_2px_20px_-5px_rgba(0,0,0,0.05)] rounded-2xl bg-white dark:bg-slate-900 text-black dark:text-slate-100">
-                            <CardHeader className="p-8">
-                                <CardTitle className="text-2xl font-bold text-[#233863] dark:text-slate-100">System Preferences</CardTitle>
-                                <CardDescription className="text-[#64748b] dark:text-slate-400 font-medium mt-1">Configure global application settings and theme details.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-8 pt-0 space-y-8">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="space-y-4">
-                                        <h4 className="text-sm font-bold uppercase tracking-widest text-[#64748b] dark:text-slate-500">Appearance</h4>
-                                        <div className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-800">
-                                            <span className="font-bold text-[#233863] dark:text-slate-200 text-sm">Dark Mode</span>
-                                            <Switch
-                                                checked={settings.darkMode}
-                                                onCheckedChange={(val) => {
-                                                    setSettings({ ...settings, darkMode: val });
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <h4 className="text-sm font-bold uppercase tracking-widest text-[#64748b] dark:text-slate-500">Language & Region</h4>
-                                        <div className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-slate-800/50 rounded-xl border border-gray-100 dark:border-slate-800">
-                                            <span className="font-bold text-[#233863] dark:text-slate-200 text-sm">Default Language</span>
-                                            <span className="text-xs font-bold text-[#3b82f6] bg-blue-50 dark:bg-blue-900/40 px-2 py-1 rounded">English (US)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="pt-6 border-t border-gray-100 dark:border-slate-800">
-                                    <h4 className="text-sm font-bold uppercase tracking-widest text-[#64748b] dark:text-slate-500 mb-4">Branding Settings</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-bold text-[#233863] dark:text-slate-300 ml-1">Platform Name</Label>
-                                            <Input
-                                                value={settings.platformName}
-                                                onChange={(e) => setSettings({ ...settings, platformName: e.target.value })}
-                                                className="h-12 rounded-xl bg-gray-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label className="text-sm font-bold text-[#233863] dark:text-slate-300 ml-1">Support Email</Label>
-                                            <Input
-                                                value={settings.supportEmail}
-                                                onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
-                                                className="h-12 rounded-xl bg-gray-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="pt-4 flex justify-end">
-                                    <Button onClick={handleSettingsSave} disabled={loading} className="w-full sm:w-auto bg-[#3b82f6] text-white h-12 px-8 rounded-xl font-bold active:scale-95 shadow-md flex items-center justify-center">
-                                        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                                        Save Application Settings
-                                    </Button>
-                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>

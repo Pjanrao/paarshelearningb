@@ -26,6 +26,7 @@ export default function CourseManagement() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [sort, setSort] = useState("");
+  const [limit, setLimit] = useState<number | "all">(10);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const { data: categoryData } = useGetCategoriesQuery();
@@ -38,7 +39,7 @@ export default function CourseManagement() {
 
   const { data, isLoading } = useGetCoursesQuery({
     page,
-    limit: 5,
+    limit: limit === "all" ? 10000 : limit,
     search,
     category,
     sort,
@@ -171,7 +172,7 @@ export default function CourseManagement() {
                   key={course._id}
                   className="border-t hover:bg-gray-50 transition"
                 >
-                  <td className="p-4">{(page - 1) * 5 + index + 1}</td>
+                  <td className="p-4">{(page - 1) * (limit === "all" ? (data?.total || 0) : limit) + index + 1}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
 
@@ -288,14 +289,32 @@ export default function CourseManagement() {
       </div>
 
       {/* PAGINATION */}
-      {/* PAGINATION */}
       <div className="px-6 py-4 border-t bg-gray-50 flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Left Side Info */}
-        <p className="text-sm text-gray-600">
-          Showing {(page - 1) * 5 + 1} to{" "}
-          {Math.min(page * 5, data?.total || page * 5)} of{" "}
-          {data?.total || 0}
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-sm text-gray-600">
+            Showing {(page - 1) * (limit === "all" ? (data?.total || 0) : limit) + 1} to{" "}
+            {Math.min(page * (limit === "all" ? (data?.total || 0) : limit), data?.total || 0)} of{" "}
+            {data?.total || 0}
+          </p>
+          <div className="flex items-center gap-1 text-sm text-gray-500">
+            <span>Show:</span>
+            <select
+              value={limit}
+              onChange={(e) => {
+                const val = e.target.value;
+                setLimit(val === "all" ? "all" : Number(val));
+                setPage(1);
+              }}
+              className="border px-2 py-1 rounded-lg text-sm bg-white"
+            >
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value="all">All</option>
+            </select>
+          </div>
+        </div>
 
         {/* Right Side Controls */}
         <div className="flex items-center gap-2">

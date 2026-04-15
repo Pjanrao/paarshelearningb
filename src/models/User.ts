@@ -1,6 +1,29 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
+export interface IUser extends mongoose.Document {
+    name: string;
+    email: string;
+    contact: string;
+    password?: string;
+    role: "student" | "teacher" | "admin";
+    image: string;
+    status: "active" | "deleted";
+    deletionReason: string;
+    referralCode?: string;
+    referredBy?: string;
+    walletBalance: number;
+    hasUsedReferral: boolean;
+    referralReward: number;
+    designation: string;
+    avatar: string;
+    loginToken?: string | null;
+    resetOtp?: string | null;
+    resetOtpExpires?: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+const userSchema = new mongoose.Schema<IUser>(
     {
         name: {
             type: String,
@@ -15,6 +38,7 @@ const userSchema = new mongoose.Schema(
         contact: {
             type: String,
             required: [true, "Please provide a contact number"],
+            unique: true,
         },
         password: {
             type: String,
@@ -77,6 +101,14 @@ const userSchema = new mongoose.Schema(
             type: String,
             default: null,
         },
+        resetOtp: {
+            type: String,
+            default: null,
+        },
+        resetOtpExpires: {
+            type: Date,
+            default: null,
+        },
 
     },
     { timestamps: true }
@@ -85,6 +117,6 @@ const userSchema = new mongoose.Schema(
 if (mongoose.models.User) {
     delete mongoose.models.User;
 }
-const User = mongoose.model("User", userSchema);
+const User = mongoose.models.User || mongoose.model<IUser>("User", userSchema);
 
 export default User;

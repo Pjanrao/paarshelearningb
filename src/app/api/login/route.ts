@@ -7,7 +7,8 @@ import User from "@/models/User";
 export async function POST(req: Request) {
     try {
         await connectDB();
-        const { email, password } = await req.json();
+        let { email, password } = await req.json();
+        email = email.trim().toLowerCase();
 
         // 1. Find user and include password field (which is select: false)
         let user = await User.findOne({ email }).select("+password");
@@ -56,17 +57,23 @@ export async function POST(req: Request) {
             );
         }
 
-        // Generate a new loginToken
-        const loginToken = crypto.randomUUID();
-        
-        // Update user in DB with the new token
-        user.loginToken = loginToken;
-        await user.save();
+        // For students: generate a new loginToken (invalidates previous sessions).
+        // For admins: skip overwriting so multiple concurrent sessions are allowed.
+        let loginToken: string | null = null;
+
+        if (user.role !== "admin") {
+            loginToken = crypto.randomUUID();
+            user.loginToken = loginToken;
+            await user.save();
+        } else {
+            // Keep existing loginToken for admin (no single-session restriction)
+            loginToken = user.loginToken || null;
+        }
 
         // 3. Generate JWT
         const token = jwt.sign(
             { id: user._id, role: user.role, loginToken },
-            process.env.JWT_SECRET || "default_secret",
+            process.env.JWT_SECRET || "paarsh_super_secret_key_123",
             { expiresIn: "1d" }
         );
 

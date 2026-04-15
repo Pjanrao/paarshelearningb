@@ -30,7 +30,7 @@ export default function MeetingManagement() {
     const [viewMeeting, setViewMeeting] = useState<any>(null);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const [itemsPerPage, setItemsPerPage] = useState<number | "all">(10);
 
     const {
         data: meetings = [],
@@ -38,11 +38,12 @@ export default function MeetingManagement() {
         isError,
     } = useGetMeetingsQuery("");
 
-    const totalPages = Math.ceil(meetings.length / itemsPerPage);
+    const effectiveLimit = itemsPerPage === "all" ? meetings.length : itemsPerPage;
+    const totalPages = itemsPerPage === "all" ? 1 : Math.ceil(meetings.length / effectiveLimit);
 
     const paginatedMeetings = meetings.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
+        (currentPage - 1) * effectiveLimit,
+        currentPage * effectiveLimit
     );
 
     const [deleteMeeting] = useDeleteMeetingMutation();
@@ -191,7 +192,7 @@ export default function MeetingManagement() {
                                         className="border-t hover:bg-gray-50 transition"
                                     >
                                         {/* ID */}
-                                        <td className="px-4 md:px-6 py-5">{(currentPage - 1) * itemsPerPage + index + 1}</td>
+                                        <td className="px-4 md:px-6 py-5">{(currentPage - 1) * effectiveLimit + index + 1}</td>
 
                                         {/* Title */}
                                         <td className="px-4 md:px-6 py-5 font-semibold text-gray-900">
@@ -277,9 +278,28 @@ export default function MeetingManagement() {
 
             {/* PAGINATION */}
             <div className="px-4 md:px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row justify-between items-center gap-4 mt-2">
-                <p className="text-sm text-gray-600">
-                    Showing {meetings.length} meetings
-                </p>
+                <div className="flex items-center gap-3">
+                    <p className="text-sm text-gray-600">
+                        Showing {meetings.length > 0 ? (currentPage - 1) * effectiveLimit + 1 : 0} to {Math.min(currentPage * effectiveLimit, meetings.length)} of {meetings.length} meetings
+                    </p>
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                        <span>Show:</span>
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setItemsPerPage(val === "all" ? "all" : Number(val));
+                                setCurrentPage(1);
+                            }}
+                            className="border px-2 py-1 rounded-lg text-sm bg-white"
+                        >
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                            <option value="all">All</option>
+                        </select>
+                    </div>
+                </div>
 
                 <div className="flex flex-wrap justify-center gap-2">
 

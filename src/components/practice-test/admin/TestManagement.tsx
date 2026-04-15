@@ -33,6 +33,7 @@ export default function TestManagement() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState<number | "all">(10);
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editingTest, setEditingTest] = useState<any>(null);
@@ -41,7 +42,7 @@ export default function TestManagement() {
 
   const { data, isLoading } = useGetPracticeTestsQuery({
     page,
-    limit: 10,
+    limit: itemsPerPage === "all" ? 99999 : itemsPerPage,
     search,
     status,
   });
@@ -233,33 +234,50 @@ export default function TestManagement() {
         </div>
 
         {/* PAGINATION */}
-        {totalPages > 1 && (
-          <div className="px-6 py-5 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="px-6 py-5 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
             <p className="text-xs text-gray-500 font-bold tracking-tight">
               PAGE <span className="text-[#2C4276]">{page}</span> OF <span className="text-[#2C4276]">{totalPages}</span>
             </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page === 1}
-                onClick={() => setPage(p => p - 1)}
-                className="h-10 rounded-xl border-gray-200 bg-white font-bold text-gray-600 hover:bg-gray-50 shadow-sm px-5 transition-all active:scale-95 disabled:opacity-50"
+            <div className="flex items-center gap-1 text-sm text-gray-500">
+              <span className="font-medium">Show:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setItemsPerPage(val === "all" ? "all" : Number(val));
+                  setPage(1);
+                }}
+                className="border px-2 py-1 rounded-lg text-sm bg-white font-medium"
               >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={page === totalPages}
-                onClick={() => setPage(p => p + 1)}
-                className="h-10 rounded-xl border-gray-200 bg-white font-bold text-gray-600 hover:bg-gray-50 shadow-sm px-5 transition-all active:scale-95 disabled:opacity-50"
-              >
-                Next
-              </Button>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value="all">All</option>
+              </select>
             </div>
           </div>
-        )}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage(p => p - 1)}
+              className="h-10 rounded-xl border-gray-200 bg-white font-bold text-gray-600 hover:bg-gray-50 shadow-sm px-5 transition-all active:scale-95 disabled:opacity-50"
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === totalPages}
+              onClick={() => setPage(p => p + 1)}
+              className="h-10 rounded-xl border-gray-200 bg-white font-bold text-gray-600 hover:bg-gray-50 shadow-sm px-5 transition-all active:scale-95 disabled:opacity-50"
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* MODALS */}

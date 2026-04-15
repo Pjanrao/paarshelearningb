@@ -42,10 +42,16 @@ export function middleware(req: NextRequest) {
         path.startsWith("/seo-training-course") ||
         path.startsWith("/internship-digital-marketing") ||
         path.startsWith("/blog") ||
+        path.startsWith("/workshops") ||
+        path.startsWith("/workshop") ||
+        path.startsWith("/career") ||
         path.startsWith("/documentation") ||
         path.startsWith("/inquiry") ||
         path.startsWith("/portfolio") ||
         path.startsWith("/services") ||
+        path.startsWith("/terms-and-conditions") ||
+        path.startsWith("/privacy-policy") ||
+        path.startsWith("/return-policy") ||
         path.startsWith("/api/auth") ||
         path.startsWith("/api/login") ||
         path.startsWith("/api/register") ||

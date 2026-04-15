@@ -167,6 +167,22 @@ const Contactform = () => {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [settings, setSettings] = useState<any>(null);
+
+  React.useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch("/api/settings");
+        if (response.ok) {
+          const data = await response.json();
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch settings:", error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -259,13 +275,13 @@ const Contactform = () => {
               <div className='col-span-3'>
                 <span className='text-white/50 text-lg'>Phone</span>
                 <p className='bg-transparent border-0 text-white text-lg'>
-                  +91 90752 01033
+                  {settings?.contactDetails?.phone || "+91 90752 01033"}
                 </p>
               </div>
               <div className='col-span-3'>
                 <span className='text-white/50 text-lg'>Email</span>
                 <p className='bg-transparent border-0 text-white text-lg'>
-                  info@paarshelearning.com
+                  {settings?.contactDetails?.email || "paarshelearning@gmail.com"}
                 </p>
               </div>
               <div className='col-span-6 pt-8'>

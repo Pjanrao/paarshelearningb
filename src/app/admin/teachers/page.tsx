@@ -51,7 +51,7 @@ export default function TeachersPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
-    const teachersPerPage = 10;
+    const [teachersPerPage, setTeachersPerPage] = useState<number | "all">(10);
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -79,9 +79,10 @@ export default function TeachersPage() {
     const fetchTeachers = async () => {
         try {
             setLoading(true);
+            const limit = teachersPerPage === "all" ? 99999 : teachersPerPage;
             setErrorMsg(null);
             const response = await fetch(
-                `/api/teachers?search=${searchQuery}&page=${currentPage}&limit=${teachersPerPage}`
+                `/api/teachers?search=${searchQuery}&page=${currentPage}&limit=${limit}`
             );
 
             if (!response.ok) {
@@ -107,7 +108,7 @@ export default function TeachersPage() {
         }, 300);
 
         return () => clearTimeout(debounceTimer);
-    }, [searchQuery, currentPage]);
+    }, [searchQuery, currentPage, teachersPerPage]);
 
     const handleAddTeacher = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -331,7 +332,7 @@ export default function TeachersPage() {
                                     {teachers.map((teacher, index) => (
                                         <tr key={teacher._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                                {(currentPage - 1) * teachersPerPage + index + 1}
+                                                {(currentPage - 1) * (teachersPerPage as number) + index + 1}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
@@ -397,8 +398,27 @@ export default function TeachersPage() {
                         </div>
 
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="text-sm text-gray-600 font-medium order-2 md:order-1">
-                                Showing <span className="font-bold text-gray-900">{(currentPage - 1) * teachersPerPage + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * teachersPerPage, total)}</span> of <span className="font-bold text-gray-900">{total}</span> teachers
+                            <div className="flex items-center gap-3 font-medium order-2 md:order-1">
+                                <div className="text-sm text-gray-600">
+                                    Showing <span className="font-bold text-gray-900">{(currentPage - 1) * (teachersPerPage as number) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * (teachersPerPage as number), total)}</span> of <span className="font-bold text-gray-900">{total}</span> teachers
+                                </div>
+                                <div className="flex items-center gap-1 text-sm text-gray-500">
+                                    <span>Show:</span>
+                                    <select
+                                        value={teachersPerPage}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setTeachersPerPage(val === "all" ? "all" : Number(val));
+                                            setCurrentPage(1);
+                                        }}
+                                        className="border px-2 py-1 rounded-lg text-sm bg-white"
+                                    >
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
+                                        <option value="all">All</option>
+                                    </select>
+                                </div>
                             </div>
                             <div className="flex items-center gap-2 order-1 md:order-2">
                                 <button
