@@ -21,6 +21,9 @@ export default function SessionValidator() {
             // Avoid checking if currently on public auth routes where you aren't logged in
             if (publicPaths.includes(pathname)) return;
 
+            // Admin users are allowed multiple concurrent sessions — skip verification
+            if (pathname.startsWith("/admin")) return;
+
             // Avoid overlapping checks
             if (isChecking.current) return;
             isChecking.current = true;

@@ -2,15 +2,12 @@ import mongoose from "mongoose";
 
 const SettingsSchema = new mongoose.Schema(
     {
-        platformName: { type: String, default: "Paarsh E-Learning" },
-        supportEmail: { type: String, default: "support@paarsh.com" },
-        darkMode: { type: Boolean, default: false },
-        defaultLanguage: { type: String, default: "en" },
-        notificationSettings: {
-            email: { type: Boolean, default: true },
-            browser: { type: Boolean, default: true },
-            courseUpdates: { type: Boolean, default: true },
-            studentEnquiries: { type: Boolean, default: true }
+        contactDetails: {
+            phone: { type: String, default: "+91 90752 01033" },
+            email: { type: String, default: "paarshelearning@gmail.com" },
+            puneAddress: { type: String, default: "Second Floor, Wisteriaa Fortune, Wakad, Maharashtra 411057" },
+            nashikAddress: { type: String, default: "Bhakti Apartment, Suchita Nagar, Mumbai Naka, Nashik" },
+            openHours: { type: String, default: "Mon - Fri, 9:30 AM - 7:30 PM" }
         }
     },
     { timestamps: true }

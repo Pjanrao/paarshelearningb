@@ -17,6 +17,22 @@ const InquiryPage = () => {
         message: "",
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [settings, setSettings] = useState<any>(null);
+
+    React.useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const response = await fetch("/api/settings");
+                if (response.ok) {
+                    const data = await response.json();
+                    setSettings(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch settings:", error);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -127,7 +143,9 @@ const InquiryPage = () => {
                                 </div>
                                 <div>
                                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Direct Call</p>
-                                    <Link href="tel:+919075201033" className="text-lg font-black text-[#2B4278] dark:text-white hover:text-[#01A0E2] transition-colors">+91 90752 01033</Link>
+                                    <Link href={`tel:${settings?.contactDetails?.phone?.replace(/\s/g, "") || "+919075201033"}`} className="text-lg font-black text-[#2B4278] dark:text-white hover:text-[#01A0E2] transition-colors">
+                                        {settings?.contactDetails?.phone || "+91 90752 01033"}
+                                    </Link>
                                 </div>
                             </div>
 
@@ -137,7 +155,9 @@ const InquiryPage = () => {
                                 </div>
                                 <div className="min-w-0">
                                     <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Email Support</p>
-                                    <Link href="mailto:paarshelearning@gmail.com" className="text-lg font-black text-[#2B4278] dark:text-white hover:text-[#01A0E2] transition-colors truncate block">paarshelearning@gmail.com</Link>
+                                    <Link href={`mailto:${settings?.contactDetails?.email || "paarshelearning@gmail.com"}`} className="text-lg font-black text-[#2B4278] dark:text-white hover:text-[#01A0E2] transition-colors truncate block">
+                                        {settings?.contactDetails?.email || "paarshelearning@gmail.com"}
+                                    </Link>
                                 </div>
                             </div>
                         </div>
