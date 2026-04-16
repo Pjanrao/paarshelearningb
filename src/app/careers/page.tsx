@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useGetJobsQuery } from "@/redux/api/jobApi";
-import { Briefcase, MapPin, Building, PlusCircle, ArrowRight } from "lucide-react";
+import { Briefcase, MapPin, Building, ArrowRight, ChevronRight } from "lucide-react";
 
 export default function Careers() {
     const { data: jobs, isLoading, error } = useGetJobsQuery();
@@ -10,11 +10,19 @@ export default function Careers() {
     return (
         <div className="bg-gray-50/30 pt-24 pb-20 px-4 sm:px-6">
             <div className="max-w-7xl mx-auto">
+
+                {/* BREADCRUMB */}
+                <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-10 px-2">
+                    <Link href="/" className="hover:text-[#2C4276] transition-colors font-medium">Home</Link>
+                    <ChevronRight size={14} className="text-gray-400" />
+                    <span className="text-[#2C4276] font-semibold">Careers</span>
+                </nav>
+
                 <div className="text-center mb-16 px-4">
-                    <h1 className="text-3xl sm:text-4xl lg:text-4xl font-bold text-gray-900 tracking-tight leading-tight">
+                    <h1 className="text-3xl sm:text-4xl lg:text-4xl font-bold text-midnight_text tracking-tight leading-tight">
                         Career Opportunities
                     </h1>
-                    <p className="mt-4 text-base sm:text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
+                    <p className="mt-4 text-base sm:text-lg text-grey max-w-2xl mx-auto leading-relaxed">
                         Join a team of innovators and creators dedicated to transforming the future of education. Find your next role with us.
                     </p>
                 </div>
@@ -37,8 +45,8 @@ export default function Careers() {
                         <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
                             <span className="text-red-500 font-bold">!</span>
                         </div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-2">Systems unavailable</h3>
-                        <p className="text-sm text-gray-500 mb-6 leading-relaxed">We're having trouble reaching our careers database. Please try refreshing or check back in a few moments.</p>
+                        <h3 className="text-lg font-bold text-midnight_text mb-2">Systems unavailable</h3>
+                        <p className="text-sm text-grey mb-6 leading-relaxed">We're having trouble reaching our careers database. Please try refreshing or check back in a few moments.</p>
                         <button onClick={() => window.location.reload()} className="px-6 py-2 bg-primary text-white text-sm font-bold rounded-full hover:shadow-lg transition-all">
                             Refresh Page
                         </button>
@@ -48,8 +56,8 @@ export default function Careers() {
                         <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-6">
                             <Briefcase className="w-8 h-8 text-gray-300" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">Expanding our horizon soon</h3>
-                        <p className="text-sm text-gray-500 leading-relaxed">We don't have any matching positions at the moment, but we're always growing. Check back soon or follow our updates.</p>
+                        <h3 className="text-xl font-bold text-midnight_text mb-2">Expanding our horizon soon</h3>
+                        <p className="text-sm text-grey leading-relaxed">We don't have any matching positions at the moment, but we're always growing. Check back soon or follow our updates.</p>
                     </div>
                 ) : (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 px-2 sm:px-4">
@@ -67,7 +75,7 @@ export default function Careers() {
                                                 </span>
                                             )}
                                         </div>
-                                        <h2 className="text-xl font-extrabold text-gray-900 group-hover:text-primary transition-colors line-clamp-2 leading-tight mb-4">
+                                        <h2 className="text-xl font-extrabold text-midnight_text group-hover:text-primary transition-colors line-clamp-2 leading-tight mb-4">
                                             {job.title}
                                         </h2>
 
@@ -82,7 +90,7 @@ export default function Careers() {
                                             </div>
                                         </div>
 
-                                        <p className="text-gray-500 text-sm leading-relaxed line-clamp-3 mb-8">
+                                        <p className="text-grey text-sm leading-relaxed line-clamp-3 mb-8">
                                             {job.description}
                                         </p>
                                     </div>
@@ -90,7 +98,7 @@ export default function Careers() {
                                     <div className="mt-auto">
                                         <Link
                                             href={`/careers/${job._id}`}
-                                            className="inline-flex items-center justify-center w-full px-6 py-3 bg-gray-950 text-white text-sm font-bold rounded-lg group-hover:bg-primary transition-all duration-300 shadow-sm"
+                                            className="inline-flex items-center justify-center w-full px-6 py-3 bg-primary text-white text-sm font-bold rounded-lg group-hover:bg-midnight_text transition-all duration-300 shadow-sm"
                                         >
                                             View Opportunity
                                             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />

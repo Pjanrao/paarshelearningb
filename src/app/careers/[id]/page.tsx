@@ -7,6 +7,7 @@ import {
     MapPin,
     Briefcase,
     ChevronLeft,
+    ChevronRight,
     CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
@@ -38,21 +39,21 @@ export default function JobDetails() {
     return (
         <div className="bg-gray-50/50 pt-24 pb-8 px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
-                {/* Navigation */}
-                <Link
-                    href="/careers"
-                    className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-primary mb-6 transition-colors group"
-                >
-                    <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
-                    Back to careers
-                </Link>
+                {/* BREADCRUMB */}
+                <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-6">
+                    <Link href="/" className="hover:text-[#2C4276] transition-colors font-medium">Home</Link>
+                    <ChevronRight size={14} className="text-gray-400" />
+                    <Link href="/careers" className="hover:text-[#2C4276] transition-colors font-medium">Careers</Link>
+                    <ChevronRight size={14} className="text-gray-400" />
+                    <span className="text-[#2C4276] font-semibold truncate max-w-[200px] sm:max-w-xs">{job.title}</span>
+                </nav>
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     {/* Header Section */}
                     <div className="px-6 py-6 sm:px-8 border-b border-gray-100 bg-gradient-to-r from-blue-50/30 to-transparent">
                         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                             <div className="flex-1">
-                                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-3">
+                                <h1 className="text-2xl sm:text-3xl font-extrabold text-midnight_text tracking-tight mb-3">
                                     {job.title}
                                 </h1>
                                 <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-gray-600">
@@ -93,7 +94,7 @@ export default function JobDetails() {
                         <div className="lg:col-span-2 space-y-8">
                             {/* About */}
                             <section>
-                                <h2 className="text-lg font-bold text-gray-900 border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
+                                <h2 className="text-lg font-bold text-midnight_text border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
                                     About the Role
                                 </h2>
                                 <div className="text-gray-600 leading-relaxed space-y-3">
@@ -106,13 +107,13 @@ export default function JobDetails() {
                             {/* Responsibilities */}
                             {job.responsibilities && (
                                 <section>
-                                    <h2 className="text-lg font-bold text-gray-900 border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
+                                    <h2 className="text-lg font-bold text-midnight_text border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
                                         Responsibilities
                                     </h2>
-                                    <div className="text-gray-600 leading-relaxed space-y-2">
-                                        {job.responsibilities.split("\n").map((r: string, i: number) => (
+                                    <div className="text-grey leading-relaxed space-y-2">
+                                        {job.responsibilities.split("\n").filter((r: string) => r.trim() !== "").map((r: string, i: number) => (
                                             <div key={i} className="flex items-start">
-                                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/40 mt-2 mr-3 flex-shrink-0" />
+                                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/60 mt-2 mr-3 flex-shrink-0" />
                                                 <p>{r}</p>
                                             </div>
                                         ))}
@@ -123,7 +124,7 @@ export default function JobDetails() {
                             {/* Requirements */}
                             {job.requirements && (
                                 <section>
-                                    <h2 className="text-lg font-bold text-gray-900 border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
+                                    <h2 className="text-lg font-bold text-midnight_text border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
                                         Key Requirements
                                     </h2>
                                     <ul className="space-y-3">
@@ -140,10 +141,10 @@ export default function JobDetails() {
                             {/* Education */}
                             {job.education && (
                                 <section>
-                                    <h2 className="text-lg font-bold text-gray-900 border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
+                                    <h2 className="text-lg font-bold text-midnight_text border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
                                         Education
                                     </h2>
-                                    <p className="text-gray-600 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                    <p className="text-grey bg-gray-50 p-4 rounded-lg border border-gray-100">
                                         {job.education}
                                     </p>
                                 </section>
@@ -154,14 +155,14 @@ export default function JobDetails() {
                         <div className="lg:col-span-1">
                             <div className="sticky top-6 space-y-6">
                                 <div className="bg-gray-50 border border-gray-100 rounded-xl p-6">
-                                    <h3 className="font-bold text-gray-900 mb-4 flex items-center">
+                                    <h3 className="font-bold text-midnight_text mb-4 flex items-center">
                                         <Briefcase className="w-5 h-5 mr-2 text-primary" />
                                         Job Overview
                                     </h3>
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="text-gray-500">Posted on</span>
-                                            <span className="font-semibold text-gray-900">
+                                            <span className="font-semibold text-midnight_text">
                                                 {new Date(job.createdAt).toLocaleDateString("en-US", {
                                                     month: "short",
                                                     day: "numeric",
@@ -171,24 +172,24 @@ export default function JobDetails() {
                                         </div>
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="text-gray-500">Location</span>
-                                            <span className="font-semibold text-gray-900">{job.location}</span>
+                                            <span className="font-semibold text-midnight_text">{job.location}</span>
                                         </div>
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="text-gray-500">Employment</span>
-                                            <span className="font-semibold text-gray-900">
+                                            <span className="font-semibold text-midnight_text">
                                                 {job.type}
                                             </span>
                                         </div>
                                         <div className="flex justify-between items-center text-sm">
                                             <span className="text-gray-500">Work Mode</span>
-                                            <span className="font-semibold text-gray-900">{job.workMode}</span>
+                                            <span className="font-semibold text-midnight_text">{job.workMode}</span>
                                         </div>
                                     </div>
 
                                     {/* Skills in Sidebar */}
                                     {job.skills?.length > 0 && (
                                         <div className="mt-8">
-                                            <h3 className="font-bold text-gray-900 mb-4 text-sm">Required Skills</h3>
+                                            <h3 className="font-bold text-midnight_text mb-4 text-sm">Required Skills</h3>
                                             <div className="flex flex-wrap gap-2">
                                                 {job.skills.map((skill: string, i: number) => (
                                                     <span

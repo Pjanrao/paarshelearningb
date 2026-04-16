@@ -18,7 +18,7 @@ const HeroSub: FC<HeroSubProps> = ({ title, description, breadcrumbLinks }) => {
         <p className=' md:text-xl text-lg text-grey dark:text-white/50 font-normal w-full max-w-full lg:max-w-45 my-6 lg:my-[1.875rem] text-justify'>
           {description}
         </p>
-        {/* <Breadcrumb links={breadcrumbLinks} /> */}
+        <Breadcrumb links={breadcrumbLinks} />
       </section>
     </>
   )
