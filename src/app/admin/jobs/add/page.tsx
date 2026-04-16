@@ -33,12 +33,29 @@ export default function AddJob() {
         e.preventDefault();
         try {
             await createJob({
-                ...form,
+                title: form.title,
+                company: form.company,
+                location: form.location,
+                salary: form.salary,
+                description: form.description,
+
+                // ✅ IMPORTANT (THIS WAS MISSING EFFECTIVELY)
+                type: form.type,
+
+                workMode: form.workMode,
+                responsibilities: form.responsibilities,
+                education: form.education,
+                isActive: form.isActive,
+
                 skills: form.skills
                     ? form.skills.split(",").map((s) => s.trim())
                     : [],
+
                 requirements: form.requirements
-                    ? form.requirements.split("\n").filter((r) => r.trim() !== "").map((r) => r.trim())
+                    ? form.requirements
+                        .split("\n")
+                        .filter((r) => r.trim() !== "")
+                        .map((r) => r.trim())
                     : [],
             }).unwrap(); router.push("/admin/jobs");
         } catch (error) {
@@ -148,7 +165,7 @@ export default function AddJob() {
                         </div>
 
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-midnight_text mb-1">Requirements </label>
+                            <label className="block text-sm font-medium text-midnight_text mb-1">Key Requirements </label>
                             <textarea
                                 rows={5}
                                 placeholder="e.g. 3+ years of React experience&#10;Strong understanding of CSS..."
@@ -161,41 +178,66 @@ export default function AddJob() {
                             <label className="block text-sm font-medium mb-1">Responsibilities</label>
                             <textarea
                                 rows={4}
-                                className="w-full px-4 py-2.5 rounded-lg border"
+                                placeholder="Define key responsibilities (e.g. Develop UI components, Collaborate with team, Optimize performance...)"
+                                className="w-full px-4 py-2.5 rounded-lg border border-border/50 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                                 value={form.responsibilities}
                                 onChange={(e) =>
                                     setForm({ ...form, responsibilities: e.target.value })
                                 }
                             />
                         </div>
+
                         <div>
                             <label className="block text-sm font-medium mb-1">Education</label>
                             <input
-                                className="w-full px-4 py-2.5 rounded-lg border"
+                                placeholder="e.g. B.Tech / MCA / Any Graduate"
+                                className="w-full px-4 py-2.5 rounded-lg border border-border/50 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                                 value={form.education}
                                 onChange={(e) => setForm({ ...form, education: e.target.value })}
                             />
                         </div>
+
                         <div>
                             <label className="block text-sm font-medium mb-1">Skills</label>
                             <input
-                                placeholder="React, Node, MongoDB"
-                                className="w-full px-4 py-2.5 rounded-lg border"
+                                placeholder="e.g. React, Node.js, MongoDB, Tailwind CSS"
+                                className="w-full px-4 py-2.5 rounded-lg border border-border/50 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                                 value={form.skills}
                                 onChange={(e) => setForm({ ...form, skills: e.target.value })}
                             />
                         </div>
                     </div>
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={form.isActive}
-                            onChange={(e) =>
-                                setForm({ ...form, isActive: e.target.checked })
-                            }
-                        />
-                        Active Job
-                    </label>
+                    <div className="mt-6 pt-4 border-t border-border/50">
+
+                        <div className="flex items-center gap-4">
+
+                            {/* Label */}
+
+                            {/* Status Text */}
+                            <span
+                                className={`text-sm font-medium ${form.isActive ? "text-green-600" : "text-red-500"
+                                    }`}
+                            >
+                                {form.isActive ? "Active" : "Inactive"}
+                            </span>
+
+                            {/* Toggle */}
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setForm({ ...form, isActive: !form.isActive })
+                                }
+                                className={`relative inline-flex h-6 w-12 items-center rounded-full transition-all duration-300 ${form.isActive ? "bg-primary" : "bg-gray-300"
+                                    }`}
+                            >
+                                <span
+                                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-all duration-300 ${form.isActive ? "translate-x-6" : "translate-x-1"
+                                        }`}
+                                />
+                            </button>
+
+                        </div>
+                    </div>
                     <div className="pt-4 border-t border-border/50 flex justify-end gap-4">
                         <Link
                             href="/admin/jobs"

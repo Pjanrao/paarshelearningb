@@ -71,7 +71,7 @@ export default function EditJob() {
     }
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 w-full max-w-4xl mx-auto">
+        <div className="p-4 sm:p-6 lg:p-8 w-full max-w-4xl mx-auto ">
             <div className="mb-8">
                 <Link href="/admin/jobs" className="inline-flex items-center text-sm font-medium text-grey hover:text-primary mb-4 transition-colors">
                     <ChevronLeft className="w-4 h-4 mr-1" />
@@ -166,7 +166,7 @@ export default function EditJob() {
                         </div>
 
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-midnight_text mb-1">Requirements</label>
+                            <label className="block text-sm font-medium text-midnight_text mb-1">Key Requirements</label>
                             <textarea
                                 rows={5}
                                 className="w-full px-4 py-2.5 rounded-lg border border-border/50 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all resize-y"
@@ -203,16 +203,37 @@ export default function EditJob() {
                             />
                         </div>
                     </div>
-                    <label className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={form.isActive}
-                            onChange={(e) =>
-                                setForm({ ...form, isActive: e.target.checked })
-                            }
-                        />
-                        Active Job
-                    </label>
+                    <div className="mt-6 pt-4 border-t border-border/50">
+
+                        <div className="flex items-center gap-4">
+
+
+
+                            {/* Status Text */}
+                            <span
+                                className={`text-sm font-medium ${form.isActive ? "text-green-600" : "text-red-500"
+                                    }`}
+                            >
+                                {form.isActive ? "Active" : "Inactive"}
+                            </span>
+
+                            {/* Toggle */}
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setForm({ ...form, isActive: !form.isActive })
+                                }
+                                className={`relative inline-flex h-6 w-12 items-center rounded-full transition-all duration-300 ${form.isActive ? "bg-primary" : "bg-gray-300"
+                                    }`}
+                            >
+                                <span
+                                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-all duration-300 ${form.isActive ? "translate-x-6" : "translate-x-1"
+                                        }`}
+                                />
+                            </button>
+
+                        </div>
+                    </div>
                     <div className="pt-4 border-t border-border/50 flex justify-end gap-4">
                         <Link
                             href="/admin/jobs"

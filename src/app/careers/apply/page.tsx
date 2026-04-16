@@ -187,16 +187,20 @@ function ApplyForm() {
 }
 
 export default function Apply() {
+    const router = useRouter();
     return (
         <div className="min-h-screen bg-section py-12 px-4 sm:px-6 flex items-center justify-center relative overflow-hidden">
             {/* Background elements to match brand styling */}
             <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] z-0 pointer-events-none"></div>
 
             <div className="max-w-xl w-full z-10 relative">
-                <Link href="/careers" className="inline-flex items-center text-sm font-medium text-grey hover:text-primary mb-6 transition-colors pl-2">
+                <button
+                    onClick={() => router.back()}
+                    className="inline-flex items-center text-sm font-medium text-grey hover:text-primary mb-6 transition-colors pl-2"
+                >
                     <ChevronLeft className="w-4 h-4 mr-1" />
                     Back
-                </Link>
+                </button>
                 <div className="bg-white/80 backdrop-blur-xl rounded-[40px] shadow-deatail_shadow border border-white/40 overflow-hidden">
                     <Suspense fallback={<div className="p-12 pl-12 text-center text-grey">Loading form...</div>}>
                         <ApplyForm />

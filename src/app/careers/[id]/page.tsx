@@ -6,7 +6,6 @@ import {
     Building,
     MapPin,
     Briefcase,
-    Clock,
     ChevronLeft,
     CheckCircle2,
 } from "lucide-react";
@@ -19,16 +18,7 @@ export default function JobDetails() {
     const { data: job, isLoading, error } = useGetJobByIdQuery(id as string);
 
     if (isLoading) {
-        return (
-            <div className="min-h-screen bg-gray-50/50 py-12 px-4">
-                <div className="max-w-4xl mx-auto space-y-6 animate-pulse">
-                    <div className="h-8 w-24 bg-slate-200 rounded mb-8"></div>
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <div className="h-10 w-3/4 bg-slate-200 rounded mb-4"></div>
-                    </div>
-                </div>
-            </div>
-        );
+        return <div className="p-10 text-center">Loading...</div>;
     }
 
     if (error || !job) {
@@ -46,99 +36,86 @@ export default function JobDetails() {
     };
 
     return (
-        <div className="min-h-screen bg-section py-12 px-4 sm:px-6 lg:px-8">
+        <div className="bg-gray-50/50 pt-24 pb-8 px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
-                {/* Back */}
+                {/* Navigation */}
                 <Link
                     href="/careers"
-                    className="inline-flex items-center text-sm font-medium text-grey hover:text-primary mb-8 transition-colors"
+                    className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-primary mb-6 transition-colors group"
                 >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
+                    <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
                     Back to careers
                 </Link>
 
-                <div className="bg-white rounded-3xl shadow-deatail_shadow border border-border/40 overflow-hidden">
-                    {/* HEADER */}
-                    <div className="px-8 py-10 sm:px-12 lg:py-12 border-b border-border/40 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#e0f7ff] via-white to-white">
-                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                            <div>
-                                <h1 className="text-3xl sm:text-4xl font-black text-midnight_text tracking-tight mb-4">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    {/* Header Section */}
+                    <div className="px-6 py-6 sm:px-8 border-b border-gray-100 bg-gradient-to-r from-blue-50/30 to-transparent">
+                        <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                            <div className="flex-1">
+                                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-3">
                                     {job.title}
                                 </h1>
-
-                                <div className="flex flex-wrap gap-4 text-secondary font-medium">
-                                    <div className="flex items-center">
-                                        <Building className="w-5 h-5 mr-2 text-primary" />
+                                <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-gray-600">
+                                    <span className="flex items-center">
+                                        <Building className="w-4 h-4 mr-1.5 text-primary/70" />
                                         {job.company || "Paarsh E-learning"}
-                                    </div>
-
-                                    <div className="flex items-center">
-                                        <MapPin className="w-5 h-5 mr-2 text-primary" />
-                                        {job.location || "Remote"}
-                                    </div>
-
-                                    <div className="flex items-center">
-                                        <Briefcase className="w-5 h-5 mr-2 text-primary" />
-                                        {job.type || "Full-time"}
-                                    </div>
-
-                                    {/* ✅ Work Mode Badge */}
-                                    <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-semibold">
-                                        {job.workMode || "Remote"}
                                     </span>
-
-                                    {/* ✅ Salary ₹ */}
+                                    <span className="flex items-center">
+                                        <MapPin className="w-4 h-4 mr-1.5 text-primary/70" />
+                                        {job.location}
+                                    </span>
+                                    <span className="flex items-center">
+                                        <Briefcase className="w-4 h-4 mr-1.5 text-primary/70" />
+                                        {job.type}
+                                    </span>
+                                    <span className="px-2 py-0.5 bg-primary/10 text-primary text-xs font-bold rounded uppercase tracking-wider">
+                                        {job.workMode}
+                                    </span>
                                     {job.salary && (
-                                        <div className="flex items-center text-success font-semibold">
+                                        <span className="text-success font-bold text-base">
                                             ₹ {job.salary}
-                                        </div>
+                                        </span>
                                     )}
                                 </div>
                             </div>
-
-                            {/* Apply */}
-                            <div className="flex-shrink-0 mt-4 md:mt-0">
-                                <button
-                                    onClick={() =>
-                                        router.push(`/careers/apply?jobId=${job._id}`)
-                                    }
-                                    className="px-8 py-3.5 bg-primary text-white text-lg font-bold rounded-full shadow-lg shadow-primary/20 hover:bg-primary/90 transform hover:-translate-y-1 transition-all duration-300"
-                                >
-                                    Apply Now
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => router.push(`/careers/apply?jobId=${job._id}`)}
+                                className="w-full md:w-auto px-8 py-3 bg-primary text-white font-bold rounded-lg shadow-lg shadow-primary/20 hover:bg-primary/90 hover:shadow-xl transition-all active:scale-95 text-center"
+                            >
+                                Apply for this position
+                            </button>
                         </div>
                     </div>
 
-                    {/* CONTENT */}
-                    <div className="px-8 py-10 sm:px-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
-                        {/* LEFT */}
-                        <div className="lg:col-span-2 space-y-10 border-b lg:border-b-0 lg:border-r border-border/50 lg:pr-12 pb-10 lg:pb-0">
-
-                            {/* Description */}
+                    {/* Content Section */}
+                    <div className="px-6 py-8 sm:px-8 grid grid-cols-1 lg:grid-cols-3 gap-10">
+                        {/* Main Body */}
+                        <div className="lg:col-span-2 space-y-8">
+                            {/* About */}
                             <section>
-                                <h2 className="text-2xl font-bold text-midnight_text mb-4">
+                                <h2 className="text-lg font-bold text-gray-900 border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
                                     About the Role
                                 </h2>
-                                <div className="prose prose-lg max-w-none text-grey">
+                                <div className="text-gray-600 leading-relaxed space-y-3">
                                     {job.description?.split("\n").map((p: string, i: number) => (
                                         <p key={i}>{p}</p>
                                     ))}
                                 </div>
                             </section>
 
-                            {/* ✅ Responsibilities */}
+                            {/* Responsibilities */}
                             {job.responsibilities && (
                                 <section>
-                                    <h2 className="text-2xl font-bold text-midnight_text mb-4">
+                                    <h2 className="text-lg font-bold text-gray-900 border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
                                         Responsibilities
                                     </h2>
-                                    <div className="prose prose-lg text-grey">
-                                        {job.responsibilities
-                                            .split("\n")
-                                            .map((r: string, i: number) => (
-                                                <p key={i}>{r}</p>
-                                            ))}
+                                    <div className="text-gray-600 leading-relaxed space-y-2">
+                                        {job.responsibilities.split("\n").map((r: string, i: number) => (
+                                            <div key={i} className="flex items-start">
+                                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/40 mt-2 mr-3 flex-shrink-0" />
+                                                <p>{r}</p>
+                                            </div>
+                                        ))}
                                     </div>
                                 </section>
                             )}
@@ -146,68 +123,95 @@ export default function JobDetails() {
                             {/* Requirements */}
                             {job.requirements && (
                                 <section>
-                                    <h2 className="text-2xl font-bold text-midnight_text mb-4">
-                                        Requirements
+                                    <h2 className="text-lg font-bold text-gray-900 border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
+                                        Key Requirements
                                     </h2>
                                     <ul className="space-y-3">
-                                        {formatRequirements(job.requirements).map(
-                                            (req: string, idx: number) => (
-                                                <li key={idx} className="flex items-start">
-                                                    <CheckCircle2 className="w-5 h-5 mr-2 text-primary" />
-                                                    {req}
-                                                </li>
-                                            )
-                                        )}
+                                        {formatRequirements(job.requirements).map((req: string, i: number) => (
+                                            <li key={i} className="flex items-start text-gray-600">
+                                                <CheckCircle2 className="w-5 h-5 mr-3 text-success flex-shrink-0 mt-0.5" />
+                                                <span>{req}</span>
+                                            </li>
+                                        ))}
                                     </ul>
                                 </section>
                             )}
 
-                            {/* ✅ Skills */}
-                            {job.skills?.length > 0 && (
-                                <section>
-                                    <h2 className="text-2xl font-bold text-midnight_text mb-4">
-                                        Skills
-                                    </h2>
-                                    <div className="flex flex-wrap gap-3">
-                                        {job.skills.map((skill: string, i: number) => (
-                                            <span
-                                                key={i}
-                                                className="px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-semibold shadow-sm"
-                                            >
-                                                {skill}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </section>
-                            )}
-
-                            {/* ✅ Education */}
+                            {/* Education */}
                             {job.education && (
                                 <section>
-                                    <h2 className="text-2xl font-bold text-midnight_text mb-4">
+                                    <h2 className="text-lg font-bold text-gray-900 border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
                                         Education
                                     </h2>
-                                    <p className="text-grey">{job.education}</p>
+                                    <p className="text-gray-600 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                        {job.education}
+                                    </p>
                                 </section>
                             )}
                         </div>
 
-                        {/* RIGHT */}
-                        <div className="space-y-6">
-                            <div className="bg-section rounded-2xl p-6 border border-border/50 shadow-service">
-                                <h3 className="font-bold text-lg mb-4">Job Overview</h3>
+                        {/* Sticky Sidebar */}
+                        <div className="lg:col-span-1">
+                            <div className="sticky top-6 space-y-6">
+                                <div className="bg-gray-50 border border-gray-100 rounded-xl p-6">
+                                    <h3 className="font-bold text-gray-900 mb-4 flex items-center">
+                                        <Briefcase className="w-5 h-5 mr-2 text-primary" />
+                                        Job Overview
+                                    </h3>
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-gray-500">Posted on</span>
+                                            <span className="font-semibold text-gray-900">
+                                                {new Date(job.createdAt).toLocaleDateString("en-US", {
+                                                    month: "short",
+                                                    day: "numeric",
+                                                    year: "numeric"
+                                                })}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-gray-500">Location</span>
+                                            <span className="font-semibold text-gray-900">{job.location}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-gray-500">Employment</span>
+                                            <span className="font-semibold text-gray-900">
+                                                {job.type}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-gray-500">Work Mode</span>
+                                            <span className="font-semibold text-gray-900">{job.workMode}</span>
+                                        </div>
+                                    </div>
 
-                                <div className="space-y-4 text-sm">
-                                    <p>
-                                        <strong>Date:</strong>{" "}
-                                        {new Date(job.createdAt).toLocaleDateString()}
-                                    </p>
-                                    <p>
-                                        <strong>Location:</strong> {job.location}
-                                    </p>
-                                    <p>
-                                        <strong>Type:</strong> {job.type}
-                                    </p>
+                                    {/* Skills in Sidebar */}
+                                    {job.skills?.length > 0 && (
+                                        <div className="mt-8">
+                                            <h3 className="font-bold text-gray-900 mb-4 text-sm">Required Skills</h3>
+                                            <div className="flex flex-wrap gap-2">
+                                                {job.skills.map((skill: string, i: number) => (
+                                                    <span
+                                                        key={i}
+                                                        className="px-2.5 py-1 bg-white border border-gray-200 text-gray-600 rounded text-xs font-medium hover:border-primary/30 hover:text-primary transition-colors cursor-default"
+                                                    >
+                                                        {skill}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="bg-primary/5 rounded-xl p-5 border border-primary/10">
+                                    <h4 className="text-sm font-bold text-primary mb-2">Ready to apply?</h4>
+                                    <p className="text-xs text-gray-600 mb-4">Click below to start your application process with Paarsh E-learning.</p>
+                                    <button
+                                        onClick={() => router.push(`/careers/apply?jobId=${job._id}`)}
+                                        className="w-full py-2 bg-primary text-white text-xs font-bold rounded uppercase tracking-widest hover:bg-primary/90 transition-colors"
+                                    >
+                                        Start Application
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -217,183 +221,3 @@ export default function JobDetails() {
         </div>
     );
 }
-
-
-// "use client";
-
-// import { useParams, useRouter } from "next/navigation";
-// import { useGetJobByIdQuery } from "@/redux/api/jobApi";
-// import { Building, MapPin, Briefcase, DollarSign, Clock, ChevronLeft, CheckCircle2 } from "lucide-react";
-// import Link from "next/link";
-
-// export default function JobDetails() {
-//     const { id } = useParams();
-//     const router = useRouter();
-
-//     const { data: job, isLoading, error } = useGetJobByIdQuery(id as string);
-
-//     if (isLoading) {
-//         return (
-//             <div className="min-h-screen bg-gray-50/50 py-12 px-4">
-//                 <div className="max-w-4xl mx-auto space-y-6 animate-pulse">
-//                     <div className="h-8 w-24 bg-slate-200 rounded mb-8"></div>
-//                     <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-//                         <div className="h-10 w-3/4 bg-slate-200 rounded mb-4"></div>
-//                         <div className="flex gap-4 mb-8">
-//                             <div className="h-6 w-32 bg-slate-100 rounded"></div>
-//                             <div className="h-6 w-32 bg-slate-100 rounded"></div>
-//                         </div>
-//                         <div className="space-y-4">
-//                             <div className="h-4 w-full bg-slate-100 rounded"></div>
-//                             <div className="h-4 w-5/6 bg-slate-100 rounded"></div>
-//                             <div className="h-4 w-4/6 bg-slate-100 rounded"></div>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-//         );
-//     }
-
-//     if (error || !job) {
-//         return (
-//             <div className="min-h-screen bg-gray-50/50 py-12 px-4 flex items-center justify-center">
-//                 <div className="text-center">
-//                     <h3 className="text-xl font-bold text-gray-900 mb-2">Job not found</h3>
-//                     <p className="text-gray-500 mb-6">The position you're looking for doesn't exist or has been closed.</p>
-//                     <Link href="/careers" className="text-blue-600 font-medium hover:underline">
-//                         &larr; Back to all jobs
-//                     </Link>
-//                 </div>
-//             </div>
-//         );
-//     }
-
-//     const formatRequirements = (reqs: any) => {
-//         if (!reqs) return [];
-//         if (Array.isArray(reqs)) return reqs.filter(r => typeof r === 'string' && r.trim() !== '');
-//         if (typeof reqs !== 'string') return [];
-//         return reqs.split('\n').filter((r: string) => r.trim() !== '');
-//     };
-
-//     return (
-//         <div className="min-h-screen bg-section py-12 px-4 sm:px-6 lg:px-8">
-//             <div className="max-w-5xl mx-auto">
-//                 <Link href="/careers" className="inline-flex items-center text-sm font-medium text-grey hover:text-primary mb-8 transition-colors">
-//                     <ChevronLeft className="w-4 h-4 mr-1" />
-//                     Back to careers
-//                 </Link>
-
-//                 <div className="bg-white rounded-3xl shadow-deatail_shadow border border-border/40 overflow-hidden">
-//                     {/* Header Section */}
-//                     <div className="px-8 py-10 sm:px-12 lg:py-12 border-b border-border/40 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#e0f7ff] via-white to-white">
-//                         <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-//                             <div>
-//                                 <h1 className="text-3xl sm:text-4xl font-black text-midnight_text tracking-tight mb-4">
-//                                     {job.title}
-//                                 </h1>
-//                                 <div className="flex flex-wrap gap-4 text-secondary font-medium">
-//                                     <div className="flex items-center">
-//                                         <Building className="w-5 h-5 mr-2 text-primary" />
-//                                         {job.company || "Paarsh E-learning"}
-//                                     </div>
-//                                     <div className="flex items-center">
-//                                         <MapPin className="w-5 h-5 mr-2 text-primary" />
-//                                         {job.location || "Remote"}
-//                                     </div>
-//                                     <div className="flex items-center">
-//                                         <Briefcase className="w-5 h-5 mr-2 text-primary" />
-//                                         {job.type || "Full-time"}
-//                                     </div>
-//                                     <div className="flex items-center">
-//                                         <Briefcase className="w-5 h-5 mr-2 text-primary" />
-//                                         {job.workMode || "Remote"}
-//                                     </div>
-//                                     {job.salary && (
-//                                         <div className="flex items-center text-success">
-//                                             <span className="text-success font-semibold">
-//                                                 ₹ {job.salary}
-//                                             </span>
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             </div>
-//                             <div className="flex-shrink-0 mt-4 md:mt-0">
-//                                 <button
-//                                     onClick={() => router.push(`/careers/apply?jobId=${job._id}`)}
-//                                     className="px-8 py-3.5 bg-primary text-white text-lg font-bold rounded-full shadow-lg shadow-primary/20 hover:bg-primary/90 transform hover:-translate-y-1 transition-all duration-300 w-full md:w-auto text-center"
-//                                 >
-//                                     Apply Now
-//                                 </button>
-//                             </div>
-//                         </div>
-//                     </div>
-
-//                     {/* Content Section */}
-//                     <div className="px-8 py-10 sm:px-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
-//                         <div className="lg:col-span-2 space-y-10 border-b lg:border-b-0 lg:border-r border-border/50 lg:pr-12 pb-10 lg:pb-0">
-//                             <section>
-//                                 <h2 className="text-2xl font-bold text-midnight_text mb-4">About the Role</h2>
-//                                 <div className="prose prose-lg max-w-none text-grey">
-//                                     {job.description?.split('\n').map((paragraph: string, i: number) => (
-//                                         <p key={i} className="mb-4">{paragraph}</p>
-//                                     ))}
-//                                 </div>
-//                             </section>
-
-//                             {job.requirements && (
-//                                 <section>
-//                                     <h2 className="text-2xl font-bold text-midnight_text mb-4">Requirements</h2>
-//                                     <ul className="space-y-4">
-//                                         {formatRequirements(job.requirements).map((req, idx) => (
-//                                             <li key={idx} className="flex items-start text-grey">
-//                                                 <CheckCircle2 className="w-6 h-6 mr-3 text-primary flex-shrink-0" />
-//                                                 <span>{req}</span>
-//                                             </li>
-//                                         ))}
-//                                     </ul>
-//                                 </section>
-//                             )}
-//                         </div>
-
-//                         <div className="lg:col-span-1 space-y-8">
-//                             <div className="bg-section rounded-2xl p-6 border border-border/50 shadow-service">
-//                                 <h3 className="font-bold text-midnight_text text-lg mb-6">Job Overview</h3>
-//                                 <div className="space-y-5">
-//                                     <div className="flex items-center text-sm">
-//                                         <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm mr-4 text-primary">
-//                                             <Clock className="w-5 h-5" />
-//                                         </div>
-//                                         <div>
-//                                             <p className="text-grey font-medium">Date Posted</p>
-//                                             <p className="font-bold text-midnight_text">
-//                                                 {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Recently'}
-//                                             </p>
-//                                         </div>
-//                                     </div>
-//                                     <div className="flex items-center text-sm">
-//                                         <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm mr-4 text-primary">
-//                                             <MapPin className="w-5 h-5" />
-//                                         </div>
-//                                         <div>
-//                                             <p className="text-grey font-medium">Location</p>
-//                                             <p className="font-bold text-midnight_text">{job.location || 'Remote'}</p>
-//                                         </div>
-//                                     </div>
-//                                     <div className="flex items-center text-sm">
-//                                         <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm mr-4 text-primary">
-//                                             <Briefcase className="w-5 h-5" />
-//                                         </div>
-//                                         <div>
-//                                             <p className="text-grey font-medium">Job Type</p>
-//                                             <p className="font-bold text-midnight_text">{job.type || 'Full-time'}</p>
-//                                         </div>
-//                                     </div>
-//                                 </div>
-//                             </div>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// }
