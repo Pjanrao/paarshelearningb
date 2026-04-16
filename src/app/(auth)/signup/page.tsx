@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { validateEmail, validatePhone, validateName, validatePassword } from "@/utils/validation";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 interface FormErrors {
     name?: string;
@@ -19,6 +20,7 @@ interface FormErrors {
 }
 
 export default function SignupPage() {
+    const { getImageUrl } = useSiteImages();
     const router = useRouter();
     const searchParams = useSearchParams();
     const returnUrl = searchParams.get("returnUrl");
@@ -124,7 +126,7 @@ export default function SignupPage() {
                     <div className="flex flex-col items-center mb-4 sm:mb-6">
                         <div className="relative w-full max-w-[220px] sm:max-w-[260px] aspect-[280/75]">
                             <Image
-                                src="/images/logo/logo-wide.webp"
+                                src={getImageUrl("SITE_LOGO", "/images/logo/logo-wide.webp")}
                                 alt="Paarsh E-learning"
                                 fill
                                 className="object-contain"

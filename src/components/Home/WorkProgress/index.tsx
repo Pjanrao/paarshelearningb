@@ -83,8 +83,8 @@ import React from 'react'
 import Image from 'next/image'
 import { points } from '@/app/api/data'
 import { getImgPath } from '@/utils/image'
-
 import { Icon } from '@iconify/react'
+import { useSiteImages } from '@/hooks/useSiteImages'
 
 interface ProgressItem {
   title: string
@@ -92,6 +92,7 @@ interface ProgressItem {
 }
 
 const Progresswork = ({ isColorMode }: { isColorMode: Boolean }) => {
+  const { getImageUrl } = useSiteImages();
   return (
     <section
       className={`relative overflow-hidden py-12 lg:py-20 ${isColorMode
@@ -118,7 +119,7 @@ const Progresswork = ({ isColorMode }: { isColorMode: Boolean }) => {
               <div className="absolute -inset-2 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-[45px] blur-xl opacity-40 group-hover:opacity-100 transition duration-1000"></div>
               <div className="relative bg-white/40 dark:bg-slate-900/40 backdrop-blur-md p-2.5 rounded-[40px] shadow-2xl border border-white/20 dark:border-white/10 overflow-hidden">
                 <Image
-                  src={getImgPath('/images/work-progress/why_choose.png')}
+                  src={getImageUrl("WHY_CHOOSE_US_IMAGE", getImgPath('/images/work-progress/why_choose.png'))}
                   alt='Why Choose Paarsh'
                   width={280}
                   height={280}

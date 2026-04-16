@@ -479,13 +479,34 @@ const CourseDetails = ({ slug }: { slug: string }) => {
   };
 
   // Trigger modal or direct download based on authentication
-  const handleDownloadSyllabusClick = () => {
+  const handleDownloadSyllabusClick = async () => {
     if (!course?.syllabusPdf) {
       toast.error("Syllabus PDF is not available for this course.");
       return;
     }
 
     if (isAuthenticated()) {
+      // Record download inquiry for authenticated user
+      try {
+        await fetch("/api/inquiry", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: user?.name || "Authenticated User",
+            email: user?.email || "N/A",
+            phone: user?.contact || user?.phone || "0000000000",
+            course: course.name,
+            courseId: course._id,
+            userId: user?._id || null,
+            message: `Authenticated user requested syllabus download for ${course.name}`,
+            type: "Downloaded Syllabus",
+            source: "Website - Course Detail Page (Auth)",
+          }),
+        });
+      } catch (err) {
+        console.error("Error logging syllabus download:", err);
+      }
+      
       downloadPDF(course.syllabusPdf);
 
     } else {
@@ -516,9 +537,11 @@ const CourseDetails = ({ slug }: { slug: string }) => {
           email: formData.email,
           phone: getCleanPhone, // just the 10 digit number to pass backend validation
           course: course.name,
+          courseId: course._id,
+          userId: user?._id || null,
           country: formData.countryCode, // Store country code here if available or just append to message
           message: `[${formData.countryCode}] Requested syllabus download for ${course.name}`,
-          type: "Inquiry Form",
+          type: "Downloaded Syllabus",
           source: "Website - Syllabus Download",
         }),
       });

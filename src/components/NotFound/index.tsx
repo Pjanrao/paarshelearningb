@@ -1,9 +1,13 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getImgPath } from "@/utils/image";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 const NotFound = () => {
+  const { getImageUrl } = useSiteImages();
   return (
     <section className="bg-white pt-8 pb-20 dark:bg-darkmode">
       <div className="container mx-auto">
@@ -11,7 +15,7 @@ const NotFound = () => {
           <div className="w-full px-4 md:w-5/12 lg:w-6/12">
             <div className="relative mx-auto aspect-129/138 max-w-[357px] text-center">
               <Image
-                src={getImgPath("/images/svgs/404.svg")}
+                src={getImageUrl("NOT_FOUND_IMAGE", getImgPath("/images/svgs/404.svg"))}
                 alt="image"
                 width={0}
                 height={0}

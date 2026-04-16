@@ -11,12 +11,14 @@ import axios from "axios";
 import { validateEmail } from "@/utils/validation";
 import { useDispatch } from "react-redux";
 import { setAuth, setAdminAuth, setStudentAuth } from "@/redux/authSlice";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 interface SignInFormProps {
   isAdmin?: boolean;
 }
 
 export default function SignInForm({ isAdmin = false }: SignInFormProps) {
+  const { getImageUrl } = useSiteImages();
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
@@ -133,7 +135,7 @@ export default function SignInForm({ isAdmin = false }: SignInFormProps) {
         <div className="flex flex-col items-center mb-6 sm:mb-8">
           <div className="relative w-full max-w-[240px] sm:max-w-[280px] aspect-[280/75]">
             <Image
-              src="/images/logo/logo-wide.webp"
+              src={getImageUrl("SITE_LOGO", "/images/logo/logo-wide.webp")}
               alt="Paarsh E-learning"
               fill
               className="object-contain"

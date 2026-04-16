@@ -288,6 +288,7 @@ import {
   Navigation
 } from "lucide-react";
 import { validateEmail, validatePhone } from "@/utils/validation";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 /**
  * Contact Page
@@ -296,6 +297,7 @@ import { validateEmail, validatePhone } from "@/utils/validation";
  * Secondary: #01A0E2 (Bright Blue/Cyan)
  */
 const ContactPage = () => {
+  const { getImageUrl } = useSiteImages();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -420,7 +422,7 @@ const ContactPage = () => {
 
                 <div className="relative w-full h-full rounded-full border-[12px] border-white dark:border-slate-800 shadow-2xl overflow-hidden group">
                   <Image
-                    src="/images/contact-page/vision.png"
+                    src={getImageUrl("CONTACT_US_IMAGE", "/images/contact-page/vision.png")}
                     alt="Contact Us"
                     fill
                     className="object-cover object-center group-hover:scale-110 transition-transform duration-1000"

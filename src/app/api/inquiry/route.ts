@@ -21,6 +21,9 @@ export async function GET(request: Request) {
 
     if (type) {
       query.type = type;
+    } else {
+      // Exclude 'Downloaded Syllabus' from 'All Leads' inquiry
+      query.type = { $ne: "Downloaded Syllabus" };
     }
 
     if (search) {
@@ -106,7 +109,7 @@ export async function POST(request: Request) {
     }
 
     // Validate type
-    if (!["Contact Form", "Inquiry Form", "Course Inquiry"].includes(type)) {
+    if (!["Contact Form", "Inquiry Form", "Course Inquiry", "Downloaded Syllabus"].includes(type)) {
       return NextResponse.json(
         { error: "Invalid inquiry type" },
         { status: 400 }

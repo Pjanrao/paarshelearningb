@@ -92,8 +92,10 @@ import { getImgPath } from '@/utils/image'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Icon } from '@iconify/react'
+import { useSiteImages } from '@/hooks/useSiteImages'
 
 const Hero = () => {
+  const { getImageUrl } = useSiteImages();
   return (
     <section className='relative min-h-[50vh] flex items-center pt-10 mt-5 md:mt-12 overflow-hidden bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#e0f7ff] via-[#b9eaff] to-[#ffffff] dark:from-slate-900 dark:to-slate-800 -mb-10'>
 
@@ -177,7 +179,7 @@ const Hero = () => {
             <div className="relative z-10 p-2 md:p-3 rounded-[40px] md:rounded-[60px] bg-white/30 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] overflow-hidden animate-float">
               <div className="relative overflow-hidden rounded-[30px] md:rounded-[50px] aspect-[4/3]">
                 <Image
-                  src={getImgPath('/images/hero/digital-marketing-course.png')}
+                  src={getImageUrl("HOME_HERO_BG", getImgPath('/images/hero/digital-marketing-course.png'))}
                   alt='Advanced digital marketing training in Nashik'
                   fill
                   priority

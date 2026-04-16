@@ -17,7 +17,8 @@ export async function POST(req: Request) {
         // Save locally
         const buffer = Buffer.from(await file.arrayBuffer());
         const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-        const relativePath = `/uploads/courses/receipts/${filename}`;
+        const folder = formData.get("folder") as string || "courses/receipts";
+        const relativePath = `/uploads/${folder}/${filename}`;
         const fullPath = path.join(process.cwd(), "public", relativePath);
         
         // Ensure directory exists

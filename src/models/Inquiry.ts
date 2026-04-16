@@ -57,7 +57,7 @@ const InquirySchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["Contact Form", "Inquiry Form", "Course Inquiry"],
+            enum: ["Contact Form", "Inquiry Form", "Course Inquiry", "Downloaded Syllabus"],
             required: [true, "Please specify the type of inquiry"],
             default: "Contact Form",
         },

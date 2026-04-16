@@ -19,8 +19,10 @@ import {
 } from "lucide-react"
 import { getImgPath } from '@/utils/image'
 import Image from 'next/image'
+import { useSiteImages } from '@/hooks/useSiteImages'
 
 const AboutPage = () => {
+  const { getImageUrl } = useSiteImages();
   const [isAboutExpanded, setIsAboutExpanded] = useState(false);
   const [isFounderExpanded, setIsFounderExpanded] = useState(false);
 
@@ -151,7 +153,7 @@ const AboutPage = () => {
                 <div className="w-full max-w-[380px] mb-6 group/img mx-auto md:mx-0">
                   <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-2xl group-hover/img:scale-[1.02] transition-transform duration-700 ease-in-out">
                     <div className="absolute inset-0 bg-blue-600/5 group-hover/img:bg-transparent transition-colors duration-500 z-10" />
-                    <Image src="/images/contact-page/Working.png" alt="Vision" fill className="object-contain p-2 relative z-0" />
+                    <Image src={getImageUrl("ABOUT_US_BANNER", "/images/contact-page/Working.png")} alt="Vision" fill className="object-contain p-2 relative z-0" />
                   </div>
                 </div>
 

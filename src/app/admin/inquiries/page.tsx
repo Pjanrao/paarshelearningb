@@ -34,6 +34,7 @@ interface Inquiry {
     country?: string;
     status: "New" | "Contacted" | "Enrolled" | "Cancelled";
     createdAt: string;
+    userId?: string;
 }
 
 export default function InquiriesManagementPage() {
@@ -43,7 +44,7 @@ export default function InquiriesManagementPage() {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [activeTab, setActiveTab] = useState<"All" | "Contact Form" | "Inquiry Form">("All");
+    const [activeTab, setActiveTab] = useState<"All" | "Contact Form" | "Inquiry Form" | "Downloaded Syllabus">("All");
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -93,6 +94,7 @@ export default function InquiriesManagementPage() {
             "Email Address": enq.email,
             "Phone Number": enq.phone,
             "Type": enq.type,
+            "User ID": enq.userId || "N/A",
             "Course / Source": enq.course,
             "Status": enq.status,
             "Submission Date": new Date(enq.createdAt).toLocaleDateString()
@@ -154,7 +156,7 @@ export default function InquiriesManagementPage() {
         <div className=" bg-gray-50 h-full">
             <div className="mb-6">
                 <div className="flex flex-wrap gap-2 p-1 bg-gray-100 rounded-xl w-fit mb-4">
-                    {(["All", "Contact Form", "Inquiry Form"] as const).map((tab) => (
+                    {(["All", "Contact Form", "Inquiry Form", "Downloaded Syllabus"] as const).map((tab) => (
                         <button
                             key={tab}
                             onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
@@ -303,6 +305,11 @@ export default function InquiriesManagementPage() {
                                                     <div>
                                                         <div className="text-sm font-bold text-gray-900">{enq.name}</div>
                                                         <div className="text-[10px] text-gray-500 truncate max-w-[150px]">{enq.email}</div>
+                                                        {enq.userId && (
+                                                            <div className="text-[10px] text-[#2C4276] font-bold">
+                                                                ID: {enq.userId}
+                                                            </div>
+                                                        )}
                                                         {enq.message && (
                                                             <div className="text-[10px] text-blue-600 font-medium truncate max-w-[150px] mt-0.5 italic">
                                                                 "{enq.message.substring(0, 30)}..."
@@ -314,7 +321,8 @@ export default function InquiriesManagementPage() {
                                             <td className="px-6 py-4">
                                                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${enq.type === 'Contact Form' ? 'bg-purple-50 text-purple-600 border-purple-100' :
                                                     enq.type === 'Inquiry Form' ? 'bg-orange-50 text-orange-600 border-orange-100' :
-                                                        'bg-gray-50 text-gray-600 border-gray-100'
+                                                        enq.type === 'Downloaded Syllabus' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                                            'bg-gray-50 text-gray-600 border-gray-100'
                                                     }`}>
                                                     {enq.type}
                                                 </span>
@@ -481,6 +489,12 @@ export default function InquiriesManagementPage() {
                                     <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Source</p>
                                     <p className="text-xs font-semibold text-gray-900">{selectedInquiry.source || "Direct"}</p>
                                 </div>
+                                {selectedInquiry.userId && (
+                                    <div className="col-span-2">
+                                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">User ID</p>
+                                        <p className="text-xs font-semibold text-gray-900 break-all">{selectedInquiry.userId}</p>
+                                    </div>
+                                )}
                             </div>
 
                             {selectedInquiry.message && (

@@ -267,12 +267,16 @@
 
 
 
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { getImgPath } from "@/utils/image";
+import { useSiteImages } from "@/hooks/useSiteImages";
 
 const Footer = () => {
+  const { getImageUrl } = useSiteImages();
   const [settings, setSettings] = React.useState<any>(null);
 
   React.useEffect(() => {
@@ -299,7 +303,7 @@ const Footer = () => {
           <div className="flex-1 text-left lg:max-w-xs">
             <Link href="/" className="flex justify-start">
               <Image
-                src={getImgPath("/images/logo/logo-wide.webp")}
+                src={getImageUrl("SITE_LOGO_DARK", getImgPath("/images/logo/logo-wide.webp"))}
                 alt="Paarsh eLearning digital marketing training institute"
                 width={250}
                 height={100}
