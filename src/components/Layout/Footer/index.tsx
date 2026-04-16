@@ -323,8 +323,10 @@ const Footer = () => {
               <li><Link href="/#" className="hover:text-secondary transition">Home</Link></li>
               <li><Link href="/about-us" className="hover:text-secondary transition">About</Link></li>
               <li><Link href="/Course" className="hover:text-secondary transition">Courses</Link></li>
+              <li><Link href="/workshops" className="hover:text-secondary transition">Workshops</Link></li>
               <li><Link href="/blog" className="hover:text-secondary transition">Blogs</Link></li>
               <li><Link href="/inquiry" className="hover:text-secondary transition">Inquiry</Link></li>
+              <li><Link href="/career" className="hover:text-secondary transition">Career</Link></li>
               <li><Link href="/contact-us" className="hover:text-secondary transition">Contact</Link></li>
             </ul>
           </div>

@@ -94,9 +94,24 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
         { name: "Test Log", path: "/admin/practice-tests/all-logs" },
       ],
     },
-    { name: "Workshops", path: "/admin/workshops", icon: BookOpen },
+    {
+      name: "Workshops",
+      icon: BookOpen,
+      subItems: [
+        { name: "Manage Workshops", path: "/admin/workshops" },
+        { name: "Registered Students", path: "/admin/workshops/registrations" },
+      ]
+    },
     { name: "Industry Partners", path: "/admin/industry-partners", icon: Briefcase },
     { name: "Referral", path: "/admin/referral", icon: Gift },
+    {
+      name: "Careers",
+      icon: Briefcase,
+      subItems: [
+        { name: "Jobs", path: "/admin/jobs" },
+        { name: "Applications", path: "/admin/applications" },
+      ],
+    },
     { name: "Withdrawals", path: "/admin/withdrawals", icon: CreditCard },
     { name: "Footprints", path: "/admin/footprints", icon: Clock },
     { name: "Images", path: "/admin/images", icon: FileText },

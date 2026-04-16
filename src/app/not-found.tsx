@@ -1,10 +1,8 @@
+"use client";
+
 import HeroSub from "@/components/SharedComponent/HeroSub";
 import NotFound from "@/components/NotFound";
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "404 Page | Paarsh E - Learning",
-};
+import React from "react";
 
 const ErrorPage = () => {
   const breadcrumbLinks = [
