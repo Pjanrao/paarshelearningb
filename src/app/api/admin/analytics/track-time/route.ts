@@ -42,43 +42,129 @@ export async function GET(req: Request) {
 
         const skip = (page - 1) * limit;
 
-        let query: any = {};
-        if (search) {
-            const users = await User.find({
-                $or: [
-                    { name: { $regex: search, $options: "i" } },
-                    { email: { $regex: search, $options: "i" } }
-                ]
-            }).select("_id");
-            
-            const userIds = users.map(u => u._id);
-            query = {
-                $or: [
-                    { userId: { $in: userIds } },
-                    { pathname: { $regex: search, $options: "i" } }
-                ]
-            };
-        }
+        const pipeline: any[] = [
+            // 1. Lookup user info
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "userId",
+                    foreignField: "_id",
+                    as: "userDetails"
+                }
+            },
+            // 2. Unwind userDetails (preserve nulls for guests)
+            { 
+                $unwind: { 
+                    path: "$userDetails", 
+                    preserveNullAndEmptyArrays: true 
+                } 
+            },
+            // 3. Match based on search query
+            {
+                $match: search ? {
+                    $or: [
+                        { "userDetails.name": { $regex: search, $options: "i" } },
+                        { "userDetails.email": { $regex: search, $options: "i" } },
+                        { "pathname": { $regex: search, $options: "i" } },
+                        { "title": { $regex: search, $options: "i" } }
+                    ]
+                } : {}
+            },
+            // 4. Group by userId
+            {
+                $group: {
+                    _id: "$userId",
+                    user: { $first: "$userDetails" },
+                    visits: { 
+                        $push: {
+                            _id: "$_id",
+                            pathname: "$pathname",
+                            title: "$title",
+                            entryTime: "$entryTime",
+                            exitTime: "$exitTime",
+                            duration: "$duration",
+                            createdAt: "$createdAt"
+                        } 
+                    },
+                    lastActive: { $max: "$exitTime" }
+                }
+            },
+            // 5. Sort by last activity
+            { $sort: { lastActive: -1 } },
+            // 6. Facet for pagination
+            {
+                $facet: {
+                    metadata: [{ $count: "total" }],
+                    data: [{ $skip: skip }, { $limit: limit }]
+                }
+            }
+        ];
 
-        const visits = await PageVisit.find(query)
-            .populate("userId", "name email role")
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit);
+        const result = await PageVisit.aggregate(pipeline);
+        const metadata = result[0].metadata[0] || { total: 0 };
+        const data = result[0].data || [];
 
-        const total = await PageVisit.countDocuments(query);
-
+        // Format data to match expected frontend structure if needed
+        // The frontend expects Visit[] and groups them. 
+        // We will change the frontend to handle these groups directly, 
+        // or flatten them here. Flattening would break the pagination by user.
+        // So we will change the frontend.
+        
         return NextResponse.json({
-            visits,
+            groups: data,
             pagination: {
-                total,
+                total: metadata.total,
                 page,
                 limit,
-                totalPages: Math.ceil(total / limit)
+                totalPages: Math.ceil(metadata.total / limit)
             }
         });
     } catch (error: any) {
         console.error("Admin Analytics Error:", error);
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: Request) {
+    try {
+        await connectDB();
+        
+        let isAdmin = false;
+        try {
+            const token = await getToken({ req: req as any, secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET });
+            if (token?.role === "admin") isAdmin = true;
+        } catch (e) {}
+
+        const cookieStore = await cookies();
+        const cookieRole = cookieStore.get("role")?.value || cookieStore.get("adminRole")?.value;
+        if (cookieRole === "admin" || cookieRole === "teacher") isAdmin = true;
+
+        if (!isAdmin) {
+            return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+        }
+
+        const { searchParams } = new URL(req.url);
+        const id = searchParams.get("id");
+        const userId = searchParams.get("userId");
+
+        if (id) {
+            await PageVisit.findByIdAndDelete(id);
+            return NextResponse.json({ message: "Visit record deleted" });
+        }
+
+        if (userId) {
+            // userId could be "guest" if we want to delete all null userIds
+            if (userId === "guest") {
+                await PageVisit.deleteMany({ userId: null });
+            } else {
+                await PageVisit.deleteMany({ userId });
+            }
+            return NextResponse.json({ message: "User visit history cleared" });
+        }
+
+        return NextResponse.json({ message: "ID or UserID required" }, { status: 400 });
+    } catch (error: any) {
+        console.error("Delete Analytics Error:", error);
         return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }
