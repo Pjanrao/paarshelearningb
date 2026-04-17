@@ -9,6 +9,10 @@ import {
     ChevronLeft,
     ChevronRight,
     CheckCircle2,
+    Info,
+    Target,
+    Award,
+    GraduationCap,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -93,11 +97,16 @@ export default function JobDetails() {
                         {/* Main Body */}
                         <div className="lg:col-span-2 space-y-8">
                             {/* About */}
-                            <section>
-                                <h2 className="text-lg font-bold text-midnight_text border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
-                                    About the Role
-                                </h2>
-                                <div className="text-gray-600 leading-relaxed space-y-3">
+                            <section className="bg-white rounded-[32px] p-8 border border-gray-100/80 shadow-sm hover:shadow-md transition-shadow">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center">
+                                        <Info className="w-6 h-6 text-primary" />
+                                    </div>
+                                    <h2 className="text-xl font-bold text-midnight_text tracking-tight">
+                                        About the Role
+                                    </h2>
+                                </div>
+                                <div className="text-gray-600 leading-relaxed space-y-4 text-[1rem]">
                                     {job.description?.split("\n").map((p: string, i: number) => (
                                         <p key={i}>{p}</p>
                                     ))}
@@ -106,15 +115,20 @@ export default function JobDetails() {
 
                             {/* Responsibilities */}
                             {job.responsibilities && (
-                                <section>
-                                    <h2 className="text-lg font-bold text-midnight_text border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
-                                        Responsibilities
-                                    </h2>
-                                    <div className="text-grey leading-relaxed space-y-2">
+                                <section className="bg-white rounded-[32px] p-8 border border-gray-100/80 shadow-sm hover:shadow-md transition-shadow">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center">
+                                            <Target className="w-6 h-6 text-orange-500" />
+                                        </div>
+                                        <h2 className="text-xl font-bold text-midnight_text tracking-tight">
+                                            Responsibilities
+                                        </h2>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-4">
                                         {job.responsibilities.split("\n").filter((r: string) => r.trim() !== "").map((r: string, i: number) => (
-                                            <div key={i} className="flex items-start">
-                                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary/60 mt-2 mr-3 flex-shrink-0" />
-                                                <p>{r}</p>
+                                            <div key={i} className="flex items-start p-4 rounded-2xl bg-gray-50/50 hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                                                <div className="w-2 h-2 rounded-full bg-orange-400 mt-2.5 mr-4 flex-shrink-0" />
+                                                <p className="text-[1rem] text-gray-600 leading-relaxed">{r}</p>
                                             </div>
                                         ))}
                                     </div>
@@ -123,28 +137,40 @@ export default function JobDetails() {
 
                             {/* Requirements */}
                             {job.requirements && (
-                                <section>
-                                    <h2 className="text-lg font-bold text-midnight_text border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
-                                        Key Requirements
-                                    </h2>
-                                    <ul className="space-y-3">
+                                <section className="bg-white rounded-[32px] p-8 border border-gray-100/80 shadow-sm hover:shadow-md transition-shadow">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="w-12 h-12 rounded-2xl bg-success/5 flex items-center justify-center">
+                                            <Award className="w-6 h-6 text-success" />
+                                        </div>
+                                        <h2 className="text-xl font-bold text-midnight_text tracking-tight">
+                                            Key Requirements
+                                        </h2>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {formatRequirements(job.requirements).map((req: string, i: number) => (
-                                            <li key={i} className="flex items-start text-gray-600">
-                                                <CheckCircle2 className="w-5 h-5 mr-3 text-success flex-shrink-0 mt-0.5" />
-                                                <span>{req}</span>
-                                            </li>
+                                            <div key={i} className="flex items-start p-4 rounded-xl border border-gray-100 bg-white hover:border-success/30 hover:bg-success/5 transition-all">
+                                                <div className="w-6 h-6 rounded-full bg-success/10 flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
+                                                    <CheckCircle2 className="w-4 h-4 text-success" />
+                                                </div>
+                                                <span className="text-sm font-medium text-gray-700">{req}</span>
+                                            </div>
                                         ))}
-                                    </ul>
+                                    </div>
                                 </section>
                             )}
 
                             {/* Education */}
                             {job.education && (
-                                <section>
-                                    <h2 className="text-lg font-bold text-midnight_text border-l-4 border-primary pl-3 mb-4 uppercase tracking-wide">
-                                        Education
-                                    </h2>
-                                    <p className="text-grey bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                <section className="bg-[#2C4276]/5 rounded-[32px] p-8 border border-[#2C4276]/10 shadow-sm">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                                            <GraduationCap className="w-5 h-5 text-[#2C4276]" />
+                                        </div>
+                                        <h2 className="text-lg font-bold text-midnight_text tracking-tight">
+                                            Education
+                                        </h2>
+                                    </div>
+                                    <p className="text-gray-600 text-[1rem] leading-relaxed">
                                         {job.education}
                                     </p>
                                 </section>
@@ -154,15 +180,17 @@ export default function JobDetails() {
                         {/* Sticky Sidebar */}
                         <div className="lg:col-span-1">
                             <div className="sticky top-6 space-y-6">
-                                <div className="bg-gray-50 border border-gray-100 rounded-xl p-6">
-                                    <h3 className="font-bold text-midnight_text mb-4 flex items-center">
-                                        <Briefcase className="w-5 h-5 mr-2 text-primary" />
-                                        Job Overview
-                                    </h3>
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center text-sm">
-                                            <span className="text-gray-500">Posted on</span>
-                                            <span className="font-semibold text-midnight_text">
+                                <div className="bg-white border border-gray-100 rounded-[32px] p-8 shadow-sm">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-1 h-5 bg-primary/20 rounded-full" />
+                                        <h3 className="font-bold text-midnight_text text-lg tracking-tight">
+                                            Job Overview
+                                        </h3>
+                                    </div>
+                                    <div className="space-y-5">
+                                        <div className="flex justify-between items-center group">
+                                            <span className="text-gray-400 font-medium text-sm">Posted on</span>
+                                            <span className="font-bold text-midnight_text text-sm">
                                                 {new Date(job.createdAt).toLocaleDateString("en-US", {
                                                     month: "short",
                                                     day: "numeric",
@@ -170,31 +198,31 @@ export default function JobDetails() {
                                                 })}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between items-center text-sm">
-                                            <span className="text-gray-500">Location</span>
-                                            <span className="font-semibold text-midnight_text">{job.location}</span>
+                                        <div className="flex justify-between items-center border-t border-gray-50 pt-4 group">
+                                            <span className="text-gray-400 font-medium text-sm">Location</span>
+                                            <span className="font-bold text-midnight_text text-sm">{job.location}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-sm">
-                                            <span className="text-gray-500">Employment</span>
-                                            <span className="font-semibold text-midnight_text">
+                                        <div className="flex justify-between items-center border-t border-gray-50 pt-4 group">
+                                            <span className="text-gray-400 font-medium text-sm">Employment</span>
+                                            <span className="font-bold text-midnight_text text-sm">
                                                 {job.type}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between items-center text-sm">
-                                            <span className="text-gray-500">Work Mode</span>
-                                            <span className="font-semibold text-midnight_text">{job.workMode}</span>
+                                        <div className="flex justify-between items-center border-t border-gray-50 pt-4 group">
+                                            <span className="text-gray-400 font-medium text-sm">Work Mode</span>
+                                            <span className="font-bold text-midnight_text text-sm">{job.workMode}</span>
                                         </div>
                                     </div>
 
                                     {/* Skills in Sidebar */}
                                     {job.skills?.length > 0 && (
-                                        <div className="mt-8">
-                                            <h3 className="font-bold text-midnight_text mb-4 text-sm">Required Skills</h3>
-                                            <div className="flex flex-wrap gap-2">
+                                        <div className="mt-10 pt-8 border-t border-gray-100">
+                                            <h3 className="font-bold text-gray-400 mb-5 text-[0.7rem] uppercase tracking-[0.2em]">Required Skills</h3>
+                                            <div className="flex flex-wrap gap-2.5">
                                                 {job.skills.map((skill: string, i: number) => (
                                                     <span
                                                         key={i}
-                                                        className="px-2.5 py-1 bg-white border border-gray-200 text-gray-600 rounded text-xs font-medium hover:border-primary/30 hover:text-primary transition-colors cursor-default"
+                                                        className="px-4 py-1.5 bg-gray-50 text-midnight_text rounded-full text-[0.75rem] font-bold hover:bg-primary hover:text-white hover:shadow-md hover:shadow-primary/20 transition-all cursor-default border border-gray-100"
                                                     >
                                                         {skill}
                                                     </span>
@@ -204,12 +232,13 @@ export default function JobDetails() {
                                     )}
                                 </div>
 
-                                <div className="bg-primary/5 rounded-xl p-5 border border-primary/10">
-                                    <h4 className="text-sm font-bold text-primary mb-2">Ready to apply?</h4>
-                                    <p className="text-xs text-gray-600 mb-4">Click below to start your application process with Paarsh E-learning.</p>
+                                <div className="bg-[#2C4276] rounded-[32px] p-8 text-white shadow-xl shadow-[#2C4276]/20 relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl transition-transform group-hover:scale-110" />
+                                    <h4 className="text-lg font-bold mb-3 relative z-10">Ready to apply?</h4>
+                                    <p className="text-sm text-white/70 mb-6 leading-relaxed relative z-10 font-medium">Click below to start your application process with Paarsh E-learning.</p>
                                     <button
                                         onClick={() => router.push(`/careers/apply?jobId=${job._id}`)}
-                                        className="w-full py-2 bg-primary text-white text-xs font-bold rounded uppercase tracking-widest hover:bg-primary/90 transition-colors"
+                                        className="w-full py-4 bg-white text-[#2C4276] text-sm font-extrabold rounded-2xl uppercase tracking-[0.1em] hover:bg-gray-50 transition-all relative z-10 shadow-lg active:scale-[0.98]"
                                     >
                                         Start Application
                                     </button>
