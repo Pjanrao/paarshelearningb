@@ -52,8 +52,19 @@ export default function SignInForm({ isAdmin = false }: SignInFormProps) {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-      const res = await axios.post(`${apiUrl}/api/login`, { email, password });
-      const data = res.data;
+      let res = await axios.post(`${apiUrl}/api/login`, { email, password });
+      let data = res.data;
+
+      if (data.warning === "already_logged_in") {
+        const confirmed = window.confirm(data.message);
+        if (confirmed) {
+          res = await axios.post(`${apiUrl}/api/login`, { email, password, force: true });
+          data = res.data;
+        } else {
+          setIsLoading(false);
+          return;
+        }
+      }
 
       if (isAdmin && data.role !== "admin") {
         toast.error("Access denied. Admin credentials required.");

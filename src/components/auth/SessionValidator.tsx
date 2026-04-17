@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { logout, logoutAdmin, logoutStudent } from "@/redux/authSlice";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 export default function SessionValidator() {
     const router = useRouter();
@@ -65,13 +66,11 @@ export default function SessionValidator() {
                     return;
                 }
 
-                const res = await fetch("/api/auth/verify-session", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ token: activeToken }),
-                });
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
+                const res = await axios.post(`${apiUrl}/api/auth/verify-session`, 
+                    { token: activeToken },
+                    { validateStatus: (status) => status < 500 }
+                );
 
                 if (res.status === 401) {
                     // Session is invalid

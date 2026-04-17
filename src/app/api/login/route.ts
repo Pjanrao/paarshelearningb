@@ -7,7 +7,7 @@ import User from "@/models/User";
 export async function POST(req: Request) {
     try {
         await connectDB();
-        let { email, password } = await req.json();
+        let { email, password, force } = await req.json();
         email = email.trim().toLowerCase();
 
         // 1. Find user and include password field (which is select: false)
@@ -62,6 +62,14 @@ export async function POST(req: Request) {
         let loginToken: string | null = null;
 
         if (user.role !== "admin") {
+            // Check if user is already logged in elsewhere
+            if (user.loginToken && !force) {
+                return NextResponse.json({
+                    warning: "already_logged_in",
+                    message: "You are already logged in on another device. Logging in here will log you out from the other device. Do you want to continue?"
+                }, { status: 200 });
+            }
+
             loginToken = crypto.randomUUID();
             user.loginToken = loginToken;
             await user.save();
