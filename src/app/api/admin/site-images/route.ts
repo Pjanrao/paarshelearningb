@@ -40,3 +40,25 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
+
+export async function DELETE(request: Request) {
+    try {
+        await connectDB();
+        const { searchParams } = new URL(request.url);
+        const key = searchParams.get("key");
+
+        if (!key) {
+            return NextResponse.json({ error: "Key is required" }, { status: 400 });
+        }
+
+        const deleted = await SiteImage.findOneAndDelete({ key });
+        
+        if (!deleted) {
+            return NextResponse.json({ error: "Image record not found" }, { status: 404 });
+        }
+
+        return NextResponse.json({ message: "Image record removed successfully" });
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}

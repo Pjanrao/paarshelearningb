@@ -10,7 +10,8 @@ import {
     Info, 
     Search,
     RefreshCcw,
-    Layout
+    Layout,
+    Trash2
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -95,6 +96,29 @@ export default function ImageManagementPage() {
                 fetchImages();
             } else {
                 throw new Error("Failed to save image metadata");
+            }
+        } catch (error: any) {
+            toast.error(error.message);
+        } finally {
+            setUpdatingKey(null);
+        }
+    };
+
+    const handleDelete = async (key: string, label: string) => {
+        if (!confirm(`Are you sure you want to remove the image for "${label}"?`)) return;
+
+        setUpdatingKey(key);
+        try {
+            const response = await fetch(`/api/admin/site-images?key=${key}`, {
+                method: "DELETE",
+            });
+
+            if (response.ok) {
+                toast.success(`${label} image removed successfully`);
+                fetchImages();
+            } else {
+                const data = await response.json();
+                throw new Error(data.error || "Failed to remove image");
             }
         } catch (error: any) {
             toast.error(error.message);
@@ -201,31 +225,47 @@ export default function ImageManagementPage() {
                                 </div>
 
                                 <div className="p-4 bg-white mt-auto">
-                                    <div className="flex items-center justify-between gap-3">
-                                        <div className="flex-1">
+                                    <div className="flex flex-col gap-3">
+                                        <div>
                                             <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Key Reference</p>
                                             <code className="text-[11px] bg-gray-50 px-2 py-1 rounded border border-gray-100 font-mono text-gray-600 block truncate">
                                                 {item.key}
                                             </code>
                                         </div>
-                                        <label className={`
-                                            cursor-pointer flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all
-                                            ${savedImage ? 'bg-[#2C4276] text-white hover:bg-opacity-90' : 'bg-blue-600 text-white hover:bg-blue-700'}
-                                            ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}
-                                        `}>
-                                            <Upload size={14} />
-                                            {savedImage ? 'Update' : 'Upload'}
-                                            <input 
-                                                type="file" 
-                                                className="hidden" 
-                                                accept="image/*"
-                                                disabled={isUpdating}
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0];
-                                                    if (file) handleUpload(item.key, item.label, item.category, file);
-                                                }}
-                                            />
-                                        </label>
+                                        <div className="flex items-center gap-2">
+                                            <label className={`
+                                                flex-1 cursor-pointer flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all
+                                                ${savedImage ? 'bg-[#2C4276] text-white hover:bg-opacity-90' : 'bg-blue-600 text-white hover:bg-blue-700'}
+                                                ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}
+                                            `}>
+                                                <Upload size={14} />
+                                                {savedImage ? 'Update' : 'Upload'}
+                                                <input 
+                                                    type="file" 
+                                                    className="hidden" 
+                                                    accept="image/*"
+                                                    disabled={isUpdating}
+                                                    onChange={(e) => {
+                                                        const file = e.target.files?.[0];
+                                                        if (file) handleUpload(item.key, item.label, item.category, file);
+                                                    }}
+                                                />
+                                            </label>
+
+                                            {savedImage && (
+                                                <button
+                                                    onClick={() => handleDelete(item.key, item.label)}
+                                                    disabled={isUpdating}
+                                                    className={`
+                                                        p-2.5 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 transition-all
+                                                        ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}
+                                                    `}
+                                                    title="Remove Image"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                     {savedImage && (
                                         <div className="mt-3 pt-3 border-t border-gray-50 flex items-center gap-1.5 text-[10px] text-green-600 font-bold">
