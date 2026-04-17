@@ -58,6 +58,7 @@ export function middleware(req: NextRequest) {
         path.startsWith("/entrance-exam") ||
         path.startsWith("/_next") ||
         path.startsWith("/images") ||
+        path.startsWith("/uploads") ||
         path.startsWith("/favicon.ico")
     ) {
         return NextResponse.next();
