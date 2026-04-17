@@ -12,7 +12,7 @@ export async function PUT(
         await connectDB();
 
         const { id } = await params;
-        const { status, remarks } = await req.json();
+        const { status, remarks, paymentMethod, transactionId } = await req.json();
 
         if (!["approved", "rejected"].includes(status)) {
             return NextResponse.json(
@@ -29,26 +29,37 @@ export async function PUT(
             );
         }
 
-        // If already processed, don't process again
-        if (withdrawal.status !== "pending") {
-            return NextResponse.json(
-                { error: "Withdrawal already processed" },
-                { status: 400 }
-            );
-        }
+        const oldStatus = withdrawal.status;
 
-        // If REJECTED → refund balance back to user
-        if (status === "rejected") {
+        // Balance adjustment logic
+        if (oldStatus !== status) {
             const user = await User.findById(withdrawal.studentId);
             if (user) {
-                user.walletBalance = (user.walletBalance || 0) + withdrawal.amount;
+                // If moving TO rejected (from pending or approved) -> Refund
+                if (status === "rejected" && oldStatus !== "rejected") {
+                    user.walletBalance = (user.walletBalance || 0) + withdrawal.amount;
+                }
+                // If moving FROM rejected (to pending or approved) -> Deduct back
+                else if (oldStatus === "rejected" && status !== "rejected") {
+                    // Check if user has enough balance to go back to approved/pending
+                    if ((user.walletBalance || 0) < withdrawal.amount) {
+                         return NextResponse.json(
+                            { error: "User has insufficient balance to re-approve" },
+                            { status: 400 }
+                        );
+                    }
+                    user.walletBalance = (user.walletBalance || 0) - withdrawal.amount;
+                }
                 await user.save();
             }
         }
 
-        // Update status
+        // Update status and payment info
         withdrawal.status = status;
         withdrawal.remarks = remarks || "";
+        if (paymentMethod) withdrawal.paymentMethod = paymentMethod;
+        if (transactionId !== undefined) withdrawal.transactionId = transactionId;
+        
         await withdrawal.save();
 
         return NextResponse.json({ success: true, withdrawal });

@@ -7,6 +7,13 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 import { Pencil, CheckCircle, XCircle, Clock } from "lucide-react";
@@ -57,7 +64,7 @@ export default function WithdrawalEditModal({ open, setOpen, withdrawal }: Props
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-6 py-4">
+                <div className="space-y-6 py-4 max-h-[70vh] overflow-y-auto pr-2">
                     {/* Status Selection */}
                     <div className="space-y-3">
                         <label className="text-sm font-semibold text-gray-700">Withdrawal Status</label>
@@ -70,11 +77,10 @@ export default function WithdrawalEditModal({ open, setOpen, withdrawal }: Props
                                 <button
                                     key={item.id}
                                     onClick={() => setStatus(item.id)}
-                                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
-                                        status === item.id 
-                                        ? `${item.border} ${item.bg}` 
-                                        : "border-gray-100 hover:border-gray-200 bg-white"
-                                    }`}
+                                    className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${status === item.id
+                                            ? `${item.border} ${item.bg}`
+                                            : "border-gray-100 hover:border-gray-200 bg-white"
+                                        }`}
                                 >
                                     <item.icon className={status === item.id ? item.color : "text-gray-400"} size={20} />
                                     <span className={`text-sm font-bold ${status === item.id ? "text-gray-900" : "text-gray-500"}`}>
@@ -93,7 +99,7 @@ export default function WithdrawalEditModal({ open, setOpen, withdrawal }: Props
                             onChange={(e) => setRemarks(e.target.value)}
                             placeholder="Add internal remarks or reason for rejection/approval..."
                             className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:ring-2 focus:ring-[#2C4276]/20 transition outline-none resize-none"
-                            rows={4}
+                            rows={3}
                         />
                     </div>
                 </div>

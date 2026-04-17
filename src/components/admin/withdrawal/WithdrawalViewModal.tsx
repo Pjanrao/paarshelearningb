@@ -100,6 +100,33 @@ export default function WithdrawalViewModal({ open, setOpen, withdrawal }: Props
 
                         <div className="flex items-start gap-3">
                             <div className="p-2 bg-gray-100 rounded-lg">
+                                <Activity size={18} className="text-gray-600" />
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider mb-1">Payment Method</p>
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold border uppercase ${withdrawal.paymentMethod === "UPI" ? "text-orange-600 bg-orange-50 border-orange-100" :
+                                        withdrawal.paymentMethod === "Cash" ? "text-green-600 bg-green-50 border-green-100" :
+                                            "text-gray-600 bg-gray-50 border-gray-100"
+                                    }`}>
+                                    {withdrawal.paymentMethod || "N/A"}
+                                </span>
+                            </div>
+                        </div>
+
+                        {withdrawal.transactionId && (
+                            <div className="flex items-start gap-3">
+                                <div className="p-2 bg-gray-100 rounded-lg">
+                                    <Info size={18} className="text-gray-600" />
+                                </div>
+                                <div className="max-w-full overflow-hidden">
+                                    <p className="text-xs text-gray-500 uppercase font-semibold tracking-wider">Transaction ID</p>
+                                    <p className="text-sm font-mono text-gray-900 break-all">{withdrawal.transactionId}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 bg-gray-100 rounded-lg">
                                 <Calendar size={18} className="text-gray-600" />
                             </div>
                             <div>

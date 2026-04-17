@@ -34,7 +34,13 @@ export const referralAdminApi = api.injectEndpoints({
         }),
 
         // ✅ ADMIN: Update Withdrawal Status (Approve/Reject)
-        updateWithdrawalStatusAdmin: builder.mutation<any, { id: string; status: string; remarks?: string }>({
+        updateWithdrawalStatusAdmin: builder.mutation<any, { 
+            id: string; 
+            status: string; 
+            remarks?: string;
+            paymentMethod?: string;
+            transactionId?: string;
+        }>({
             query: ({ id, ...data }) => ({
                 url: `/admin/withdrawal/${id}`,
                 method: "PUT",
