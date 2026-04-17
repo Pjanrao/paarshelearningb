@@ -45,12 +45,12 @@ export default function StudentCertificatesPage() {
         const getStudentId = () => {
             if (user?._id) return user._id;
             if (user?.id) return user.id;
-            
+
             // Fallback to localStorage — check all possible keys
             try {
                 const studentUser = JSON.parse(localStorage.getItem("studentUser") || "{}");
                 if (studentUser._id || studentUser.id) return studentUser._id || studentUser.id;
-                
+
                 const localUser = JSON.parse(localStorage.getItem("user") || "{}");
                 return localUser._id || localUser.id || null;
             } catch (e) {

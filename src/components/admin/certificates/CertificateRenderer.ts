@@ -13,12 +13,12 @@ export function generateCertificateCanvas(
 ): HTMLCanvasElement {
     const canvas = document.createElement("canvas");
     canvas.width = 1200;
-    canvas.height = 850;
+    canvas.height = 750;
     const ctx = canvas.getContext("2d")!;
 
     // ── Background ──
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, 1200, 850);
+    ctx.fillRect(0, 0, 1200, 750);
 
     // ── Decorative blue corner shapes ──
     const drawCornerAccent = (x: number, y: number, flipX: boolean, flipY: boolean) => {
@@ -74,30 +74,30 @@ export function generateCertificateCanvas(
     // Top-right corner
     drawCornerAccent(1200, 0, true, false);
     // Bottom-left corner
-    drawCornerAccent(0, 850, false, true);
+    drawCornerAccent(0, 750, false, true);
     // Bottom-right corner
-    drawCornerAccent(1200, 850, true, true);
+    drawCornerAccent(1200, 750, true, true);
 
     // ── Decorative border ──
     ctx.strokeStyle = "#dbeafe";
     ctx.lineWidth = 3;
-    ctx.strokeRect(30, 30, 1140, 790);
+    ctx.strokeRect(30, 30, 1140, 690);
 
     ctx.strokeStyle = "#93c5fd";
     ctx.lineWidth = 1;
-    ctx.strokeRect(40, 40, 1120, 770);
+    ctx.strokeRect(40, 40, 1120, 670);
 
     // ── Side accent lines ──
     ctx.strokeStyle = "#3b82f6";
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.moveTo(15, 250);
-    ctx.lineTo(15, 600);
+    ctx.moveTo(15, 200);
+    ctx.lineTo(15, 550);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(1185, 250);
-    ctx.lineTo(1185, 600);
+    ctx.moveTo(1185, 200);
+    ctx.lineTo(1185, 550);
     ctx.stroke();
 
     // ── Logo ──
@@ -166,39 +166,39 @@ export function generateCertificateCanvas(
     ctx.fillStyle = "#94a3b8";
     ctx.font = "13px 'Courier New', monospace";
     ctx.textAlign = "left";
-    ctx.fillText(`Certificate No: ${data.certificateNumber}`, 60, 750);
+    ctx.fillText(`Certificate No: ${data.certificateNumber}`, 60, 680);
 
     // ── Signature area ──
     ctx.strokeStyle = "#cbd5e1";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(880, 620);
-    ctx.lineTo(1100, 620);
+    ctx.moveTo(880, 560);
+    ctx.lineTo(1100, 560);
     ctx.stroke();
 
     ctx.fillStyle = "#64748b";
     ctx.font = "14px 'Georgia', serif";
     ctx.textAlign = "center";
-    ctx.fillText("Authorized Signatory", 990, 645);
+    ctx.fillText("Authorized Signatory", 990, 585);
 
     // ── Date of issue line ──
     ctx.strokeStyle = "#cbd5e1";
     ctx.beginPath();
-    ctx.moveTo(100, 620);
-    ctx.lineTo(320, 620);
+    ctx.moveTo(100, 560);
+    ctx.lineTo(320, 560);
     ctx.stroke();
 
     ctx.fillStyle = "#64748b";
     ctx.font = "14px 'Georgia', serif";
-    ctx.fillText("Date of Issue", 210, 645);
+    ctx.fillText("Date of Issue", 210, 585);
 
     ctx.fillStyle = "#475569";
     ctx.font = "15px 'Georgia', serif";
-    ctx.fillText(dateObj.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }), 210, 610);
+    ctx.fillText(dateObj.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }), 210, 550);
 
     // ── "INDUSTRY RECOGNIZED" badge ──
     const badgeX = 600;
-    const badgeY = 730;
+    const badgeY = 660;
     const badgeW = 280;
     const badgeH = 42;
 
