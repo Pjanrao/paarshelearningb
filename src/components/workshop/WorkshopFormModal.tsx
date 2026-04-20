@@ -17,17 +17,17 @@ import Image from "next/image";
 interface Workshop {
     _id?: string;
     title: string;
+    subtitle?: string;
     instructorName: string;
     date: string;
     time: string;
     duration: string;
-    price: number;
     mode: "online" | "offline";
     location?: string;
     meetingLink?: string;
     description: string;
+    highlights: string[];
     status: "active" | "inactive";
-    thumbnail?: string;
 }
 
 interface Props {
@@ -46,78 +46,72 @@ export default function WorkshopFormModal({
 
     const [form, setForm] = useState({
         title: "",
+        subtitle: "",
         instructorName: "",
         date: "",
         time: "",
         duration: "",
-        price: 0,
         mode: "online",
         location: "",
         meetingLink: "",
         description: "",
+        highlights: ["", "", "", ""],
         status: "active",
     });
 
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string>("");
-    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (editing) {
             setForm({
                 title: editing.title || "",
+                subtitle: editing.subtitle || "",
                 instructorName: editing.instructorName || "",
                 date: editing.date || "",
                 time: editing.time || "",
                 duration: editing.duration || "",
-                price: editing.price || 0,
                 mode: editing.mode || "online",
                 location: editing.location || "",
                 meetingLink: editing.meetingLink || "",
                 description: editing.description || "",
+                highlights: editing.highlights?.length > 0 ? [...editing.highlights, "", "", "", ""].slice(0, 4) : ["", "", "", ""],
                 status: editing.status || "active",
             });
-            setImagePreview(editing.thumbnail || "");
         } else {
             setForm({
                 title: "",
+                subtitle: "",
                 instructorName: "",
                 date: "",
                 time: "",
                 duration: "",
-                price: 0,
                 mode: "online",
                 location: "",
                 meetingLink: "",
                 description: "",
+                highlights: ["", "", "", ""],
                 status: "active",
             });
-            setImagePreview("");
-            setImageFile(null);
         }
     }, [editing, open]);
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setImageFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+
 
     const handleSubmit = async () => {
         setLoading(true);
         try {
             const formData = new FormData();
-            
+
             // Append all form fields
             Object.entries(form).forEach(([key, value]) => {
-                formData.append(key, value.toString());
+                if (key === "highlights") {
+                    (value as string[]).forEach((h) => {
+                        if (h.trim()) formData.append("highlights", h.trim());
+                    });
+                } else {
+                    formData.append(key, value.toString());
+                }
             });
 
             // Append _id if editing
@@ -125,14 +119,9 @@ export default function WorkshopFormModal({
                 formData.append("_id", editing._id);
             }
 
-            // Append image if selected
-            if (imageFile) {
-                formData.append("thumbnail", imageFile);
-            }
-
             const res = await fetch("/api/workshops", {
                 method: "POST",
-                body: formData, // Browser automatically sets content-type to multipart/form-data
+                body: formData,
             });
 
             if (res.ok) {
@@ -160,46 +149,10 @@ export default function WorkshopFormModal({
                 </DialogHeader>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
-                    
+
                     {/* LEFT COLUMN: Image & Basic Info */}
                     <div className="space-y-6">
-                        {/* Image Upload Area */}
-                        <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-3 uppercase tracking-wider">
-                                Workshop Thumbnail
-                            </label>
-                            <div 
-                                onClick={() => fileInputRef.current?.click()}
-                                className="relative aspect-video w-full rounded-2xl border-2 border-dashed border-gray-200 hover:border-blue-400 bg-gray-50 flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all group"
-                            >
-                                {imagePreview ? (
-                                    <>
-                                        <Image 
-                                            src={imagePreview} 
-                                            alt="Preview" 
-                                            fill 
-                                            className="object-cover"
-                                        />
-                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <Icon icon="solar:camera-bold" className="text-white w-10 h-10" />
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <Icon icon="solar:cloud-upload-bold" className="text-gray-300 w-12 h-12 mb-2 group-hover:text-blue-400 transition-colors" />
-                                        <p className="text-xs text-gray-400 font-medium">Click to upload workshop thumbnail</p>
-                                        <p className="text-[10px] text-gray-300 mt-1 uppercase">PNG, JPG up to 10MB</p>
-                                    </>
-                                )}
-                            </div>
-                            <input 
-                                type="file" 
-                                ref={fileInputRef} 
-                                onChange={handleImageChange} 
-                                className="hidden" 
-                                accept="image/*"
-                            />
-                        </div>
+
 
                         {/* Title */}
                         <div>
@@ -214,23 +167,23 @@ export default function WorkshopFormModal({
                             />
                         </div>
 
-                        {/* Instructor */}
+                        {/* Subtitle */}
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
-                                Instructor Name
+                                Short Subtitle
                             </label>
                             <Input
-                                placeholder="Who is teaching?"
+                                placeholder="Catchy one-liner"
                                 className="h-11 border-gray-200 focus:border-blue-600 rounded-xl"
-                                value={form.instructorName}
-                                onChange={(e) => setForm({ ...form, instructorName: e.target.value })}
+                                value={form.subtitle}
+                                onChange={(e) => setForm({ ...form, subtitle: e.target.value })}
                             />
                         </div>
 
                         {/* Description */}
                         <div>
                             <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
-                                Description
+                                Detailed Description
                             </label>
                             <Textarea
                                 rows={4}
@@ -240,11 +193,36 @@ export default function WorkshopFormModal({
                                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                             />
                         </div>
+
+                        {/* Highlights/Benefits */}
+                        <div className="p-5 border rounded-2xl bg-gray-50/50 space-y-4">
+                            <label className="text-sm font-bold text-[#2C4276] flex items-center gap-2">
+                                <Icon icon="solar:star-bold-duotone" className="text-blue-600" />
+                                Workshop Benefits (Up to 4)
+                            </label>
+                            <div className="grid grid-cols-1 gap-3">
+                                {form.highlights.map((h, i) => (
+                                    <div key={i} className="relative group">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-300 group-focus-within:text-blue-400">0{i + 1}</span>
+                                        <Input
+                                            placeholder={`Benefit ${i + 1}...`}
+                                            className="pl-8 h-10 border-gray-200 focus:border-blue-600 rounded-xl bg-white"
+                                            value={h}
+                                            onChange={(e) => {
+                                                const newH = [...form.highlights];
+                                                newH[i] = e.target.value;
+                                                setForm({ ...form, highlights: newH });
+                                            }}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
                     {/* RIGHT COLUMN: Schedule & Logistics */}
                     <div className="space-y-6">
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
@@ -270,7 +248,7 @@ export default function WorkshopFormModal({
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1">
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
                                     Duration
@@ -282,17 +260,18 @@ export default function WorkshopFormModal({
                                     onChange={(e) => setForm({ ...form, duration: e.target.value })}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
-                                    Price (₹)
-                                </label>
-                                <Input
-                                    type="number"
-                                    className="h-11 border-gray-200 focus:border-blue-600 rounded-xl font-bold text-blue-600"
-                                    value={form.price}
-                                    onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-                                />
-                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
+                                Instructor Name
+                            </label>
+                            <Input
+                                placeholder="Expert Name"
+                                className="h-11 border-gray-200 focus:border-blue-600 rounded-xl"
+                                value={form.instructorName}
+                                onChange={(e) => setForm({ ...form, instructorName: e.target.value })}
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -307,7 +286,7 @@ export default function WorkshopFormModal({
                                     <SelectTrigger className="h-11 border-gray-200 rounded-xl">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent>
+                                    <SelectContent className="bg-white">
                                         <SelectItem value="online">🎥 Online</SelectItem>
                                         <SelectItem value="offline">🏢 Offline</SelectItem>
                                     </SelectContent>
@@ -337,10 +316,10 @@ export default function WorkshopFormModal({
                             {form.mode === "offline" ? (
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">
-                                        Physical Venue Location
+                                        Workshop Venue / Address
                                     </label>
                                     <Input
-                                        placeholder="Enter full address"
+                                        placeholder="Enter full training center / venue address"
                                         className="h-11 border-gray-200 bg-white rounded-xl"
                                         value={form.location}
                                         onChange={(e) => setForm({ ...form, location: e.target.value })}
@@ -349,10 +328,10 @@ export default function WorkshopFormModal({
                             ) : (
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">
-                                        Meeting Link / URL
+                                        Online Meeting Link
                                     </label>
                                     <Input
-                                        placeholder="Zoom, Google Meet, etc."
+                                        placeholder="Paste Zoom, Google Meet or Teams link here"
                                         className="h-11 border-gray-200 bg-white rounded-xl text-blue-600"
                                         value={form.meetingLink}
                                         onChange={(e) => setForm({ ...form, meetingLink: e.target.value })}

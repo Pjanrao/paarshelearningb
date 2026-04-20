@@ -1,168 +1,106 @@
-<<<<<<< Updated upstream
 "use client";
-=======
->>>>>>> Stashed changes
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
-<<<<<<< Updated upstream
+import { formatWorkshopDate, getWorkshopDateParts } from "@/utils/date";
 
 interface WorkshopCardProps {
   id: string;
+  isFeatured?: boolean;
   workshop: {
     title: string;
     subtitle: string;
-    promoImage: string;
+    promoImage: string; // Left in type but currently unused visually
+    date?: string;
+    time?: string;
+    category?: string;
+    mode?: string;
   };
 }
 
-const WorkshopCard: React.FC<WorkshopCardProps> = ({ id, workshop }) => {
+const WorkshopCard: React.FC<WorkshopCardProps> = ({ id, workshop, isFeatured }) => {
   return (
-    <div className="group bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 flex flex-col h-full">
-      {/* Image Container */}
-      <div className="relative h-48 w-full overflow-hidden">
-        <Image
-          src={workshop.promoImage || "/images/placeholder.jpg"}
-          alt={workshop.title}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-500"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-          <span className="text-white text-sm font-medium flex items-center gap-1">
-            <Icon icon="solar:round-alt-arrow-right-bold" /> View Workshop
-          </span>
+    <div className={`group bg-white dark:bg-gray-900 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-200/60 dark:border-gray-800 flex flex-col h-full ${isFeatured ? 'col-span-full' : ''}`}>
+
+      {/* Content Area */}
+      <div className={`p-5 sm:p-6 flex flex-col flex-grow relative overflow-hidden ${isFeatured ? 'xl:p-8' : ''}`}>
+        
+        {/* Subtle decorative background glow for Featured */}
+        {isFeatured && (
+           <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-blue-100/50 via-transparent to-transparent dark:from-blue-900/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+        )}
+
+        <div className="flex-grow relative z-10 w-full">
+            {/* Tags Row */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {(workshop.mode || workshop.category) ? (
+                <>
+                  {workshop.mode && (
+                    <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full border border-blue-100 dark:border-blue-800 flex items-center gap-1.5 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                      {workshop.mode}
+                    </span>
+                  )}
+                  {workshop.category && (
+                    <span className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm">
+                      {workshop.category}
+                    </span>
+                  )}
+                </>
+              ) : (
+                 <span className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full border border-blue-100 dark:border-blue-800 shadow-sm flex items-center gap-1.5">
+                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                   Live Session
+                 </span>
+              )}
+            </div>
+
+            <h3 className={`${isFeatured ? 'text-2xl md:text-3xl' : 'text-lg'} font-extrabold text-gray-900 dark:text-white mb-3 tracking-tight ${!isFeatured && 'line-clamp-2 min-h-[2.75rem]'}`}>
+            {workshop.title}
+            </h3>
+            
+            {/* Meta Data Row */}
+            <div className={`flex flex-wrap gap-y-2 gap-x-5 mb-4 ${isFeatured ? 'md:mb-6' : ''}`}>
+               <div className="flex items-center text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400">
+                 <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-gray-800 flex items-center justify-center mr-2 border border-gray-100 dark:border-gray-700">
+                    <Icon icon="solar:calendar-bold-duotone" className="w-4 h-4 text-blue-500" />
+                 </div>
+                 {(() => {
+                      const parts = getWorkshopDateParts(workshop.date);
+                      if (parts) {
+                          return (
+                              <>
+                                  {parts.day}<sup className="text-[10px] ml-0.5">{parts.ordinal}</sup> {parts.month} {parts.year}
+                              </>
+                          );
+                      }
+                      return workshop.date || "Upcoming Dates TBA";
+                  })()}
+               </div>
+               <div className="flex items-center text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400">
+                 <div className="w-7 h-7 rounded-full bg-indigo-50 dark:bg-gray-800 flex items-center justify-center mr-2 border border-gray-100 dark:border-gray-700">
+                     <Icon icon="solar:clock-circle-bold-duotone" className="w-4 h-4 text-indigo-500" />
+                 </div>
+                 {workshop.time || "Time TBA"}
+               </div>
+            </div>
+
+            <p className={`text-gray-600 dark:text-gray-400 ${isFeatured ? 'text-sm md:text-base mb-6 max-w-4xl opacity-90' : 'text-xs sm:text-sm mb-5 line-clamp-3 opacity-90'}`}>
+            {workshop.subtitle}
+            </p>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 min-h-[3.5rem]">
-          {workshop.title}
-        </h3>
-        <p className="text-gray-600 dark:text-gray-400 text-sm mb-6 line-clamp-3">
-          {workshop.subtitle}
-        </p>
-
-        <div className="mt-auto">
+        <div className={`mt-auto pt-4 border-t border-gray-100 dark:border-gray-800 relative z-10 ${isFeatured ? 'flex justify-start' : ''}`}>
           <Link
             href={`/workshops/${id}`}
-            className="inline-flex items-center justify-center w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-blue-500/20 active:scale-95"
+            className={`inline-flex items-center justify-center font-bold rounded-xl transition-all duration-300 active:scale-95 group/btn ${isFeatured ? 'bg-[#2C4276] hover:bg-blue-800 text-white px-8 py-3 shadow-lg shadow-blue-900/20 w-max hover:shadow-blue-900/30 text-base' : 'w-full px-4 py-2.5 bg-white hover:bg-gray-50 dark:bg-gray-900 dark:hover:bg-gray-800 text-[#2C4276] dark:text-blue-400 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 shadow-sm text-sm'}`}
           >
-            Explore Workshop
-            <Icon icon="solar:arrow-right-linear" className="ml-2 w-5 h-5" />
+            {isFeatured ? 'Register Now' : 'View Details'}
+            <Icon icon="solar:arrow-right-linear" className={`ml-2 transition-transform group-hover/btn:translate-x-1 ${isFeatured ? 'w-6 h-6' : 'w-5 h-5'}`} />
           </Link>
         </div>
       </div>
     </div>
   );
-=======
-import { FaStar, FaCalendarAlt, FaClock, FaChalkboardTeacher } from "react-icons/fa";
-
-interface Workshop {
-    _id?: string;
-    title: string;
-    description: string;
-    thumbnail?: string;
-    instructorName: string;
-    date: string;
-    time: string;
-    duration: string;
-    price: number;
-    mode: "online" | "offline";
-    status: string;
-}
-
-const WorkshopCard = ({ workshop }: { workshop: Workshop }) => {
-    const { 
-        _id, 
-        title, 
-        description, 
-        thumbnail, 
-        instructorName, 
-        date, 
-        time, 
-        duration, 
-        price, 
-        mode 
-    } = workshop;
-
-    const workshopImage = thumbnail || "/images/course/default.jpeg";
-
-    return (
-        <div className="group bg-white dark:bg-darkmode rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-800">
-            {/* Image Section */}
-            <div className="relative aspect-[16/9] overflow-hidden">
-                <Link href={`/workshops/${_id}`}>
-                    <div className="relative h-full w-full">
-                        <Image
-                            src={workshopImage}
-                            alt={title}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
-                        <div className="absolute top-3 left-3 flex gap-2">
-                            <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider text-white shadow-sm ${
-                                mode === "online" ? "bg-blue-600" : "bg-orange-600"
-                            }`}>
-                                {mode}
-                            </span>
-                        </div>
-                    </div>
-                </Link>
-            </div>
-
-            {/* Content Section */}
-            <div className="p-4 flex flex-col flex-1">
-                <h3 className="mb-2">
-                    <Link
-                        href={`/workshops/${_id}`}
-                        className="font-bold text-[#2C4276] group-hover:text-blue-600 dark:text-white dark:group-hover:text-blue-400 text-lg leading-tight transition-colors line-clamp-1"
-                    >
-                        {title}
-                    </Link>
-                </h3>
-
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 line-clamp-2">
-                    {description}
-                </p>
-
-                {/* Details Grid */}
-                <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-[12px] font-medium text-gray-600 dark:text-gray-400 mb-5 border-t border-gray-50 dark:border-gray-800 pt-4">
-                    <div className="flex items-center gap-2">
-                        <FaCalendarAlt className="text-blue-600 w-3 h-3" />
-                        <span>{date}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <FaClock className="text-blue-600 w-3 h-3" />
-                        <span>{time} ({duration})</span>
-                    </div>
-                    <div className="flex items-center gap-2 col-span-2">
-                        <FaChalkboardTeacher className="text-blue-600 w-3 h-3" />
-                        <span className="truncate">By {instructorName}</span>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-auto flex items-center justify-between border-t border-gray-50 dark:border-gray-800 pt-4">
-                    <div className="flex flex-col">
-                        <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider leading-none mb-1">Price</span>
-                        <span className="text-lg font-extrabold text-[#2C4276] dark:text-white leading-none">
-                            {price === 0 ? "FREE" : `₹${price}`}
-                        </span>
-                    </div>
-
-                    <Link
-                        href={`/workshops/${_id}`}
-                        className="px-5 py-2.5 bg-[#2C4276] hover:bg-blue-900 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-blue-100 dark:shadow-none hover:translate-y-[-2px]"
-                    >
-                        View Details
-                    </Link>
-                </div>
-            </div>
-        </div>
-    );
->>>>>>> Stashed changes
 };
-
 export default WorkshopCard;

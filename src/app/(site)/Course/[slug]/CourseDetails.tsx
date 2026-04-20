@@ -379,6 +379,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
   const [agreeTnc, setAgreeTnc] = useState(false);
 
   // Redux state
+  const adminUser = useSelector((state: RootState) => state.auth.adminUser);
   const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser || state.auth.adminUser);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [enrollmentLoading, setEnrollmentLoading] = useState(false);
@@ -407,15 +408,15 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
   // Handle Dynamic Enrollment Button Click
   const handleEnrollClick = () => {
-    if (!user) {
-      // Guest: Open modal with empty fields
+    if (!user || adminUser || user.role === 'admin') {
+      // Guest or Admin: Open modal with empty fields
       setFormData({ name: '', email: '', phone: '', countryCode: '+91' });
       setIsInterestedModalOpen(true);
     } else if (isEnrolled) {
       // Enrolled: Redirect to learning
       router.push('/student/my-courses');
     } else {
-      // Logged in but not enrolled: Open modal prefilled
+      // Logged in student but not enrolled: Open modal prefilled
       setFormData({
         name: user.name || '',
         email: user.email || '',
@@ -506,10 +507,12 @@ const CourseDetails = ({ slug }: { slug: string }) => {
       } catch (err) {
         console.error("Error logging syllabus download:", err);
       }
-      
+
       downloadPDF(course.syllabusPdf);
 
     } else {
+      // Explicitly clear form data so no stale/admin details are leaked into the form
+      setFormData({ name: '', email: '', phone: '', countryCode: '+91' });
       setIsSyllabusModalOpen(true);
     }
   };

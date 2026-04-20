@@ -7,84 +7,90 @@ const workshopSchema = new mongoose.Schema(
             required: true,
             trim: true,
         },
-
-        description: {
+        subtitle: {
             type: String,
-            required: true,
-        },
-
-        thumbnail: {
-            type: String, // image URL
             default: "",
         },
-
+        description: {
+            type: String,
+            default: "",
+        },
+        thumbnail: {
+            type: String, // mapped to promoImage
+            default: "",
+        },
+        promoImage: {
+            type: String,
+            default: "",
+        },
+        qrImage: {
+            type: String,
+            default: "",
+        },
         instructorName: {
             type: String,
-            required: true,
-            trim: true,
+            default: "Expert Instructor",
         },
-
-        // 📅 Date & Time
         date: {
-            type: String, // or Date if you prefer
-            required: true,
+            type: String,
+            default: "",
         },
-
         time: {
             type: String,
-            required: true,
+            default: "",
         },
-
         duration: {
-            type: String, // e.g. "2 hours"
-            required: true,
+            type: String,
+            default: "",
         },
-
-        // 💰 Pricing
         price: {
             type: Number,
-            required: true,
             default: 0,
         },
-
-        // 🖥 Mode
         mode: {
             type: String,
             enum: ["online", "offline"],
             default: "online",
         },
-
         location: {
-            type: String, // for offline
+            type: String,
             default: "",
         },
-
         meetingLink: {
-            type: String, // for online
+            type: String,
             default: "",
         },
-
-        // 👥 Capacity
-        capacity: {
-            type: Number,
-            default: 0,
+        whatsappGroupLink: {
+            type: String,
+            default: "https://chat.whatsapp.com/KTnpNJVt2MUIaGz6wzXn65?mode=gi_t",
         },
-
-        enrolledCount: {
-            type: Number,
-            default: 0,
+        highlights: {
+            type: [String],
+            default: [],
         },
-
-        // 📌 Status
+        agenda: {
+            type: [{
+                time: String,
+                activity: String
+            }],
+            default: [],
+        },
+        instructions: {
+            type: [String],
+            default: [],
+        },
+        brochurePdf: {
+            type: String,
+            default: "",
+        },
         status: {
             type: String,
             enum: ["active", "inactive"],
             default: "active",
         },
-
     },
     {
-        timestamps: true, // createdAt, updatedAt
+        timestamps: true,
     }
 );
 

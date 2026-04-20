@@ -2,6 +2,8 @@ import { connectDB } from "@/lib/db";
 import WorkshopRegistration from "@/models/WorkshopRegistration";
 import Workshop from "@/models/Workshop";
 import { NextResponse } from "next/server";
+import { sendWorkshopRegistrationEmail } from "@/utils/sendEmail";
+
 
 export async function POST(req: Request) {
     try {
@@ -46,6 +48,14 @@ export async function POST(req: Request) {
 
         // Optionally increment enrolledCount in Workshop model
         await Workshop.findByIdAndUpdate(workshopId, { $inc: { enrolledCount: 1 } });
+
+        // Send confirmation email asynchronously
+        try {
+            await sendWorkshopRegistrationEmail(email, name, workshop);
+        } catch (emailError) {
+            console.error("[Workshop Registration] Email failed to send:", emailError);
+            // We don't fail the registration if email fails, but we log it
+        }
 
         return NextResponse.json(
             { message: "Registration successful", registration },
