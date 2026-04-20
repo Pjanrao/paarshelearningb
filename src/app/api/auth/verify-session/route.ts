@@ -15,7 +15,7 @@ export async function POST(req: Request) {
         // Verify the JWT token
         let decoded: any;
         try {
-            decoded = jwt.verify(token, process.env.JWT_SECRET || "default_secret");
+            decoded = jwt.verify(token, process.env.JWT_SECRET || "paarsh_super_secret_key_123");
         } catch (err) {
             return NextResponse.json({ message: "Invalid or expired token" }, { status: 401 });
         }

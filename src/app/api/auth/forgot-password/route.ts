@@ -35,7 +35,7 @@ export async function POST(req: Request) {
         // 2. Generate reset token
         const resetToken = jwt.sign(
             { id: user._id, type: "password-reset" },
-            process.env.JWT_SECRET || "default_secret",
+            process.env.JWT_SECRET || "paarsh_super_secret_key_123",
             { expiresIn: "1h" }
         );
 

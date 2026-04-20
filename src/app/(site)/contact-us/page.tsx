@@ -324,8 +324,8 @@ const ContactPage = () => {
   }, []);
 
   const mapLocations = {
-    Pune: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.364426543!2d73.7424911751936!3d18.602177473215277!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2bb926f4327fd%3A0xc392db26998d30e8!2sPaarsh%20Infotech%20Pvt%20Ltd!5e0!3m2!2sen!2sin!4v1707222100000!5m2!1sen!2sin",
-    Nashik: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3749.19168434!2d73.7819373!3d19.9813934!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bddeb638e000001%3A0x2d1bce8da5e8bd9e!2sPaarsh+Infotech+Pvt+Ltd!5e0!3m2!2sen!2sin!4v1707222100000!5m2!1sen!2sin"
+    Pune: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1936066.2420780319!2d71.30676269531253!3d18.601998315229597!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2bb84a53dcf37%3A0x6fe3dbdb8a330ab0!2sPaarsh%20Infotech%20Pvt%20Ltd!5e0!3m2!1sen!2sin!4v1776681169804!5m2!1sen!2sin",
+    Nashik: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1936066.2420780319!2d71.30676269531253!3d18.601998315229597!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bddeb9c403fffff%3A0x491627e9317d9ca6!2sPAARSH%20INFOTECH%20PVT%20LTD!5e0!3m2!1sen!2sin!4v1776681501676!5m2!1sen!2sin",
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
