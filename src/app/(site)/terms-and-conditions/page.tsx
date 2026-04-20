@@ -40,7 +40,19 @@ const TermsPage = () => {
               Welcome to Paarsh E-Learning! These terms and conditions outline the rules and regulations for the use of Paarsh E-Learning&apos;s Website, located at <a href="https://www.paarshelearning.com/" className="text-blue-500 hover:underline">https://www.paarshelearning.com/</a>. By accessing this website we assume you accept these terms and conditions. Do not continue to use Paarsh E-Learning if you do not agree to take all of the terms and conditions stated on this page.
             </p>
             <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-              The following terminology applies to these Terms and Conditions, Privacy Statement and Disclaimer Notice and all Agreements: &quot;Client&quot;, &quot;You&quot; and &quot;Your&quot; refers to you, the person log on this website and compliant to the Company&apos;s terms and conditions. &quot;The Company&quot;, &quot;Ourselves&quot;, &quot;We&quot;, &quot;Our&quot; and &quot;Us&quot;, refers to our Company. &quot;Party&quot;, &quot;Parties&quot;, or &quot;Us&quot;, refers to both the Client and ourselves.
+              The following terminology applies to these Terms and Conditions, Privacy Statement, Disclaimer Notice, and all Agreements.
+            </p>
+
+            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+              "Client", "You", and "Your" refer to you — the person who accesses this website and agrees to follow the Company's terms and conditions.
+            </p>
+
+            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+              "The Company", "We", "Our", and "Us" refer to our organization.
+            </p>
+
+            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+              "Party", "Parties", or "Us"refer to both you (the Client) and the Company together.
             </p>
           </section>
 
