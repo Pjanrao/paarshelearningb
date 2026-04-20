@@ -123,4 +123,105 @@ export const sendAdminNotificationEmail = async (data: any) => {
         console.error("[Email] Nodemailer admin error:", error);
         return { success: false, error };
     }
-};
+};
+
+export const sendWorkshopRegistrationEmail = async (email: string, name: string, workshopData: any) => {
+    const { title, date, time, mode, location, meetingLink } = workshopData;
+    const whatsappGroupLink = workshopData.whatsappGroupLink || "https://chat.whatsapp.com/KTnpNJVt2MUIaGz6wzXn65?mode=gi_t";
+
+    console.log(`[Email] Attempting to send Workshop Confirmation for "${title}" to: ${email}`);
+
+    if (!user || !pass) {
+        console.error("[Email] EMAIL_USER or EMAIL_PASSWORD is missing!");
+        return { success: false, error: "Credentials missing" };
+    }
+
+    const transporter = createTransporter();
+
+    // Pre-compute conditional strings to avoid nested template literals
+    const isOffline = mode === "offline";
+    const meetingLinkHtml = (!isOffline && meetingLink)
+        ? '<a href="' + meetingLink + '" class="btn">Join Meeting Link</a>'
+        : '';
+    
+    const venueHtml = (isOffline && location)
+        ? '<div class="detail-item"><span class="detail-label">Venue:</span> ' + location + '</div>'
+        : '';
+
+    try {
+        const mailOptions = {
+            from: `"Paarsh Infotech" <${user}>`,
+            to: email,
+            subject: `Registration Confirmed: ${title} - Paarsh Infotech`,
+            html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 20px auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+            .header { background: #2B4278; color: #ffffff; padding: 40px 20px; text-align: center; }
+            .header h1 { margin: 0; font-size: 26px; letter-spacing: 1px; }
+            .content { padding: 30px; background: #ffffff; }
+            .content h2 { color: #2B4278; margin-top: 0; }
+            .workshop-card { background: #f8f9fa; border-left: 4px solid #01A0E2; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+            .workshop-title { font-size: 18px; font-weight: bold; color: #2B4278; margin-bottom: 10px; }
+            .detail-item { margin: 8px 0; font-size: 15px; }
+            .detail-label { font-weight: bold; color: #555; width: 80px; display: inline-block; }
+            .actions { text-align: center; margin-top: 30px; }
+            .btn { display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #01A0E2 0%, #007bb5 100%); color: #ffffff; text-decoration: none; border-radius: 50px; font-weight: 600; margin: 10px; box-shadow: 0 4px 10px rgba(1, 160, 226, 0.25); text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px; }
+            .btn-whatsapp { background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.25); }
+            .footer { background: #f1f3f5; padding: 20px; text-align: center; font-size: 0.85em; color: #777; }
+            .footer a { color: #01A0E2; text-decoration: none; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Registration Successful!</h1>
+            </div>
+            <div class="content">
+              <h2>Hello ${name},</h2>
+              <p>Congratulations! You have successfully registered for our upcoming workshop. We are excited to have you join us for this learning experience.</p>
+              
+              <div class="workshop-card">
+                <div class="workshop-title">${title}</div>
+                <div class="detail-item"><span class="detail-label">Date:</span> ${date}</div>
+                <div class="detail-item"><span class="detail-label">Time:</span> ${time}</div>
+                <div class="detail-item"><span class="detail-label">Mode:</span> ${mode === 'offline' ? '🏢 In-Person (Offline)' : '🎥 Online'}</div>
+                ${venueHtml}
+              </div>
+
+              <p>Please join the official WhatsApp group for all future updates and materials.</p>
+
+              <div class="actions">
+                <a href="${whatsappGroupLink}" class="btn btn-whatsapp">Join WhatsApp Group</a>
+                ${meetingLinkHtml}
+              </div>
+
+              <p style="margin-top: 30px;"><strong>Instructions:</strong></p>
+              <ul style="padding-left: 20px;">
+                ${mode === 'offline' 
+                  ? '<li>Reach the venue 15 minutes before the scheduled time.</li><li>Carry your registration details (this email) for entry.</li>'
+                  : '<li>Join the session 10 minutes before the scheduled time.</li><li>Ensure you have a stable internet connection.</li>'}
+              </ul>
+            </div>
+            <div class="footer">
+              <p>&copy; ${new Date().getFullYear()} Paarsh Infotech. All rights reserved.</p>
+              <p>Need help? Contact us at <a href="mailto:${user}">${user}</a></p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log("[Email] Workshop Registration email sent successfully:", info.messageId);
+        return { success: true, data: info };
+    } catch (error) {
+        console.error("[Email] Nodemailer workshop registration error:", error);
+        return { success: false, error };
+    }
+};
+

@@ -59,6 +59,7 @@ export function middleware(req: NextRequest) {
         path.startsWith("/_next") ||
         path.startsWith("/images") ||
         path.startsWith("/uploads") ||
+        path.startsWith("/promo") ||
         path.startsWith("/favicon.ico")
     ) {
         return NextResponse.next();

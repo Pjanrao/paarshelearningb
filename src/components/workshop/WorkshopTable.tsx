@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Pencil, Trash2 } from "lucide-react";
+import { Search, Pencil, Trash2, Eye } from "lucide-react";
 import {
     Select,
     SelectTrigger,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 
 import WorkshopFormModal from "./WorkshopFormModal";
+import WorkshopViewModal from "./WorkshopViewModal";
 
 interface Workshop {
     _id?: string;
@@ -21,7 +22,6 @@ interface Workshop {
     date: string;
     time: string;
     duration: string;
-    price: number;
     mode: "online" | "offline";
     location?: string;
     meetingLink?: string;
@@ -40,6 +40,9 @@ export default function WorkshopManagement() {
 
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState<Workshop | null>(null);
+
+    const [viewOpen, setViewOpen] = useState(false);
+    const [viewingWorkshop, setViewingWorkshop] = useState<Workshop | null>(null);
 
     const limit = 5;
 
@@ -190,7 +193,6 @@ export default function WorkshopManagement() {
                             <th className="p-4 text-left">Workshop</th>
                             <th className="p-4 text-left">Instructor</th>
                             <th className="p-4 text-left">Date</th>
-                            <th className="p-4 text-left">Price</th>
                             <th className="p-4 text-left">Mode</th>
                             <th className="p-4 text-left">Status</th>
                             <th className="p-4 text-left">Actions</th>
@@ -226,7 +228,6 @@ export default function WorkshopManagement() {
 
                                 <td className="p-4">{w.instructorName}</td>
                                 <td className="p-4">{w.date}</td>
-                                <td className="p-4 font-semibold">₹ {w.price}</td>
 
                                 <td className="p-4">
                                     <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded-md text-xs">
@@ -246,6 +247,16 @@ export default function WorkshopManagement() {
 
                                 <td className="p-4">
                                     <div className="flex gap-1">
+                                        <button
+                                            onClick={() => {
+                                                setViewingWorkshop(w);
+                                                setViewOpen(true);
+                                            }}
+                                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg"
+                                            title="View Workshop"
+                                        >
+                                            <Eye size={18} />
+                                        </button>
 
                                         <button
                                             onClick={() => {
@@ -253,6 +264,7 @@ export default function WorkshopManagement() {
                                                 setOpen(true);
                                             }}
                                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                                            title="Edit Workshop"
                                         >
                                             <Pencil size={18} />
                                         </button>
@@ -260,6 +272,7 @@ export default function WorkshopManagement() {
                                         <button
                                             onClick={() => handleDelete(w._id!)}
                                             className="p-2 text-red-600 hover:bg-red-50 rounded-lg"
+                                            title="Delete Workshop"
                                         >
                                             <Trash2 size={18} />
                                         </button>
@@ -323,6 +336,12 @@ export default function WorkshopManagement() {
                 setOpen={setOpen}
                 editing={editing}
                 onClose={handleClose}
+            />
+
+            <WorkshopViewModal
+                open={viewOpen}
+                setOpen={setViewOpen}
+                workshop={viewingWorkshop}
             />
 
         </div>
