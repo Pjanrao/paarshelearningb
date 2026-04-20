@@ -19,6 +19,5 @@ export const headerData: HeaderItem[] = [
   //   //   { label: "Blog Details", href: "/blog/Blog_1" },
   //   // ],
   // },
-  { label: "Careers", href: "/careers" },
   { label: "Contact", href: "/contact-us" },
 ];
