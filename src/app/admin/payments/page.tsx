@@ -5,6 +5,7 @@ import { useGetPaymentsQuery } from "@/redux/api/paymentApi";
 import PaymentTable from "@/components/dashboard/payments/PaymentTable";
 import AddPaymentModal from "@/components/dashboard/payments/AddPaymentModal";
 import { Plus } from "lucide-react";
+import Pagination from "@/components/Common/Pagination";
 
 export default function PaymentsPage() {
 
@@ -220,69 +221,18 @@ export default function PaymentsPage() {
             <PaymentTable payments={paginated} loading={isLoading} />
 
             {/* PAGINATION */}
-
-            <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3">
-
-                <div className="flex items-center gap-3">
-                    <p className="text-sm text-gray-500 text-center sm:text-left">
-                        Showing {total > 0 ? start + 1 : 0} to{" "}
-                        {Math.min(start + effectiveLimit, total)} of {total} payments
-                    </p>
-                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                        <span>Show:</span>
-                        <select
-                            value={itemsPerPage}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setItemsPerPage(val === "all" ? "all" : Number(val));
-                                setPage(1);
-                            }}
-                            className="border px-2 py-1 rounded-lg text-sm bg-white"
-                        >
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                            <option value={50}>50</option>
-                            <option value="all">All</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="flex flex-wrap justify-center gap-2">
-
-                    <button
-                        disabled={page === 1}
-                        onClick={() => setPage(page - 1)}
-                        className="bg-gray-200 px-3 py-1 rounded"
-                    >
-                        Previous
-                    </button>
-
-                    {[...Array(pages)].map((_, i) => (
-
-                        <button
-                            key={i}
-                            onClick={() => setPage(i + 1)}
-                            className={`px-3 py-1 rounded ${page === i + 1
-                                ? "bg-[#2C4276] text-white"
-                                : "bg-gray-200"
-                                }`}
-                        >
-                            {i + 1}
-                        </button>
-
-                    ))}
-
-                    <button
-                        disabled={page === pages}
-                        onClick={() => setPage(page + 1)}
-                        className="bg-gray-200 px-3 py-1 rounded"
-                    >
-                        Next
-                    </button>
-
-                </div>
-
-            </div>
+            <Pagination
+                currentPage={page}
+                totalPages={pages}
+                onPageChange={setPage}
+                totalItems={total}
+                itemsPerPage={itemsPerPage}
+                onItemsPerPageChange={(val) => {
+                    setItemsPerPage(val);
+                    setPage(1);
+                }}
+                itemName="payments"
+            />
 
             {/* ADD PAYMENT MODAL */}
 

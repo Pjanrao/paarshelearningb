@@ -5,6 +5,7 @@ import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Send, CheckCircle, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import Link from "next/link";
+import { validatePhone } from "@/utils/validation";
 
 function ApplyForm() {
     const searchParams = useSearchParams();
@@ -24,6 +25,10 @@ function ApplyForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!validatePhone(form.phone)) {
+            alert("Please enter a valid 10-digit mobile number.");
+            return;
+        }
         if (!resumeFile) {
             alert("Please upload your resume.");
             return;
@@ -124,10 +129,11 @@ function ApplyForm() {
                                 id="phone"
                                 type="tel"
                                 required
-                                placeholder="+1 (555) 000-0000"
+                                placeholder="9876543210"
+                                maxLength={10}
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
                                 value={form.phone}
-                                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                                onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
                             />
                         </div>
                     </div>

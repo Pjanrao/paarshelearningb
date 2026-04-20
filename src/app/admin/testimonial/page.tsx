@@ -14,12 +14,12 @@ import {
     Filter
 } from "lucide-react";
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
@@ -296,15 +296,15 @@ export default function AdmintestimonialPage() {
                         </div>
 
                         <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
-                         <div className="flex items-center gap-3 text-sm text-gray-600 font-medium order-2 md:order-1">
+                            <div className="flex items-center gap-3 text-sm text-gray-600 font-medium order-2 md:order-1">
                                 <div>
-                                {total === 0 ? (
-                                    "Showing 0 to 0 of 0 testimonials"
-                                ) : (
-                                    <>
-                                        Showing <span className="font-bold text-gray-900">{(currentPage - 1) * (testimonialsPerPage as number) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * (testimonialsPerPage as number), total)}</span> of <span className="font-bold text-gray-900">{total}</span> testimonials
-                                    </>
-                                )}
+                                    {total === 0 ? (
+                                        "Showing 0 to 0 of 0 testimonials"
+                                    ) : (
+                                        <>
+                                            Showing <span className="font-bold text-gray-900">{(currentPage - 1) * (testimonialsPerPage as number) + 1}</span> to <span className="font-bold text-gray-900">{Math.min(currentPage * (testimonialsPerPage as number), total)}</span> of <span className="font-bold text-gray-900">{total}</span> testimonials
+                                        </>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-1 text-gray-500">
                                     <span>Show:</span>

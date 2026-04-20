@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import Pagination from "@/components/Common/Pagination";
 import {
     useGetJobsQuery,
     useDeleteJobMutation,
@@ -17,6 +18,7 @@ import {
     Search,
 } from "lucide-react";
 
+
 export default function AdminJobs() {
     const { data: jobs, isLoading } = useGetJobsQuery(true);
     const [deleteJob] = useDeleteJobMutation();
@@ -24,17 +26,19 @@ export default function AdminJobs() {
     const [selectedJob, setSelectedJob] = useState<any>(null);
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const [itemsPerPage, setItemsPerPage] = useState<number | "all">(10);
 
     const filteredJobs = jobs?.filter((job: any) =>
         job.title.toLowerCase().includes(search.toLowerCase())
     );
 
-    const totalPages = Math.ceil((filteredJobs?.length || 0) / itemsPerPage);
+    const total = filteredJobs?.length || 0;
+    const effectiveLimit: number = itemsPerPage === "all" ? total : (itemsPerPage as number);
+    const totalPages = itemsPerPage === "all" ? 1 : Math.ceil(total / effectiveLimit);
 
     const paginatedJobs = filteredJobs?.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
+        (currentPage - 1) * effectiveLimit,
+        currentPage * effectiveLimit
     );
 
     const handleDelete = async (id: string) => {
@@ -113,7 +117,7 @@ export default function AdminJobs() {
                                     {paginatedJobs?.map((job: any, index: number) => (
                                         <tr key={job._id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                                {(currentPage - 1) * itemsPerPage + index + 1}
+                                                {(currentPage - 1) * effectiveLimit + index + 1}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="text-sm font-bold text-gray-900">{job.title}</div>
@@ -172,47 +176,18 @@ export default function AdminJobs() {
                         </div>
 
                         {/* PAGINATION */}
-                        <div className="px-6 py-4 border-t bg-gray-50 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <div className="text-sm text-gray-600">
-                                Showing <span className="font-bold text-gray-900">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-                                <span className="font-bold text-gray-900">{Math.min(currentPage * itemsPerPage, filteredJobs?.length || 0)}</span> of{" "}
-                                <span className="font-bold text-gray-900">{filteredJobs?.length || 0}</span> jobs
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                                    disabled={currentPage === 1}
-                                    className="px-4 py-2 text-sm font-bold rounded-lg border bg-white hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm active:scale-95"
-                                >
-                                    Previous
-                                </button>
-                                <div className="hidden sm:flex items-center gap-1">
-                                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                                        let pageNum;
-                                        if (totalPages <= 5) pageNum = i + 1;
-                                        else if (currentPage <= 3) pageNum = i + 1;
-                                        else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-                                        else pageNum = currentPage - 2 + i;
-                                        return (
-                                            <button
-                                                key={pageNum}
-                                                onClick={() => setCurrentPage(pageNum)}
-                                                className={`w-10 h-10 rounded-lg text-sm font-bold transition-all shadow-sm active:scale-95 ${currentPage === pageNum ? "bg-[#2C4276] text-white" : "border bg-white hover:bg-gray-50 text-gray-700"}`}
-                                            >
-                                                {pageNum}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                                <button
-                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                                    disabled={currentPage === totalPages || totalPages === 0}
-                                    className="px-4 py-2 text-sm font-bold rounded-lg border bg-white hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm active:scale-95"
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(p) => setCurrentPage(p)}
+                            totalItems={total}
+                            itemsPerPage={itemsPerPage}
+                            onItemsPerPageChange={(val) => {
+                                setItemsPerPage(val);
+                                setCurrentPage(1);
+                            }}
+                            itemName="jobs"
+                        />
                     </>
                 )}
             </div>

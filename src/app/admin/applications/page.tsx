@@ -2,6 +2,7 @@
 
 import { useGetApplicationsQuery } from "@/redux/api/jobApi";
 import { useState, useMemo } from "react";
+import Pagination from "@/components/Common/Pagination";
 import {
     Eye,
     Download,
@@ -148,7 +149,7 @@ export default function Applications() {
     // Search and Pagination State
     const [search, setSearch] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const [itemsPerPage, setItemsPerPage] = useState<number | "all">(10);
 
     /**
      * Delete an application
@@ -176,13 +177,15 @@ export default function Applications() {
     /**
      * Calculate paginated subset
      */
-    const totalPages = Math.ceil(filteredApps.length / itemsPerPage);
+    const total = filteredApps.length;
+    const effectiveLimit: number = itemsPerPage === "all" ? total : (itemsPerPage as number);
+    const totalPages = itemsPerPage === "all" ? 1 : Math.ceil(total / effectiveLimit);
     const paginatedApps = useMemo(() => {
         return filteredApps.slice(
-            (currentPage - 1) * itemsPerPage,
-            currentPage * itemsPerPage
+            (currentPage - 1) * effectiveLimit,
+            currentPage * effectiveLimit
         );
-    }, [filteredApps, currentPage]);
+    }, [filteredApps, currentPage, effectiveLimit]);
 
     return (
         <div className="bg-[#F8FAFC] min-h-screen p-4 sm:p-6 lg:p-8">
@@ -250,7 +253,7 @@ export default function Applications() {
                                             <tr key={app._id} className="hover:bg-blue-50/30 transition-all group">
                                                 {/* Index Number */}
                                                 <td className="px-6 py-6 whitespace-nowrap text-sm font-mono text-gray-400">
-                                                    {((currentPage - 1) * itemsPerPage + index + 1).toString().padStart(2, '0')}
+                                                    {((currentPage - 1) * effectiveLimit + index + 1).toString().padStart(2, '0')}
                                                 </td>
 
                                                 {/* Candidate Identity */}
@@ -334,48 +337,18 @@ export default function Applications() {
                         </div>
 
                         {/* Pagination Bar */}
-                        <div className="px-8 py-6 border-t border-gray-50 bg-[#F8FAFC]/50 flex flex-col md:flex-row items-center justify-between gap-6">
-                            <div className="text-sm text-gray-500 font-medium">
-                                Showing records <span className="text-[#2C4276] font-black">{(currentPage - 1) * itemsPerPage + 1}</span> to{" "}
-                                <span className="text-[#2C4276] font-black">{Math.min(currentPage * itemsPerPage, filteredApps.length)}</span> of{" "}
-                                <span className="text-[#2C4276] font-black">{filteredApps.length}</span> candidates
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                                    disabled={currentPage === 1}
-                                    className="px-6 py-2.5 text-sm font-bold rounded-xl border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 transition-all shadow-sm active:scale-95"
-                                >
-                                    Prev
-                                </button>
-
-                                <div className="hidden sm:flex items-center gap-2">
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                        .filter(p => Math.abs(p - currentPage) <= 2 || p === 1 || p === totalPages)
-                                        .map((pageNum, idx, arr) => (
-                                            <div key={pageNum} className="flex items-center gap-2">
-                                                {idx > 0 && arr[idx - 1] !== pageNum - 1 && <span className="text-gray-300">...</span>}
-                                                <button
-                                                    onClick={() => setCurrentPage(pageNum)}
-                                                    className={`w-11 h-11 rounded-xl text-sm font-black transition-all active:scale-90 ${currentPage === pageNum ? "bg-[#2C4276] text-white shadow-lg shadow-blue-200" : "bg-white border border-gray-200 text-gray-600 hover:border-[#2C4276] hover:text-[#2C4276]"}`}
-                                                >
-                                                    {pageNum}
-                                                </button>
-                                            </div>
-                                        ))
-                                    }
-                                </div>
-
-                                <button
-                                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                                    disabled={currentPage === totalPages || totalPages === 0}
-                                    className="px-6 py-2.5 text-sm font-bold rounded-xl border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-40 transition-all shadow-sm active:scale-95"
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(p) => setCurrentPage(p)}
+                            totalItems={total}
+                            itemsPerPage={itemsPerPage}
+                            onItemsPerPageChange={(val) => {
+                                setItemsPerPage(val);
+                                setCurrentPage(1);
+                            }}
+                            itemName="candidates"
+                        />
                     </>
                 )}
             </div>

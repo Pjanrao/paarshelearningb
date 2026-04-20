@@ -6,7 +6,7 @@ import Counter from "@/components/Home/Counter";
 import Progresswork from "@/components/Home/WorkProgress";
 import Services from "@/components/Home/Services";
 export const metadata: Metadata = {
-    title: "Services | Paarsh E - Learning",
+  title: "Services | Paarsh E - Learning",
 };
 
 const page = () => {
@@ -21,7 +21,7 @@ const page = () => {
         description="Discover a wealth of insightful materials meticulously crafted to provide you with a comprehensive understanding of the latest trends."
         breadcrumbLinks={breadcrumbLinks}
       />
-      <Services/>
+      <Services />
     </>
   );
 };

@@ -3,6 +3,7 @@
 import { useGetReferralUsersAdminQuery } from "@/redux/api/referralAdminApi";
 import { useState, useEffect } from "react";
 import ReferralViewModal from "./ReferralViewModal";
+import Pagination from "@/components/Common/Pagination";
 
 
 export default function ReferralTable() {
@@ -90,24 +91,6 @@ export default function ReferralTable() {
                         <option value="amount">Amount</option>
                     </select>
 
-                    {/* SHOW PER PAGE */}
-                    <div className="flex items-center gap-1">
-                        <label className="text-sm text-gray-500">Show:</label>
-                        <select
-                            value={itemsPerPage}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setItemsPerPage(val === "all" ? "all" : Number(val));
-                                setCurrentPage(1);
-                            }}
-                            className="border px-2 py-2 rounded-lg text-sm"
-                        >
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                            <option value={50}>50</option>
-                            <option value="all">All</option>
-                        </select>
-                    </div>
 
                     {/* EXPORT */}
                     <button
@@ -221,36 +204,18 @@ export default function ReferralTable() {
                     </div>
 
                     {/* PAGINATION */}
-                    <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3">
-
-                        <p className="text-sm text-gray-500 text-center sm:text-left">
-                            Showing {startIndex + 1} to{" "}
-                            {Math.min(startIndex + effectiveLimit, filteredData.length)} of{" "}
-                            {filteredData.length}
-                        </p>
-
-                        <div className="flex flex-wrap justify-center gap-2">
-                            <button
-                                onClick={() => setCurrentPage((p) => p - 1)}
-                                disabled={currentPage === 1}
-                                className="px-3 py-1 bg-gray-100 rounded disabled:opacity-50"
-                            >
-                                Previous
-                            </button>
-
-                            <button className="px-3 py-1 bg-[#2C4276] text-white rounded">
-                                {currentPage}
-                            </button>
-
-                            <button
-                                onClick={() => setCurrentPage((p) => p + 1)}
-                                disabled={currentPage === totalPages}
-                                className="px-3 py-1 bg-gray-100 rounded disabled:opacity-50"
-                            >
-                                Next
-                            </button>
-                        </div>
-                    </div>
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={setCurrentPage}
+                        totalItems={filteredData.length}
+                        itemsPerPage={itemsPerPage}
+                        onItemsPerPageChange={(val) => {
+                            setItemsPerPage(val);
+                            setCurrentPage(1);
+                        }}
+                        itemName="referrals"
+                    />
                 </>
             )}
 
