@@ -274,6 +274,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getImgPath } from "@/utils/image";
 import { useSiteImages } from "@/hooks/useSiteImages";
+import { ChevronRight } from "lucide-react";
 
 const Footer = () => {
   const { getImageUrl } = useSiteImages();
@@ -319,15 +320,55 @@ const Footer = () => {
 
           <div className="flex-1 text-left lg:max-w-xs ml-0 lg:ml-[22%]">
             <h3 className="text-white font-semibold mb-4 text-left">Quick Links</h3>
-            <ul className="space-y-2 text-white/70 text-sm text-left">
-              <li><Link href="/#" className="hover:text-secondary transition">Home</Link></li>
-              <li><Link href="/about-us" className="hover:text-secondary transition">About</Link></li>
-              <li><Link href="/Course" className="hover:text-secondary transition">Courses</Link></li>
-              <li><Link href="/workshops" className="hover:text-secondary transition">Workshops</Link></li>
-              <li><Link href="/blog" className="hover:text-secondary transition">Blogs</Link></li>
-              <li><Link href="/inquiry" className="hover:text-secondary transition">Inquiry</Link></li>
-              <li><Link href="/careers" className="hover:text-secondary transition">Careers</Link></li>
-              <li><Link href="/contact-us" className="hover:text-secondary transition">Contact</Link></li>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-white/70 text-sm text-left font-medium">
+              <li className="group">
+                <Link href="/#" className="flex items-center gap-1 hover:text-secondary transition-all duration-300">
+                  <ChevronRight className="w-3 h-3 text-secondary opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">Home</span>
+                </Link>
+              </li>
+              <li className="group">
+                <Link href="/Course" className="flex items-center gap-1 hover:text-secondary transition-all duration-300">
+                  <ChevronRight className="w-3 h-3 text-secondary opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">Courses</span>
+                </Link>
+              </li>
+              <li className="group">
+                <Link href="/about-us" className="flex items-center gap-1 hover:text-secondary transition-all duration-300">
+                  <ChevronRight className="w-3 h-3 text-secondary opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">About</span>
+                </Link>
+              </li>
+              <li className="group">
+                <Link href="/workshops" className="flex items-center gap-1 hover:text-secondary transition-all duration-300">
+                  <ChevronRight className="w-3 h-3 text-secondary opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">Workshops</span>
+                </Link>
+              </li>
+              <li className="group">
+                <Link href="/blog" className="flex items-center gap-1 hover:text-secondary transition-all duration-300">
+                  <ChevronRight className="w-3 h-3 text-secondary opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">Blogs</span>
+                </Link>
+              </li>
+              <li className="group">
+                <Link href="/careers" className="flex items-center gap-1 hover:text-secondary transition-all duration-300">
+                  <ChevronRight className="w-3 h-3 text-secondary opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">Careers</span>
+                </Link>
+              </li>
+              <li className="group">
+                <Link href="/inquiry" className="flex items-center gap-1 hover:text-secondary transition-all duration-300">
+                  <ChevronRight className="w-3 h-3 text-secondary opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">Inquiry</span>
+                </Link>
+              </li>
+              <li className="group">
+                <Link href="/contact-us" className="flex items-center gap-1 hover:text-secondary transition-all duration-300">
+                  <ChevronRight className="w-3 h-3 text-secondary opacity-0 -ml-3 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                  <span className="group-hover:translate-x-1 transition-transform duration-300">Contact</span>
+                </Link>
+              </li>
             </ul>
           </div>
 
