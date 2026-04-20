@@ -101,31 +101,59 @@ export default function WorkshopFormModal({
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            const formData = new FormData();
 
-            // Append all form fields
-            Object.entries(form).forEach(([key, value]) => {
-                if (key === "highlights") {
-                    (value as string[]).forEach((h) => {
-                        if (h.trim()) formData.append("highlights", h.trim());
-                    });
-                } else {
-                    formData.append(key, value.toString());
-                }
-            });
-
-            // Append _id if editing
-            if (editing?._id) {
-                formData.append("_id", editing._id);
+            // ✅ STEP 1: VALIDATION (FIRST)
+            if (!form.title || !form.description) {
+                alert("Title and Description are required");
+                setLoading(false);
+                return;
             }
+
+            if (form.mode === "online" && !form.meetingLink) {
+                alert("Meeting link is required for online workshop");
+                setLoading(false);
+                return;
+            }
+
+            if (form.mode === "offline" && !form.location) {
+                alert("Location is required for offline workshop");
+                setLoading(false);
+                return;
+            }
+            const payload = {
+                ...form,
+                highlights: form.highlights.filter((h) => h.trim() !== ""),
+                ...(form.mode === "online"
+                    ? { location: "" }
+                    : { meetingLink: "" }),
+
+                ...(editing?._id && { _id: editing._id }),
+            };
 
             const res = await fetch("/api/workshops", {
                 method: "POST",
-                body: formData,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
             });
 
             if (res.ok) {
                 onClose();
+                setForm({
+                    title: "",
+                    subtitle: "",
+                    instructorName: "",
+                    date: "",
+                    time: "",
+                    duration: "",
+                    mode: "online",
+                    location: "",
+                    meetingLink: "",
+                    description: "",
+                    highlights: ["", "", "", ""],
+                    status: "active",
+                });
             } else {
                 const data = await res.json();
                 alert(data.message || "Failed to save workshop");
@@ -316,10 +344,10 @@ export default function WorkshopFormModal({
                             {form.mode === "offline" ? (
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">
-                                        Workshop Venue / Address
+                                        Physical Venue Location
                                     </label>
                                     <Input
-                                        placeholder="Enter full training center / venue address"
+                                        placeholder="Enter full address"
                                         className="h-11 border-gray-200 bg-white rounded-xl"
                                         value={form.location}
                                         onChange={(e) => setForm({ ...form, location: e.target.value })}
@@ -328,10 +356,10 @@ export default function WorkshopFormModal({
                             ) : (
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">
-                                        Online Meeting Link
+                                        Meeting Link / URL
                                     </label>
                                     <Input
-                                        placeholder="Paste Zoom, Google Meet or Teams link here"
+                                        placeholder="Zoom, Google Meet, etc."
                                         className="h-11 border-gray-200 bg-white rounded-xl text-blue-600"
                                         value={form.meetingLink}
                                         onChange={(e) => setForm({ ...form, meetingLink: e.target.value })}

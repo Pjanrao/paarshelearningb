@@ -26,7 +26,7 @@ const WorkshopsPage = () => {
     }, []);
 
     // Filter Logic
-    const filters = ["All", "Online", "Offline", "Popular"];
+    const filters = ["All", "Online", "Offline"];
 
     const dynamicList = dbWorkshops.map((w) => [
         w._id,
@@ -43,7 +43,6 @@ const WorkshopsPage = () => {
 
     const filteredList = dynamicList.filter(([id, w]: any) => {
         if (selectedFilter === "All") return true;
-        if (selectedFilter === "Popular") return true; 
         if (selectedFilter === "Online") return w.mode?.toLowerCase() === "online";
         if (selectedFilter === "Offline") return w.mode?.toLowerCase() === "offline";
         return true; // Fallback

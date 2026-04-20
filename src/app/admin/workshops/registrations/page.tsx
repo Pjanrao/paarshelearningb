@@ -154,7 +154,6 @@ export default function WorkshopRegistrationsPage() {
                             <th className="p-4 text-left">ID</th>
                             <th className="p-4 text-left">Student Info</th>
                             <th className="p-4 text-left">Workshop</th>
-                            <th className="p-4 text-left">Status</th>
                             <th className="p-4 text-left">Date Joined</th>
                             <th className="p-4 text-left">Actions</th>
                         </tr>
@@ -195,14 +194,7 @@ export default function WorkshopRegistrationsPage() {
                                             </span>
                                         </div>
                                     </td>
-                                    <td className="p-4">
-                                        <span className={`px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider border 
-                                            ${reg.status === 'confirmed' ? 'bg-green-50 text-green-600 border-green-100' 
-                                            : reg.status === 'cancelled' ? 'bg-red-50 text-red-600 border-red-100' 
-                                            : 'bg-yellow-50 text-yellow-600 border-yellow-100'}`}>
-                                            {reg.status}
-                                        </span>
-                                    </td>
+
                                     <td className="p-4 text-gray-500">
                                         {reg.createdAt ? new Date(reg.createdAt).toLocaleDateString() : "N/A"}
                                     </td>
@@ -327,10 +319,7 @@ export default function WorkshopRegistrationsPage() {
                                 <span className="font-bold text-gray-800">Profession/Status:</span>
                                 <span className="col-span-2">{selectedReg.currentStatus}</span>
                             </div>
-                            <div className="grid grid-cols-3 gap-2 border-b pb-2">
-                                <span className="font-bold text-gray-800">Reg. Status:</span>
-                                <span className="col-span-2 capitalize">{selectedReg.status}</span>
-                            </div>
+
                             <div className="flex flex-col gap-1 border-b pb-2">
                                 <span className="font-bold text-gray-800">Message Provided:</span>
                                 <span className="text-gray-500 italic p-3 bg-gray-50 rounded-lg">{selectedReg.message || "No message provided."}</span>
@@ -370,18 +359,10 @@ export default function WorkshopRegistrationsPage() {
                                         <Input name="phone" defaultValue={selectedReg.phone} required className="bg-gray-50" />
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1">
                                     <div>
                                         <label className="block text-xs font-bold text-gray-700 mb-1">Current Status</label>
                                         <Input name="currentStatus" defaultValue={selectedReg.currentStatus} className="bg-gray-50" />
-                                    </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-700 mb-1">Registration Status</label>
-                                        <select name="status" defaultValue={selectedReg.status} className="w-full h-10 px-3 py-2 rounded-md border border-input bg-gray-50 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50">
-                                            <option value="pending">Pending</option>
-                                            <option value="confirmed">Confirmed</option>
-                                            <option value="cancelled">Cancelled</option>
-                                        </select>
                                     </div>
                                 </div>
                             </div>

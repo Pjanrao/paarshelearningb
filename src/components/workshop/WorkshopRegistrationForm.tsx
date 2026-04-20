@@ -41,6 +41,21 @@ export default function WorkshopRegistrationForm({ workshopId, workshopTitle, on
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // 1. Frontend Validation
+        if (!formData.name.trim()) {
+            toast.error("Please enter your full name");
+            return;
+        }
+        if (!formData.email.trim()) {
+            toast.error("Please enter your email address");
+            return;
+        }
+        if (!formData.phone.trim() || formData.phone.length < 10) {
+            toast.error("Please enter a valid 10-digit phone number");
+            return;
+        }
+
         setLoading(true);
 
         try {
@@ -64,6 +79,7 @@ export default function WorkshopRegistrationForm({ workshopId, workshopTitle, on
                 });
                 if (onSuccess) onSuccess();
             } else {
+                // This will catch the "You have already registered" message from API
                 toast.error(data.message || "Registration failed. Please try again.");
             }
         } catch (err) {

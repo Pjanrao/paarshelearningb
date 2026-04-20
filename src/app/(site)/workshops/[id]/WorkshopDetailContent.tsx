@@ -65,7 +65,7 @@ const WorkshopDetailContent = ({ workshop }: { workshop: WorkshopData }) => {
             {/* Top Badge */}
             <div className="mb-4">
               <span className="inline-block px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-900 dark:text-blue-200 font-bold text-xs border border-blue-100 dark:border-blue-800 shadow-sm">
-                {workshop.mode === "offline" ? "🏢 In-Person Workshop" : "🚀 Live Online Workshop"}
+                {workshop.mode?.toLowerCase().trim() === "offline" ? "🏢 In-Person Workshop" : "🚀 Live Online Workshop"}
               </span>
             </div>
 
@@ -78,7 +78,7 @@ const WorkshopDetailContent = ({ workshop }: { workshop: WorkshopData }) => {
             </p>
 
             {/* Event Details Ribbon */}
-            <div className="inline-flex flex-wrap items-center gap-4 md:gap-8 mb-10 bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 px-6 py-4 rounded-xl shadow-sm self-start">
+            <div className="inline-flex flex-wrap items-center gap-4 md:gap-8 mb-6 bg-blue-50/50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 px-6 py-4 rounded-xl shadow-sm self-start">
               <div>
                 <p className="text-[9px] text-blue-600 dark:text-blue-400 mb-1 font-bold tracking-widest uppercase">Date</p>
                 <p className="font-extrabold text-blue-950 dark:text-white text-base md:text-lg tracking-tight">
@@ -102,18 +102,23 @@ const WorkshopDetailContent = ({ workshop }: { workshop: WorkshopData }) => {
                   {workshop.time || "8 PM"}
                 </p>
               </div>
-              {workshop.mode === "offline" && workshop.location && (
-                <>
-                  <div className="w-px h-8 bg-blue-200 dark:bg-blue-800"></div>
-                  <div>
-                    <p className="text-[9px] text-blue-600 dark:text-blue-400 mb-1 font-bold tracking-widest uppercase">Venue</p>
-                    <p className="font-extrabold text-blue-950 dark:text-white text-base md:text-lg tracking-tight">
-                      {workshop.location}
-                    </p>
-                  </div>
-                </>
-              )}
             </div>
+
+            {/* Venue Section (Offline Only) */}
+            {workshop.mode?.toLowerCase().trim() === "offline" && workshop.location && !workshop.location.startsWith('http') && (
+              <div className="flex items-center gap-4 mb-8 p-4 bg-gray-50/80 dark:bg-blue-900/10 border border-gray-100 dark:border-blue-900/30 rounded-2xl self-start max-w-lg">
+                <div className="bg-white dark:bg-blue-900/40 p-3 rounded-xl shadow-sm border border-blue-50 dark:border-blue-800">
+                  <Icon icon="solar:map-point-bold-duotone" className="text-2xl text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest mb-1">Workshop Venue</p>
+                  <p className="text-sm md:text-base font-bold text-blue-950 dark:text-white leading-snug">
+                    {workshop.location}
+                  </p>
+                </div>
+              </div>
+            )}
+
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 self-start w-full sm:w-auto">
