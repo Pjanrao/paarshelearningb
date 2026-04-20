@@ -18,6 +18,7 @@ import WorkshopViewModal from "./WorkshopViewModal";
 interface Workshop {
     _id?: string;
     title: string;
+    subtitle?: string;
     instructorName: string;
     date: string;
     time: string;
@@ -26,6 +27,7 @@ interface Workshop {
     location?: string;
     meetingLink?: string;
     description: string;
+    highlights: string[];
     status: "active" | "inactive";
 }
 

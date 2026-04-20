@@ -1,6 +1,5 @@
-import mongoose from "mongoose";
-import SiteImage from "./src/models/SiteImage.ts";
-import { connectDB } from "./src/lib/db.ts";
+import SiteImage from "../src/models/SiteImage";
+import { connectDB } from "../src/lib/db";
 
 async function checkImages() {
     try {

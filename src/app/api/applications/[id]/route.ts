@@ -4,9 +4,10 @@ import Application from "@/models/Application";
 
 export async function DELETE(
     req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     await connectDB();
-    await Application.findByIdAndDelete(params.id);
+    await Application.findByIdAndDelete(id);
     return NextResponse.json({ message: "Deleted" });
 }
