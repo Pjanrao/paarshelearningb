@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useGetJobByIdQuery, useUpdateJobMutation } from "@/redux/api/jobApi";
 import Link from "next/link";
-import { ChevronLeft, Save, Upload, X, Image as ImageIcon } from "lucide-react";
+import { ChevronLeft, Save, Upload, X, Image as ImageIcon, MapPin } from "lucide-react";
 import Image from "next/image";
 
 export default function EditJob() {
@@ -83,7 +83,7 @@ export default function EditJob() {
             if (imageFile) {
                 const formData = new FormData();
                 formData.append("file", imageFile);
-                formData.append("folder", "jobs");
+                formData.append("folder", "job-images");
 
                 const res = await fetch("/api/upload", {
                     method: "POST",
@@ -156,11 +156,14 @@ export default function EditJob() {
 
                         <div className="md:col-span-2">
                             <label className="block text-sm font-semibold text-gray-700 mb-1">Locations</label>
-                            <div className="flex gap-2">
+                            <div className="relative flex items-center">
+                                <div className="absolute left-3 text-gray-400 pointer-events-none">
+                                    <MapPin size={18} />
+                                </div>
                                 <input
                                     type="text"
-                                    placeholder="e.g. Pune (Press Enter or click Add)"
-                                    className="flex-1 px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-[#2C4276]/20 outline-none transition-all"
+                                    placeholder="Type a location & press Enter..."
+                                    className="w-full pl-10 pr-24 py-2.5 rounded-lg border focus:ring-2 focus:ring-[#2C4276]/20 outline-none transition-all"
                                     value={locationInput}
                                     onChange={(e) => setLocationInput(e.target.value)}
                                     onKeyDown={(e) => {
@@ -181,22 +184,23 @@ export default function EditJob() {
                                             setLocationInput("");
                                         }
                                     }}
-                                    className="px-5 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-all whitespace-nowrap"
+                                    className="absolute right-1.5 top-1.5 bottom-1.5 px-4 bg-[#2C4276] text-white text-sm font-semibold rounded-md hover:bg-[#2C4276]/90 transition-colors"
                                 >
-                                    Add Location
+                                    Add
                                 </button>
                             </div>
                             {form.locations.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-3">
+                                <div className="mt-3 p-4 bg-gray-50 border border-gray-100 rounded-xl flex flex-wrap gap-2 shadow-inner">
                                     {form.locations.map((loc, i) => (
-                                        <div key={i} className="flex items-center px-3 py-1.5 bg-blue-50 border border-blue-100 rounded-full text-sm font-semibold text-[#2C4276]">
+                                        <div key={i} className="flex items-center px-3 py-1.5 bg-white border border-gray-200 shadow-sm rounded-lg text-sm font-semibold text-gray-700 group cursor-default">
+                                            <MapPin size={12} className="text-gray-400 mr-1.5" />
                                             {loc}
                                             <button
                                                 type="button"
                                                 onClick={() => setForm({ ...form, locations: form.locations.filter((_, index) => index !== i) })}
-                                                className="ml-2 w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors"
+                                                className="ml-2 w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-red-100 hover:text-red-500 transition-colors"
                                             >
-                                                <X size={10} />
+                                                <X size={12} />
                                             </button>
                                         </div>
                                     ))}
