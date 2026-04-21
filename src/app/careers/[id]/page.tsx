@@ -143,6 +143,8 @@ export default function JobDetails() {
                             {/* Requirements */}
                             {job.requirements && (
                                 <section className="bg-white rounded-xl p-6 border border-gray-100/80 shadow-sm hover:shadow-md transition-shadow">
+
+                                    {/* Header */}
                                     <div className="flex items-center gap-4 mb-6">
                                         <div className="w-12 h-12 rounded-2xl bg-success/5 flex items-center justify-center">
                                             <Award className="w-6 h-6 text-success" />
@@ -151,30 +153,43 @@ export default function JobDetails() {
                                             Key Requirements
                                         </h2>
                                     </div>
-                                    <div className="flex flex-wrap gap-3">
-                                        {formatRequirements(job.requirements).map((req: string, i: number) => (
-                                            <div key={i} className="px-4 py-2 bg-[#2C4276]/5 text-[#2C4276] rounded-full text-sm font-semibold border border-[#2C4276]/10 hover:bg-[#2C4276]/10 transition-colors cursor-default">
-                                                {req}
-                                            </div>
-                                        ))}
+
+                                    {/* List */}
+                                    <div className="space-y-2">
+                                        {formatRequirements(job.requirements)
+                                            .filter((req: string) => req.trim() !== "")
+                                            .map((req: string, i: number) => (
+                                                <div
+                                                    key={i}
+                                                    className="flex items-start gap-4 p-3 rounded-xl bg-gray-50/60 hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100"
+                                                >
+                                                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mt-1 flex-shrink-0">
+                                                        <CheckCircle2 size={14} className="text-green-600" />
+                                                    </div>
+
+                                                    <p className="text-gray-700 text-[0.95rem] leading-relaxed font-medium">
+                                                        {req}
+                                                    </p>
+                                                </div>
+                                            ))}
                                     </div>
+
                                 </section>
                             )}
-
 
                         </div>
 
                         {/* Sticky Sidebar */}
                         <div className="lg:col-span-3">
-                            <div className="sticky top-6 space-y-6">
-                                <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
+                            <div className="sticky top-6 space-y-3">
+                                <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
                                     <div className="flex items-center gap-3 mb-6">
                                         <div className="w-1 h-5 bg-primary/20 rounded-full" />
                                         <h3 className="font-bold text-midnight_text text-lg tracking-tight">
                                             Job Overview
                                         </h3>
                                     </div>
-                                    <div className="space-y-5">
+                                    <div className="space-y-3">
                                         <div className="flex justify-between items-center group">
                                             <span className="text-gray-400 font-medium text-sm">Posted on</span>
                                             <span className="font-bold text-midnight_text text-sm">
@@ -185,7 +200,7 @@ export default function JobDetails() {
                                                 })}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between items-start border-t border-gray-50 pt-4 group">
+                                        <div className="flex justify-between items-start border-t border-gray-50 pt-2 group">
                                             <span className="text-gray-400 font-medium text-sm w-1/3 mt-0.5">Location</span>
                                             <div className="flex flex-wrap gap-1.5 justify-end w-2/3">
                                                 {job.locations?.length > 0 ? (
@@ -215,7 +230,7 @@ export default function JobDetails() {
 
                                     {/* Skills in Sidebar */}
                                     {job.skills?.length > 0 && (
-                                        <div className="mt-10 pt-8 border-t border-gray-100">
+                                        <div className="mt-10 pt-6 border-t border-gray-100">
                                             <h3 className="font-bold text-gray-400 mb-5 text-[0.7rem] uppercase tracking-[0.2em]">Required Skills</h3>
                                             <div className="flex flex-wrap gap-2.5">
                                                 {job.skills.map((skill: string, i: number) => (
@@ -230,20 +245,6 @@ export default function JobDetails() {
                                         </div>
                                     )}
                                 </div>
-
-                                {/* Start Application Card */}
-                                <div className="bg-[#2C4276] rounded-xl p-6 text-white shadow-xl shadow-[#2C4276]/20 relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl transition-transform group-hover:scale-110" />
-                                    <h4 className="text-lg font-bold mb-3 relative z-10">Ready to apply?</h4>
-                                    <p className="text-sm text-white/70 mb-6 leading-relaxed relative z-10 font-medium">Click below to start your application process with Paarsh E-learning.</p>
-                                    <button
-                                        onClick={() => router.push(`/careers/apply?jobId=${job._id}`)}
-                                        className="w-full py-4 bg-white text-[#2C4276] text-sm font-extrabold rounded-2xl uppercase tracking-[0.1em] hover:bg-gray-50 transition-all relative z-10 shadow-lg active:scale-[0.98]"
-                                    >
-                                        Start Application
-                                    </button>
-                                </div>
-
                                 {/* Education Section under Start Application */}
                                 {job.education && (
                                     <div className="bg-[#2C4276]/5 rounded-xl p-6 border border-[#2C4276]/10 shadow-sm">
@@ -261,77 +262,41 @@ export default function JobDetails() {
                                     </div>
                                 )}
 
+
+                                {/* Start Application Card */}
+                                <div className="bg-[#2C4276] rounded-xl p-6 text-white shadow-xl shadow-[#2C4276]/20 relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl transition-transform group-hover:scale-110" />
+                                    <h4 className="text-lg font-bold mb-3 relative z-10">Ready to apply?</h4>
+                                    <p className="text-sm text-white/70 mb-6 leading-relaxed relative z-10 font-medium">Click below to start your application process with Paarsh E-learning.</p>
+                                    <button
+                                        onClick={() => router.push(`/careers/apply?jobId=${job._id}`)}
+                                        className="w-full py-4 bg-white text-[#2C4276] text-sm font-extrabold rounded-2xl uppercase tracking-[0.1em] hover:bg-gray-50 transition-all relative z-10 shadow-lg active:scale-[0.98]"
+                                    >
+                                        Start Application
+                                    </button>
+                                </div>
+
+
                                 {/* Dynamic Job Image Section - Strictly from Backend */}
                                 {job.jobImage && (
                                     <div className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm transition-all hover:shadow-md group">
-                                        <div className="relative aspect-[16/9] sm:aspect-[4/3] w-full bg-gray-50">
+                                        <div className="relative w-full">
                                             <Image
                                                 src={job.jobImage.startsWith('/') ? job.jobImage : `/${job.jobImage}`}
                                                 alt={job.title}
-                                                fill
-                                                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                                width={800}
+                                                height={500}
+                                                className="w-full h-auto object-contain"
                                                 priority
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
 
-                                            {/* Floating badge */}
-                                            <div className="absolute top-4 left-4">
-                                                <div className="bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 shadow-sm flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                                                    <span className="text-[0.65rem] font-bold text-midnight_text uppercase tracking-wider">
-                                                        Job Spotlight
-                                                    </span>
-                                                </div>
-                                            </div>
 
-                                            {/* Bottom label */}
-                                            <div className="absolute bottom-4 left-4 right-4">
-                                                <p className="text-white font-bold text-sm truncate drop-shadow-sm">
-                                                    {job.title}
-                                                </p>
-                                                <p className="text-white/80 text-[0.7rem] uppercase tracking-wider font-semibold">
-                                                    {job.company || "Paarsh E-learning"}
-                                                </p>
-                                            </div>
                                         </div>
                                     </div>
                                 )}
 
-                                {/* Static Data Block below Job Image */}
-                                <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm">
-                                    <h3 className="font-bold text-midnight_text text-lg tracking-tight mb-4">
-                                        Why Join Us?
-                                    </h3>
-                                    <ul className="space-y-4">
-                                        <li className="flex items-start">
-                                            <div className="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                                                <CheckCircle2 size={12} className="text-green-500" />
-                                            </div>
-                                            <div>
-                                                <h4 className="text-sm font-bold text-gray-900">Career Growth</h4>
-                                                <p className="text-xs text-gray-500 mt-0.5">Fast-paced environment with vast learning opportunities.</p>
-                                            </div>
-                                        </li>
-                                        <li className="flex items-start">
-                                            <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                                                <CheckCircle2 size={12} className="text-blue-500" />
-                                            </div>
-                                            <div>
-                                                <h4 className="text-sm font-bold text-gray-900">Flexible Work</h4>
-                                                <p className="text-xs text-gray-500 mt-0.5">Focus on results and balanced lifestyle.</p>
-                                            </div>
-                                        </li>
-                                        <li className="flex items-start">
-                                            <div className="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center mr-3 flex-shrink-0 mt-0.5">
-                                                <CheckCircle2 size={12} className="text-purple-500" />
-                                            </div>
-                                            <div>
-                                                <h4 className="text-sm font-bold text-gray-900">Great Culture</h4>
-                                                <p className="text-xs text-gray-500 mt-0.5">Collaborative, inclusive, and innovative team.</p>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
+
                             </div>
                         </div>
                     </div>
