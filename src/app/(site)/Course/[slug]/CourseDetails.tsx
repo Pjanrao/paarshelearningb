@@ -251,8 +251,9 @@ import { useGetCourseByIdQuery } from "@/redux/api/courseApi";
 import toast, { Toaster } from 'react-hot-toast';
 import { useGetCoursesQuery } from "@/redux/api/courseApi";
 import CourseCard from "@/components/SharedComponent/Course/CourseCard"; // adjust path
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
+import { setStudentAuth } from "@/redux/authSlice";
 
 
 // import VideoPlayer from '@/components/SharedComponent/Course/VideoPlayer';
@@ -381,6 +382,29 @@ const CourseDetails = ({ slug }: { slug: string }) => {
   // Redux state
   const adminUser = useSelector((state: RootState) => state.auth.adminUser);
   const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser || state.auth.adminUser);
+  const dispatch = useDispatch();
+
+  // 🔥 SESSION HYDRATION: If Redux is empty on refresh, restore from localStorage
+  useEffect(() => {
+    if (!user) {
+      const storedUser = localStorage.getItem("studentUser");
+      const storedToken = localStorage.getItem("studentToken");
+
+      if (storedUser && storedToken) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          dispatch(setStudentAuth({
+            token: storedToken,
+            role: parsedUser.role || "student",
+            user: parsedUser
+          }));
+        } catch (e) {
+          console.error("Failed to hydrate student session:", e);
+        }
+      }
+    }
+  }, [user, dispatch]);
+
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [enrollmentLoading, setEnrollmentLoading] = useState(false);
 
@@ -1113,7 +1137,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             <div className="p-6 md:p-8">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-black text-gray-900 dark:text-white text-center flex-1 ml-6">
-                  Check Your Interest
+                  Show Your Interest
                 </h3>
                 <button
                   onClick={() => setIsInterestedModalOpen(false)}
@@ -1122,6 +1146,11 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                   <Icon icon="mdi:close" width="24" />
                 </button>
               </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 mb-4 leading-relaxed text-center">
+                If you are interested in this course, please fill out the form below. Our team will contact you shortly for the next steps.
+              </p>
+
+
 
               <form onSubmit={handleInterestedSubmit} className="space-y-4">
                 <div>
