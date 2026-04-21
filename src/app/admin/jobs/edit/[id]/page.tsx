@@ -84,7 +84,7 @@ export default function EditJob() {
             if (imageFile) {
                 const formData = new FormData();
                 formData.append("file", imageFile);
-                formData.append("folder", "job-images");
+                formData.append("folder", "ads");
 
                 const res = await fetch("/api/upload", {
                     method: "POST",
