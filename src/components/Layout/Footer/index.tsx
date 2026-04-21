@@ -313,7 +313,7 @@ const Footer = () => {
             </Link>
 
             <p className="md:w-[400px] w-full text-white/70 text-sm leading-relaxed text-left">
-              Paarsh E-Learning is a leading edtech platform in Pune, Nashik, and Surat, offering career-oriented courses in digital marketing and in-demand skills. Learn from industry experts through a secure and trusted online platform designed to help students build practical knowledge and achieve real career growth.
+              Paarsh E-Learning is a leading edtech platform in Pune, Nashik, offering career-oriented courses in digital marketing and in-demand skills. Learn from industry experts through a secure and trusted online platform designed to help students build practical knowledge and achieve real career growth.
             </p>
 
           </div>
