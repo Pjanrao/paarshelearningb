@@ -18,7 +18,7 @@ export const getDataPath = (path: string): string => {
 
 export const getAssetUrl = (path: string): string => {
   if (!path) return "";
-  if (path.startsWith("http")) return path;
+  if (path.startsWith("http") || path.startsWith("data:") || path.startsWith("blob:")) return path;
 
   const isProd = process.env.NODE_ENV === "production";
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";

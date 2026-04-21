@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { getAssetUrl } from "@/utils/image";
 
 export default function JobDetails() {
     const { id } = useParams();
@@ -282,7 +283,7 @@ export default function JobDetails() {
                                     <div className="bg-white rounded-xl overflow-hidden border border-gray-100 shadow-sm transition-all hover:shadow-md group">
                                         <div className="relative w-full">
                                             <Image
-                                                src={job.jobImage.startsWith('/') ? job.jobImage : `/${job.jobImage}`}
+                                                src={getAssetUrl(job.jobImage)}
                                                 alt={job.title}
                                                 width={800}
                                                 height={500}

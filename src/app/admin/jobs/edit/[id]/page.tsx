@@ -6,6 +6,7 @@ import { useGetJobByIdQuery, useUpdateJobMutation } from "@/redux/api/jobApi";
 import Link from "next/link";
 import { ChevronLeft, Save, Upload, X, Image as ImageIcon, MapPin } from "lucide-react";
 import Image from "next/image";
+import { getAssetUrl } from "@/utils/image";
 
 export default function EditJob() {
     const { id } = useParams();
@@ -302,7 +303,7 @@ export default function EditJob() {
                                     <div className={`w-32 h-32 rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all ${imagePreview ? 'border-primary/50' : 'border-gray-300 hover:border-[#2C4276]'}`}>
                                         {imagePreview ? (
                                             <>
-                                                <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+                                                <Image src={getAssetUrl(imagePreview)} alt="Preview" fill className="object-cover" />
                                                 <button
                                                     type="button"
                                                     onClick={removeImage}

@@ -18,6 +18,7 @@ import {
     Search,
 } from "lucide-react";
 import Image from "next/image";
+import { getAssetUrl } from "@/utils/image";
 
 
 export default function AdminJobs() {
@@ -257,7 +258,7 @@ export default function AdminJobs() {
                             {selectedJob.jobImage && (
                                 <div className="relative w-full h-48 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
                                     <Image
-                                        src={selectedJob.jobImage.startsWith('/') ? selectedJob.jobImage : `/${selectedJob.jobImage}`}
+                                        src={getAssetUrl(selectedJob.jobImage)}
                                         alt="Job Banner"
                                         fill
                                         className="object-cover"
