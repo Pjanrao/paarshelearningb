@@ -4,7 +4,9 @@ const JobSchema = new mongoose.Schema({
     title: String,
     company: String,
     location: String,
+    locations: [String],
     salary: String,
+    jobImage: String,
 
     // ✅ NEW FIELDS
     workMode: String, // Remote / Hybrid / On-site
@@ -25,4 +27,9 @@ const JobSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.models.Job || mongoose.model("Job", JobSchema);
+// Next.js hot-reload fix for mongoose caching
+if (mongoose.models.Job) {
+    delete mongoose.models.Job;
+}
+
+export default mongoose.model("Job", JobSchema);

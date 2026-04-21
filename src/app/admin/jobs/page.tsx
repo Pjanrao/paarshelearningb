@@ -17,6 +17,7 @@ import {
     Briefcase,
     Search,
 } from "lucide-react";
+import Image from "next/image";
 
 
 export default function AdminJobs() {
@@ -126,9 +127,13 @@ export default function AdminJobs() {
                                                 )}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center gap-1.5 text-sm text-gray-600">
-                                                    <MapPin size={13} className="text-gray-400" />
-                                                    {job.location}
+                                                <div className="flex flex-wrap items-center gap-1.5 text-sm text-gray-600 max-w-[200px]">
+                                                    <MapPin size={13} className="text-gray-400 mt-0.5 flex-shrink-0" />
+                                                    <span className="truncate">
+                                                        {job.locations?.length > 0
+                                                            ? job.locations.join(" | ")
+                                                            : (job.location || "Location not specified")}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
@@ -213,9 +218,13 @@ export default function AdminJobs() {
                             <div>
                                 <h3 className="text-2xl font-bold text-[#2C4276] mb-1">{selectedJob.title}</h3>
                                 <div className="flex flex-wrap gap-3 mt-2">
-                                    <div className="flex items-center text-sm text-gray-500">
-                                        <MapPin className="w-4 h-4 mr-1.5 text-gray-400" />
-                                        {selectedJob.location}
+                                    <div className="flex items-center text-sm text-gray-500 max-w-full">
+                                        <MapPin className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                        <span className="truncate break-all">
+                                            {selectedJob.locations?.length > 0
+                                                ? selectedJob.locations.join(" | ")
+                                                : (selectedJob.location || "Location not specified")}
+                                        </span>
                                     </div>
                                     <div className="flex items-center text-sm text-gray-500">
                                         <Briefcase className="w-4 h-4 mr-1.5 text-gray-400" />
@@ -244,6 +253,20 @@ export default function AdminJobs() {
                                 <p className="text-gray-400 text-[9px] font-bold uppercase mb-2">Description</p>
                                 <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{selectedJob.description}</p>
                             </div>
+
+                            {selectedJob.jobImage && (
+                                <div className="relative w-full h-48 rounded-xl overflow-hidden border border-gray-100 shadow-sm">
+                                    <Image
+                                        src={selectedJob.jobImage.startsWith('/') ? selectedJob.jobImage : `/${selectedJob.jobImage}`}
+                                        alt="Job Banner"
+                                        fill
+                                        className="object-cover"
+                                    />
+                                    <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-midnight_text uppercase">
+                                        Job Banner
+                                    </div>
+                                </div>
+                            )}
 
                             {selectedJob.responsibilities && (
                                 <div className="bg-gray-50 px-3 py-3 rounded-xl border border-gray-100">

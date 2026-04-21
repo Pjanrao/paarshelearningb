@@ -85,8 +85,12 @@ export default function Careers() {
                                                 <span className="font-medium truncate">{job.company || "Paarsh E-learning"}</span>
                                             </div>
                                             <div className="flex items-center">
-                                                <MapPin className="w-4 h-4 mr-2.5 text-gray-300" />
-                                                <span className="font-medium">{job.location}</span>
+                                                <MapPin className="w-4 h-4 mr-2.5 text-gray-300 flex-shrink-0" />
+                                                <span className="font-medium truncate">
+                                                    {job.locations?.length > 0
+                                                        ? job.locations.join(" | ")
+                                                        : (job.location || "Location not specified")}
+                                                </span>
                                             </div>
                                         </div>
 
