@@ -23,10 +23,78 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useGetStudentTestsQuery } from "@/redux/api/practiceTestApi";
+import { useGetMyCoursesQuery, useGetCoursesQuery } from "@/redux/api/courseApi";
+import { useGetWalletStatsQuery } from "@/redux/api/referralApi";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { useEffect, useState } from "react";
 
 export default function StudentDashboard() {
+    const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser);
+    const userId = user?._id || user?.id;
+
+    // Data Fetching
     const { data: tests, isLoading: isLoadingTests } = useGetStudentTestsQuery();
+    const { data: myCourses, isLoading: isLoadingMyCourses } = useGetMyCoursesQuery();
+    const { data: availableCoursesData, isLoading: isLoadingAvailable } = useGetCoursesQuery({ status: "active" as any });
+    const { data: walletStats } = useGetWalletStatsQuery();
+
+    const [certificatesCount, setCertificatesCount] = useState(0);
+    const [isLoadingCerts, setIsLoadingCerts] = useState(false);
+
+    useEffect(() => {
+        if (userId) {
+            setIsLoadingCerts(true);
+            fetch(`/api/certificates?studentId=${userId}&limit=1`)
+                .then(res => res.json())
+                .then(data => {
+                    setCertificatesCount(data.total || data.certificates?.length || 0);
+                })
+                .catch(err => console.error("Error fetching certs:", err))
+                .finally(() => setIsLoadingCerts(false));
+        }
+    }, [userId]);
+
     const activeTestsCount = tests?.length || 0;
+    const purchasedCoursesCount = myCourses?.length || 0;
+    const availableCoursesCount = availableCoursesData?.total || 0;
+    const walletBalance = walletStats?.balance || 0;
+
+    // Recent Activities Logic
+    const recentActivities = [
+        ...(myCourses || []).slice(0, 2).map((c: any) => ({
+            id: `course-${c.id}`,
+            title: c.title,
+            subtitle: "Newly Enrolled",
+            icon: <Monitor size={20} />,
+            color: "blue"
+        })),
+        ...(tests || []).filter((t: any) => t.status === "completed").slice(0, 1).map((t: any) => ({
+            id: `test-${t._id}`,
+            title: t.name,
+            subtitle: "Test Attempted",
+            icon: <CheckCircle2 size={20} />,
+            color: "green"
+        }))
+    ].slice(0, 2);
+
+    // Fallback if no activities
+    const displayActivities = recentActivities.length > 0 ? recentActivities : [
+        {
+            id: "default-1",
+            title: "No new course available.",
+            subtitle: "Purchase new course",
+            icon: <Monitor size={20} />,
+            color: "blue"
+        },
+        {
+            id: "default-2",
+            title: "Ongoing Learning.",
+            subtitle: "Stay consistent with your goals",
+            icon: <CheckCircle2 size={20} />,
+            color: "green"
+        }
+    ];
 
     return (
         <>
@@ -57,7 +125,9 @@ export default function StudentDashboard() {
                             <Monitor size={30} />
                         </div>
                         <h3 className="font-bold text-lg mb-1">My Courses</h3>
-                        <p className="text-xs text-blue-50/80 font-medium">Continue your learning journey</p>
+                        <p className="text-xs text-blue-50/80 font-medium">
+                            {isLoadingMyCourses ? "Loading..." : `${purchasedCoursesCount} Enrolled Courses`}
+                        </p>
                     </div>
                     <Link
                         href="/student/my-courses"
@@ -77,7 +147,9 @@ export default function StudentDashboard() {
                             <MapPin size={30} />
                         </div>
                         <h3 className="font-bold text-lg mb-1">Available Courses</h3>
-                        <p className="text-xs text-green-50/80 font-medium">Browse all available courses</p>
+                        <p className="text-xs text-green-50/80 font-medium">
+                            {isLoadingAvailable ? "Loading..." : `${availableCoursesCount} Courses for You`}
+                        </p>
                     </div>
                     <Link
                         href="/student/courses"
@@ -97,7 +169,9 @@ export default function StudentDashboard() {
                             <Award size={30} />
                         </div>
                         <h3 className="font-bold text-lg mb-1">My Certificates</h3>
-                        <p className="text-xs text-purple-50/80 font-medium">View & download your certificates</p>
+                        <p className="text-xs text-purple-50/80 font-medium">
+                            {isLoadingCerts ? "Loading..." : `${certificatesCount} Certificates Earned`}
+                        </p>
                     </div>
                     <Link
                         href="/student/certificates"
@@ -140,24 +214,17 @@ export default function StudentDashboard() {
                         </h3>
                     </div>
                     <div className="p-4 space-y-3">
-                        <div className="flex items-center gap-4 p-3 rounded-xl bg-blue-50/30 border border-blue-100 transition-all hover:shadow-sm">
-                            <div className="bg-blue-100 p-2.5 rounded-lg text-blue-600 border border-blue-200">
-                                <Monitor size={20} />
+                        {displayActivities.map((activity) => (
+                            <div key={activity.id} className={`flex items-center gap-4 p-3 rounded-xl bg-${activity.color}-50/30 border border-${activity.color}-100 transition-all hover:shadow-sm`}>
+                                <div className={`bg-${activity.color}-100 p-2.5 rounded-lg text-${activity.color}-600 border border-${activity.color}-200`}>
+                                    {activity.icon}
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-[#1e293b] text-sm">{activity.title}</h4>
+                                    <p className="text-gray-500 text-xs mt-0.5 font-medium">{activity.subtitle}</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 className="font-bold text-[#1e293b] text-sm">No new course available.</h4>
-                                <p className="text-gray-500 text-xs mt-0.5 font-medium">Purchase new course</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-4 p-4 rounded-xl bg-green-50/30 border border-green-100 transition-all hover:shadow-sm">
-                            <div className="bg-green-100 p-2.5 rounded-lg text-green-600 border border-green-200">
-                                <CheckCircle2 size={20} />
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-[#1e293b] text-sm">Ongoing Learning.</h4>
-                                <p className="text-gray-500 text-xs mt-0.5 font-medium">Stay consistent with your goals</p>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
 
@@ -174,8 +241,12 @@ export default function StudentDashboard() {
                                 <Wallet size={20} />
                             </div>
                             <div>
-                                <h4 className="font-bold text-[#1e293b] text-sm">No wallet activities found.</h4>
-                                <p className="text-gray-500 text-xs mt-0.5 font-medium">Start learning to earn rewards</p>
+                                <h4 className="font-bold text-[#1e293b] text-sm">
+                                    {walletBalance > 0 ? `₹${walletBalance} Rewards Available` : "No wallet activities found."}
+                                </h4>
+                                <p className="text-gray-500 text-xs mt-0.5 font-medium">
+                                    {walletBalance > 0 ? "Withdraw your earnings" : "Start learning to earn rewards"}
+                                </p>
                             </div>
                         </div>
                         <Link href="/student/tests" className="flex items-center gap-4 p-4 rounded-xl bg-orange-50/30 border border-orange-100 transition-all hover:shadow-sm hover:translate-x-1 cursor-pointer">
