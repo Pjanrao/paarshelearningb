@@ -9,10 +9,6 @@ const ApplicationSchema = new mongoose.Schema({
     email: String,
     phone: String,
     resumeUrl: String,
-    highestQualification: String,
-    universityName: String,
-    yearOfPassing: String,
-    percentage: String,
     createdAt: { type: Date, default: Date.now },
 });
 

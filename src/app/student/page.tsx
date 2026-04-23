@@ -23,8 +23,11 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useGetStudentTestsQuery } from "@/redux/api/practiceTestApi";
+import { Download } from "lucide-react";
 import { useGetMyCoursesQuery, useGetCoursesQuery } from "@/redux/api/courseApi";
 import { useGetWalletStatsQuery } from "@/redux/api/referralApi";
+import { useGetDownloadsQuery } from "@/redux/api/downloadApi";
+import { useGetRecentActivitiesQuery } from "@/redux/api/activityApi";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { useEffect, useState } from "react";
@@ -38,6 +41,8 @@ export default function StudentDashboard() {
     const { data: myCourses, isLoading: isLoadingMyCourses } = useGetMyCoursesQuery();
     const { data: availableCoursesData, isLoading: isLoadingAvailable } = useGetCoursesQuery({ status: "active" as any });
     const { data: walletStats } = useGetWalletStatsQuery();
+    const { data: downloads, isLoading: isLoadingDownloads } = useGetDownloadsQuery();
+    const { data: dbActivities, isLoading: isLoadingActivities } = useGetRecentActivitiesQuery();
 
     const [certificatesCount, setCertificatesCount] = useState(0);
     const [isLoadingCerts, setIsLoadingCerts] = useState(false);
@@ -58,41 +63,27 @@ export default function StudentDashboard() {
     const activeTestsCount = tests?.length || 0;
     const purchasedCoursesCount = myCourses?.length || 0;
     const availableCoursesCount = availableCoursesData?.total || 0;
-    const walletBalance = walletStats?.balance || 0;
+    const walletBalance = walletStats?.walletBalance || 0;
+    const pendingWithdrawals = walletStats?.pendingWithdrawals || 0;
+    const hasWalletActivity = walletBalance > 0 || pendingWithdrawals > 0;
+    const downloadCount = downloads?.length || 0;
 
     // Recent Activities Logic
-    const recentActivities = [
-        ...(myCourses || []).slice(0, 2).map((c: any) => ({
-            id: `course-${c.id}`,
-            title: c.title,
-            subtitle: "Newly Enrolled",
-            icon: <Monitor size={20} />,
-            color: "blue"
-        })),
-        ...(tests || []).filter((t: any) => t.status === "completed").slice(0, 1).map((t: any) => ({
-            id: `test-${t._id}`,
-            title: t.name,
-            subtitle: "Test Attempted",
-            icon: <CheckCircle2 size={20} />,
-            color: "green"
-        }))
-    ].slice(0, 2);
+    const activityMap = (dbActivities || []).map((a: any) => ({
+        id: a._id,
+        title: a.action,
+        subtitle: new Date(a.createdAt).toLocaleDateString() + " at " + new Date(a.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        icon: a.type === "download" ? <Download size={20} /> : a.type === "test" ? <ClipboardCheck size={20} /> : <Monitor size={20} />,
+        color: a.type === "download" ? "purple" : a.type === "test" ? "orange" : "blue"
+    }));
 
-    // Fallback if no activities
-    const displayActivities = recentActivities.length > 0 ? recentActivities : [
+    const displayActivities = activityMap.length > 0 ? activityMap : [
         {
             id: "default-1",
-            title: "No new course available.",
-            subtitle: "Purchase new course",
+            title: "No recent activities.",
+            subtitle: "Start exploring your courses",
             icon: <Monitor size={20} />,
             color: "blue"
-        },
-        {
-            id: "default-2",
-            title: "Ongoing Learning.",
-            subtitle: "Stay consistent with your goals",
-            icon: <CheckCircle2 size={20} />,
-            color: "green"
         }
     ];
 
@@ -207,24 +198,48 @@ export default function StudentDashboard() {
             {/* Panels Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
                 {/* Recent Activities */}
+                {/* My Learning Progress */}
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden">
                     <div className="bg-gray-50/50 p-4 border-b border-gray-100">
                         <h3 className="text-[#1e293b] font-bold text-lg flex items-center gap-2">
-                            Recent Activities
+                            My Learning Progress
                         </h3>
                     </div>
-                    <div className="p-4 space-y-3">
-                        {displayActivities.map((activity) => (
-                            <div key={activity.id} className={`flex items-center gap-4 p-3 rounded-xl bg-${activity.color}-50/30 border border-${activity.color}-100 transition-all hover:shadow-sm`}>
-                                <div className={`bg-${activity.color}-100 p-2.5 rounded-lg text-${activity.color}-600 border border-${activity.color}-200`}>
-                                    {activity.icon}
+
+                    <div className="p-4 space-y-4">
+
+                        {/* Courses In Progress */}
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-blue-50 border border-blue-100">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-blue-100 p-2 rounded-lg">
+                                    <BookOpen size={20} className="text-blue-600" />
                                 </div>
                                 <div>
-                                    <h4 className="font-bold text-[#1e293b] text-sm">{activity.title}</h4>
-                                    <p className="text-gray-500 text-xs mt-0.5 font-medium">{activity.subtitle}</p>
+                                    <h4 className="font-semibold text-sm">Courses In Progress</h4>
+                                    <p className="text-xs text-gray-500">
+                                        {purchasedCoursesCount} course(s) in progress
+                                    </p>
                                 </div>
                             </div>
-                        ))}
+                            <span className="font-bold text-blue-600">{purchasedCoursesCount}</span>
+                        </div>
+
+                        {/* Certificates */}
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-green-50 border border-green-100">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-green-100 p-2 rounded-lg">
+                                    <CheckCircle2 size={20} className="text-green-600" />
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold text-sm">Certificates Earned</h4>
+                                    <p className="text-xs text-gray-500">
+                                        Completed certifications
+                                    </p>
+                                </div>
+                            </div>
+                            <span className="font-bold text-green-600">{certificatesCount}</span>
+                        </div>
+
                     </div>
                 </div>
 
@@ -232,23 +247,39 @@ export default function StudentDashboard() {
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden">
                     <div className="bg-gray-50/50 p-4 border-b border-gray-100">
                         <h3 className="text-[#1e293b] font-bold text-lg flex items-center gap-2">
-                            Downloadables and Practice Tests
+                            Wallets and Practice Tests
                         </h3>
                     </div>
                     <div className="p-4 space-y-3">
-                        <div className="flex items-center gap-4 p-3 rounded-xl bg-purple-50/30 border border-purple-100 transition-all hover:shadow-sm">
+                        <Link href="/student/wallet" className="flex items-center gap-4 p-3 rounded-xl bg-purple-50/30 border border-purple-100 transition-all hover:shadow-sm hover:translate-x-1 cursor-pointer">
                             <div className="bg-purple-100 p-2.5 rounded-lg text-purple-600 border border-purple-200">
                                 <Wallet size={20} />
                             </div>
                             <div>
                                 <h4 className="font-bold text-[#1e293b] text-sm">
-                                    {walletBalance > 0 ? `₹${walletBalance} Rewards Available` : "No wallet activities found."}
+                                    {hasWalletActivity
+                                        ? (walletBalance > 0 ? `₹${walletBalance} Balance Available` : `₹${pendingWithdrawals} Withdrawal Pending`)
+                                        : "No wallet activities found."
+                                    }
                                 </h4>
                                 <p className="text-gray-500 text-xs mt-0.5 font-medium">
-                                    {walletBalance > 0 ? "Withdraw your earnings" : "Start learning to earn rewards"}
+                                    {hasWalletActivity ? "Click to manage your funds" : "Start learning to earn rewards"}
                                 </p>
                             </div>
-                        </div>
+                        </Link>
+                        {/* <Link href="/student/downloads" className="flex items-center gap-4 p-3 rounded-xl bg-blue-50/30 border border-blue-100 transition-all hover:shadow-sm hover:translate-x-1 cursor-pointer">
+                            <div className="bg-blue-100 p-2.5 rounded-lg text-blue-600 border border-blue-200">
+                                <BookOpen size={20} />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-[#1e293b] text-sm">
+                                    {downloadCount > 0 ? `${downloadCount} Study Resources Available` : "No downloadables found."}
+                                </h4>
+                                <p className="text-gray-500 text-xs mt-0.5 font-medium">
+                                    {downloadCount > 0 ? "Download course materials" : "Check back later for updates"}
+                                </p>
+                            </div>
+                        </Link> */}
                         <Link href="/student/tests" className="flex items-center gap-4 p-4 rounded-xl bg-orange-50/30 border border-orange-100 transition-all hover:shadow-sm hover:translate-x-1 cursor-pointer">
                             <div className="bg-orange-100 p-2.5 rounded-lg text-orange-600 border border-orange-200">
                                 <Percent size={20} />

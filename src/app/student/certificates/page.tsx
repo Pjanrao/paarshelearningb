@@ -105,7 +105,7 @@ export default function StudentCertificatesPage() {
         setShowPreview(true);
     };
 
-    const handleDownload = (cert: CertificateRecord) => {
+    const handleDownload = async (cert: CertificateRecord) => {
         const canvas = generateCertificateCanvas(
             {
                 studentName: cert.studentName,
@@ -116,6 +116,20 @@ export default function StudentCertificatesPage() {
             logoRef.current
         );
         downloadCertificate(canvas, cert.studentName);
+
+        // Log this activity
+        try {
+            await fetch("/api/downloads/log", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: `Certificate: ${cert.courseName}`,
+                    type: "certificate"
+                })
+            });
+        } catch (err) {
+            console.error("Failed to log certificate download:", err);
+        }
     };
 
     const formatDate = (dateString: string) => {
