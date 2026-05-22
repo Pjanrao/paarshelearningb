@@ -468,7 +468,7 @@ const ContactPage = () => {
               <div className="space-y-4">
 
                 <div className="flex items-center gap-4 p-2 rounded-2xl hover:bg-[#01A0E2]/5">
-                  <div className="w-12 h-12 bg-[#01A0E2] rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-[#01A0E2] rounded-xl flex items-center justify-center shrink-0">
                     <Phone className="text-white" size={20} />
                   </div>
                   <div>
@@ -480,7 +480,7 @@ const ContactPage = () => {
                 </div>
 
                 <div className="flex items-center gap-4 p-2 rounded-2xl hover:bg-[#2B4278]/5">
-                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center shrink-0">
                     <Mail className="text-white" size={20} />
                   </div>
                   <div>
@@ -492,7 +492,7 @@ const ContactPage = () => {
                 </div>
 
                 <div className="flex items-start gap-4 p-2 rounded-2xl hover:bg-[#01A0E2]/5">
-                  <div className="w-12 h-12 bg-[#01A0E2] rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-[#01A0E2] rounded-xl flex items-center justify-center shrink-0">
                     <MapPin className="text-white" size={20} />
                   </div>
                   <div>
@@ -504,7 +504,7 @@ const ContactPage = () => {
                 </div>
 
                 <div className="flex items-start gap-4 p-2 rounded-2xl hover:bg-[#01A0E2]/5">
-                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center shrink-0">
                     <MapPin className="text-white" size={20} />
                   </div>
                   <div>
@@ -516,7 +516,7 @@ const ContactPage = () => {
                 </div>
 
                 <div className="flex items-center gap-4 p-2 rounded-2xl hover:bg-[#2B4278]/5">
-                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center shrink-0">
                     <Clock className="text-white" size={20} />
                   </div>
                   <div>
