@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
-
+import { motion } from "framer-motion";
 import { FaStar, FaClock } from "react-icons/fa6";
 
 export interface Course {
@@ -45,7 +45,11 @@ const CourseCard = ({ course }: { course: Course }) => {
   const generatedSlug = course._id || slug || generateSlug(name);
 
   return (
-    <div className="group bg-white dark:bg-darkmode rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-800">
+    <motion.div
+      whileHover={{ y: -6, boxShadow: "0 20px 40px -12px rgba(44,66,118,0.18)" }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      className="group bg-white dark:bg-darkmode rounded-2xl shadow-md overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-800"
+    >
       {/* Course Image */}
       <div className="relative aspect-[16/9] overflow-hidden">
         <Link href={`/Course/${generatedSlug}`}>
@@ -104,7 +108,7 @@ const CourseCard = ({ course }: { course: Course }) => {
           </Link>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

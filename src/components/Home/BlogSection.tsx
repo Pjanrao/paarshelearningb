@@ -1,45 +1,42 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import BlogCard from "@/app/(site)/blog/BlogCard";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
 
 const BlogSection = () => {
-    const [blogs, setBlogs] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchLatestBlogs = async () => {
-            try {
-                const response = await fetch("/api/blogs?limit=3");
-                const data = await response.json();
-                if (response.ok) {
-                    setBlogs(data.blogs);
-                }
-            } catch (error) {
-                console.error("Error fetching latest blogs:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchLatestBlogs();
-    }, []);
-
-    if (loading) {
-        return (
-            <section className="py-16 lg:py-24 bg-white dark:bg-darkmode" id="blog">
-                <div className="container mx-auto max-w-6xl px-4 text-center">
-                    <p className="text-gray-500 animate-pulse">Loading updates...</p>
-                </div>
-            </section>
-        );
-    }
+    const blogs = [
+        {
+            _id: "ai-in-digital-marketing",
+            title: "The Future of AI in Digital Marketing: Trends to Watch",
+            coverImage: "ai-blog.png",
+            author: { name: "Paarsh eLearning" },
+            publishedDate: new Date().toISOString(),
+            tags: ["AI"]
+        },
+        {
+            _id: "digital-marketing-internship",
+            title: "How to Land Your Dream Digital Marketing Internship",
+            coverImage: "internship-blog.png",
+            author: { name: "Paarsh eLearning" },
+            publishedDate: new Date().toISOString(),
+            tags: ["Internship"]
+        },
+        {
+            _id: "top-digital-marketing-courses",
+            title: "Top Digital Marketing Courses to Accelerate Your Career",
+            coverImage: "courses-blog.png",
+            author: { name: "Paarsh eLearning" },
+            publishedDate: new Date().toISOString(),
+            tags: ["Courses"]
+        }
+    ];
 
     return (
         <section className="py-10 lg:py-24 bg-white dark:bg-darkmode" id="blog">
             <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-6">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-12 gap-6" data-aos="fade-up" data-aos-duration="1000">
                     <div className="text-left">
                         <div className="inline-flex items-center gap-2 bg-primary/5 dark:bg-primary/20 px-4 py-1.5 rounded-full border border-primary/10 mb-4">
                             <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
@@ -62,14 +59,14 @@ const BlogSection = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                    {blogs.map((blog) => (
-                        <div key={blog._id}>
+                    {blogs.map((blog, index) => (
+                        <div key={blog._id} data-aos="fade-up" data-aos-delay={index * 200} data-aos-duration="1000">
                             <BlogCard blog={{
                                 id: blog._id,
                                 title: blog.title,
                                 coverImage: blog.coverImage,
                                 author: blog.author.name,
-                                date: new Date(blog.publishedDate).toLocaleDateString(),
+                                date: new Date(blog.publishedDate).toLocaleDateString("en-GB"),
                                 tags: blog.tags
                             }} />
                         </div>

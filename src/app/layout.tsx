@@ -59,6 +59,8 @@ export const metadata: Metadata = {
   },
 };
 
+import PageTransition from "@/components/Common/PageTransition";
+
 export default function RootLayout({
   children,
 }: {
@@ -94,9 +96,11 @@ export default function RootLayout({
               forcedTheme="light"
             >
               <Aoscompo>
-                <LayoutWrapper>
-                  {children}
-                </LayoutWrapper>
+                <PageTransition>
+                  <LayoutWrapper>
+                    {children}
+                  </LayoutWrapper>
+                </PageTransition>
               </Aoscompo>
               <ScrollToTop />
             </ThemeProvider>

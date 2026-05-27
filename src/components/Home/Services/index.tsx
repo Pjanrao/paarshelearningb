@@ -81,7 +81,7 @@ const Services = () => {
     <section className='bg-section dark:bg-darklight py-6 lg:py-12' id='services'>
       <div className='container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8'>
 
-        <div className="text-center mb-8 md:mb-12">
+        <div className="text-center mb-8 md:mb-12" data-aos="fade-up" data-aos-duration="1000">
           <h2 className="text-2xl md:text-3xl font-extrabold text-primary dark:text-white mb-4">
             Strategies for Students
           </h2>
@@ -120,6 +120,9 @@ const Services = () => {
 
             <div
               key={index}
+              data-aos="fade-up"
+              data-aos-delay={index * 150}
+              data-aos-duration="1000"
               className='bg-white dark:bg-darkmode border border-transparent hover:border-secondary rounded-2xl shadow-service py-7 px-6 flex flex-col items-center text-center gap-4 transition duration-300 hover:-translate-y-1 hover:shadow-lg'>
               <Image
                 src={item.icon}

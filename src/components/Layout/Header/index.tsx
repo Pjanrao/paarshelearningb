@@ -8,6 +8,7 @@ import HeaderLink from '../Header/Navigation/HeaderLink'
 import MobileHeaderLink from '../Header/Navigation/MobileHeaderLink'
 import { useSelector, useDispatch } from "react-redux";
 import { logout, logoutAdmin, logoutStudent } from '@/redux/authSlice'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const Header: React.FC = () => {
   const router = useRouter()
@@ -93,7 +94,11 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header className={`fixed top-0 z-999 w-full transition-all duration-300 ${sticky
+      <motion.header 
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6 }}
+        className={`fixed top-0 z-999 w-full transition-all duration-300 ${sticky
         ? 'py-2 bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100'
         : 'py-4 bg-transparent shadow-none'
         }`}>
@@ -152,41 +157,59 @@ const Header: React.FC = () => {
               </div>
             ) : (
               <>
-                <Link
-                  href='/signin'
-                  className='hidden sm:inline-flex px-5 py-2.5 rounded-full text-primary hover:bg-primary/5 font-semibold'>
-                  Sign In
-                </Link>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link
+                    href='/signin'
+                    className='hidden sm:inline-flex px-5 py-2.5 rounded-full text-primary hover:bg-primary/5 font-semibold'>
+                    Sign In
+                  </Link>
+                </motion.div>
 
-                <Link
-                  href='/signup'
-                  className='hidden sm:inline-flex px-6 py-2.5 rounded-full bg-primary text-white shadow-md font-semibold hover:bg-primary/90 active:scale-95 transition-all'>
-                  Sign Up
-                </Link>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link
+                    href='/signup'
+                    className='hidden sm:inline-flex px-6 py-2.5 rounded-full bg-primary text-white shadow-md font-semibold hover:bg-primary/90 active:scale-95 transition-all'>
+                    Sign Up
+                  </Link>
+                </motion.div>
               </>
             )}
 
             {/* Mobile Menu Button */}
-            <button
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={() => setNavbarOpen(!navbarOpen)}
               className='lg:hidden p-2 rounded-xl bg-gray-50'
             >
               ☰
-            </button>
+            </motion.button>
 
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Mobile Menu */}
-      {navbarOpen && (
-        <div className='fixed inset-0 bg-black/60 z-[1000] backdrop-blur-sm' onClick={() => setNavbarOpen(false)} />
-      )}
+      <AnimatePresence>
+        {navbarOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className='fixed inset-0 bg-black/60 z-[1000] backdrop-blur-sm' 
+            onClick={() => setNavbarOpen(false)} 
+          />
+        )}
+      </AnimatePresence>
 
-      <div
-        ref={mobileMenuRef}
-        className={`lg:hidden fixed top-0 right-0 h-full w-[300px] bg-white dark:bg-[#1a1c23] shadow-[-10px_0_30px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-in-out ${navbarOpen ? 'translate-x-0' : 'translate-x-full'
-          } z-[1001] flex flex-col`}>
+      <AnimatePresence>
+        {navbarOpen && (
+          <motion.div
+            ref={mobileMenuRef}
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className={`lg:hidden fixed top-0 right-0 h-full w-[300px] bg-white dark:bg-[#1a1c23] shadow-[-10px_0_30px_rgba(0,0,0,0.1)] z-[1001] flex flex-col`}>
 
         <div className='flex items-center justify-between p-6 border-b dark:border-gray-800'>
           <Logo />
@@ -247,7 +270,9 @@ const Header: React.FC = () => {
           </div>
 
         </nav>
-      </div>
+      </motion.div>
+      )}
+      </AnimatePresence>
     </>
   )
 }

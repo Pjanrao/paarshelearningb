@@ -60,19 +60,21 @@ const Counter: React.FC<CounterProps> = ({ isColorMode }) => {
               </div>
 
               <div className="pt-2">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => router.push("/Course")}
                   className="
     group flex items-center gap-2 px-6 py-3 bg-[#2C4276] text-white
     rounded-xl font-bold text-base shadow-lg shadow-[#2C4276]/20
-    hover:bg-[#1e2e54] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 w-fit
+    hover:bg-[#1e2e54] hover:shadow-xl transition-all duration-300 w-fit
   "
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 group-hover:-translate-x-1 transition-transform">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                   </svg>
                   <span>Start Your Career Today</span>
-                </button>
+                </motion.button>
               </div>
 
             </div>

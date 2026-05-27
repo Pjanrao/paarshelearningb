@@ -85,6 +85,7 @@ import { points } from '@/app/api/data'
 import { getImgPath } from '@/utils/image'
 import { Icon } from '@iconify/react'
 import { useSiteImages } from '@/hooks/useSiteImages'
+import { motion } from 'framer-motion'
 
 interface ProgressItem {
   title: string
@@ -176,8 +177,10 @@ const Progresswork = ({ isColorMode }: { isColorMode: Boolean }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               {points.map((item, index) => (
-                <div
+                <motion.div
                   key={index}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   className="group flex items-center gap-3 p-2.5 rounded-xl bg-white dark:bg-white/5 border border-primary/5 hover:border-secondary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
                 >
                   <div className="shrink-0 w-8 h-8 rounded-lg bg-primary/5 dark:bg-white/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300">
@@ -186,7 +189,7 @@ const Progresswork = ({ isColorMode }: { isColorMode: Boolean }) => {
                   <p className="text-gray-700 dark:text-white/80 font-bold text-[11px] lg:text-[12px] leading-tight transition-colors duration-300 group-hover:text-primary dark:group-hover:text-white">
                     {item.title}
                   </p>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>

@@ -49,7 +49,7 @@ export default function TestimonialsSection() {
     return (
         <section id="testimonial" className="bg-[#f0f7ff] dark:bg-[#111827]">
             <div className="container mx-auto px-4 max-w-7xl">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12" data-aos="fade-up" data-aos-duration="1000">
                     <div className="text-left max-w-2xl">
                         <h2 className="text-3xl md:text-4xl font-headline font-bold text-blue-950 dark:text-white">
                             What Our Students Say

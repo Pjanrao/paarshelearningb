@@ -64,7 +64,7 @@ const Index = () => {
                     text-white
                     mb-12
                     drop-shadow-lg
-                ">
+                " data-aos="fade-down" data-aos-duration="1000">
                     Our Achievements
                 </h2>
 
@@ -79,7 +79,7 @@ const Index = () => {
                     border border-white/20
                     shadow-2xl
                     mb-16 lg:mb-20
-                ">
+                " data-aos="zoom-in" data-aos-duration="1000" data-aos-delay="200">
                     <p className="text-base sm:text-md text-white font-medium leading-relaxed">
                         Paarsh E-Learning is a Start-up based Edutech Company from Pune,
                         Nashik & Surat. We provide career-focused courses for students.
@@ -102,6 +102,9 @@ const Index = () => {
                     ].map((item, index) => (
                         <div
                             key={index}
+                            data-aos="fade-up"
+                            data-aos-delay={index * 150}
+                            data-aos-duration="1000"
                             className="
                                 bg-transparent
                                 rounded-2xl
