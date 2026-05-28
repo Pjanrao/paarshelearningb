@@ -1,91 +1,3 @@
-// 'use client'
-// import { getImgPath } from '@/utils/image'
-// import Image from 'next/image'
-// import Link from 'next/link'
-
-// const Hero = () => {
-//   return (
-//     <section className='relative md:pt-32 pt-20 bg-white dark:bg-darklight bg-cover text-white'>
-//       <div className='container mx-auto max-w-6xl px-4 grid grid-cols-12 gap-4 relative z-10'>
-//         <div
-//           className='md:col-span-6 col-span-12 p-4 md:px-4 px-0 space-y-4 flex flex-col items-start justify-center'
-//           data-aos='fade-right'
-//           data-aos-delay='200'
-//           data-aos-duration='1000'>
-//           <div className='flex gap-2 items-center'>
-//             <span className='w-3 h-3 rounded-full bg-success'></span>
-//             <span className='font-medium text-midnight_text text-sm dark:text-white/50 mt-0'>
-//               Learn & Grow
-//             </span>
-//           </div>
-//           <h1 className='text-midnight_text font-bold dark:text-white text-4xl md:text-5xl md:leading-[1.15]'>
-//             Education: The Gateway to Success
-//           </h1>
-//           <p className='text-grey dark:text-white/70 text-xl font-normal'>
-//             Education is door for future & Paarsh E-Learning is the key for Bright your future
-//           </p>
-//           <a
-//             href='/Course'
-//             className='py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition duration-300 px-8'>
-//             Explore More
-//           </a>
-
-//           <div className='flex items-center mt-12 gap-4'>
-//             <div className='flex items-center'>
-//               <Image
-//                 src={getImgPath('/images/hero/hero-profile-1.jpg')}
-//                 alt='hero-image'
-//                 width={40}
-//                 height={40}
-//                 quality={100}
-//                 className='w-10! h-10! rounded-full border border-solid border-white -ml-0'
-//               />
-//               <Image
-//                 src={getImgPath('/images/hero/hero-profile-2.jpg')}
-//                 alt='hero-image'
-//                 width={40}
-//                 height={40}
-//                 quality={100}
-//                 className='w-10! h-10! rounded-full border border-solid border-white -ml-3'
-//               />
-//               <Image
-//                 src={getImgPath('/images/hero/hero-profile-3.jpg')}
-//                 alt='hero-image'
-//                 width={40}
-//                 height={40}
-//                 quality={100}
-//                 className='w-10! h-10! rounded-full border border-solid border-white -ml-3'
-//               />
-//             </div>
-//             <div>
-//               <p className='text-sm font-normal text-grey max-w-56'>
-//                 Need help?{' '}
-//                 <Link href='/contact-us' className='text-primary hover:text-blue-700'>
-//                   Contact our experts
-//                 </Link>{' '}
-//                 Tell us about your project
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="md:col-span-6 col-span-12 relative flex justify-center items-center">
-//           <Image
-//             src={getImgPath('/images/hero/Class2.png')}
-//             alt='hero-image'
-//             width={700}
-//             height={450}
-//             quality={100}
-//             className="w-full h-auto sm:h-[50px] lg:h-[350px] object-cover rounded-[10px] mt-8"
-//           />
-//         </div>
-//       </div>
-//     </section>
-//   )
-// }
-
-// export default Hero
-
 "use client";
 import React from 'react'
 import Image from 'next/image'
@@ -134,7 +46,7 @@ const Hero = () => {
           animate="visible"
         >
 
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className='flex gap-2 items-center mb-6 mt-8 md:mt-0 bg-white/60 backdrop-blur-sm px-4 py-1.5 rounded-full border border-primary/20 shadow-sm'
           >
@@ -144,7 +56,7 @@ const Hero = () => {
             </span>
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             variants={itemVariants}
             className='text-[#0f172a] font-black dark:text-white text-3xl sm:text-4xl md:text-5xl leading-[1.1] mb-4 tracking-tight'
           >
@@ -154,36 +66,46 @@ const Hero = () => {
             </span>
           </motion.h1>
 
-          <motion.p 
+          <motion.p
             variants={itemVariants}
             className='text-slate-600 dark:text-slate-300 text-base md:text-lg font-normal max-w-xl mb-8 leading-relaxed'
           >
             Paarsh eLearning is a leading institute in Nashik offering industry-focused programming language training with real-time projects and placement support.
           </motion.p>
 
-          <motion.div variants={itemVariants} className='flex flex-col sm:flex-row items-start sm:items-center gap-4'>
-            <motion.div
-              whileHover={{ scale: 1.06 }}
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              className="relative"
-            >
-              {/* Pulse ring */}
-              <span className="absolute inset-0 rounded-2xl animate-ping bg-primary/30 pointer-events-none" />
-              <Link
-                href='/Course'
-                className='relative py-4 px-10 bg-primary text-white font-bold rounded-2xl shadow-xl shadow-primary/30 hover:bg-primary/90 transition-colors duration-200 inline-block'>
-                Enroll Now
-              </Link>
-            </motion.div>
-          </motion.div>
 
+
+          {/* Enroll Button */}
+          {/* Enroll Button */}
+          <motion.div variants={itemVariants} className="mt-2">
+            <Link
+              href="/Course"
+              className="
+      inline-flex
+      items-center
+      justify-center
+      h-[60px]
+      w-[170px]
+      rounded-[18px]
+      bg-[#2C4276]
+      text-white
+      text-[18px]
+      font-semibold
+      shadow-[0_14px_28px_rgba(47,79,151,0.28)]
+      hover:bg-[#1e2e54]
+      transition-all
+      duration-300
+    "
+            >
+              Enroll Now
+            </Link>
+          </motion.div>
 
           <motion.div variants={itemVariants} className='flex items-center gap-3 mt-10'>
             <div className='flex -space-x-3'>
               {[1, 2, 3].map((i) => (
-                <motion.div 
-                  key={i} 
+                <motion.div
+                  key={i}
                   whileHover={{ y: -5, scale: 1.1, zIndex: 30 }}
                   className='w-12 h-12 rounded-full border-4 border-white overflow-hidden shadow-sm transition-all duration-300 relative'
                 >
@@ -217,12 +139,12 @@ const Hero = () => {
           <div className="relative w-full max-w-[500px] lg:max-w-[600px] group">
             {/* Multiple Layered Background Decorations */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/10 rounded-full blur-[100px] animate-pulse"></div>
-            <motion.div 
-              animate={{ 
+            <motion.div
+              animate={{
                 y: [0, -15, 0],
                 x: [0, 10, 0]
               }}
-              transition={{ 
+              transition={{
                 duration: 8,
                 repeat: Infinity,
                 ease: "easeInOut"
@@ -234,7 +156,7 @@ const Hero = () => {
             <div className="absolute inset-0 opacity-20 dark:opacity-10 z-0 pointer-events-none" style={{ backgroundImage: `radial-gradient(#2F73F2 1px, transparent 1px)`, backgroundSize: '30px 30px' }}></div>
 
             {/* Main Image with Glassmorphism Frame */}
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
               className="relative z-10 p-2 md:p-3 rounded-[40px] md:rounded-[60px] bg-white/30 dark:bg-white/5 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] overflow-hidden animate-float"
@@ -255,7 +177,7 @@ const Hero = () => {
             </motion.div>
 
             {/* Floating Elements / Icons */}
-            <motion.div 
+            <motion.div
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
               className="absolute -top-4 -left-4 w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl shadow-xl flex items-center justify-center text-primary z-20 border border-primary/10"
@@ -263,7 +185,7 @@ const Hero = () => {
               <Icon icon="ic:round-school" className="text-2xl" />
             </motion.div>
 
-            <motion.div 
+            <motion.div
               animate={{ y: [0, 10, 0] }}
               transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
               className="absolute top-1/4 -right-6 w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl shadow-xl flex items-center justify-center text-secondary z-20 border border-secondary/10"
@@ -271,7 +193,7 @@ const Hero = () => {
               <Icon icon="ic:round-menu-book" className="text-2xl" />
             </motion.div>
 
-            <motion.div 
+            <motion.div
               animate={{ y: [0, -12, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
               className="absolute -bottom-8 left-10 w-12 h-12 bg-white dark:bg-slate-800 rounded-2xl shadow-xl flex items-center justify-center text-blue-400 z-20 border border-blue-400/10"
@@ -280,7 +202,7 @@ const Hero = () => {
             </motion.div>
 
             {/* Enhanced Success Badge */}
-            <motion.div 
+            <motion.div
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 1.2, duration: 0.8 }}
