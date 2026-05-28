@@ -23,8 +23,10 @@ export const sidebarConfig = {
 
   teacher: [
     { name: "Dashboard", path: "/teacher" },
-    { name: "My Classes", path: "/teacher/classes" },
-    { name: "Assignments", path: "/teacher/assignments" },
+    { name: "My Courses", path: "/teacher/courses" },
+    { name: "My Batches", path: "/teacher/batches" },
+    { name: "Take Lecture", path: "/teacher/take-lecture" },
+    { name: "Syllabus Progress", path: "/teacher/syllabus-progress" },
   ],
 
   student: [

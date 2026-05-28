@@ -83,7 +83,14 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     // { name: "Group Consent", path: "/admin/group-management", icon: ClipboardCheck },
     { name: "Blogs", path: "/admin/blogs", icon: FileText },
     // { name: "Placement", path: "/admin/placement", icon: Briefcase },
-    { name: "Reports", path: "/admin/reports", icon: BarChart3 },
+    {
+      name: "Reports",
+      icon: BarChart3,
+      subItems: [
+        { name: "Reports & Analytics", path: "/admin/reports" },
+        { name: "Syllabus Tracking", path: "/admin/reports/syllabus-tracking" }
+      ]
+    },
     // { name: "Payments", path: "/admin/payments", icon: CreditCard },
     { name: "Testimonials", path: "/admin/testimonial", icon: FileText },
     {
@@ -118,6 +125,14 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     { name: "Settings", path: "/admin/settings", icon: Settings },
   ];
 
+  const teacherMenu = [
+    { name: "Dashboard", path: "/teacher", icon: LayoutDashboard },
+    { name: "My Courses", path: "/teacher/courses", icon: BookOpen },
+    { name: "My Batches", path: "/teacher/batches", icon: Users },
+    { name: "Take Lecture", path: "/teacher/take-lecture", icon: PenBox },
+    { name: "Syllabus Progress", path: "/teacher/syllabus-progress", icon: BarChart3 },
+  ];
+
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
   const toggleSubmenu = (name: string) => {
@@ -125,7 +140,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     setOpenSubmenu((prev) => (prev === name ? null : name));
   };
 
-  const menu = adminMenu;
+  const menu = role?.toLowerCase() === "teacher" ? teacherMenu : adminMenu;
 
   return (
     <motion.div
