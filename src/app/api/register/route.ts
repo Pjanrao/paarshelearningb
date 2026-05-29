@@ -21,9 +21,11 @@ export async function POST(req: Request) {
     try {
         await connectDB();
 
-        // ✅ ADD referredBy
-        const { name, email, contact, password, referredBy } =
-            await req.json();
+        const body = await req.json();
+        console.log("=== API STUDENT REGISTER CALLED ===");
+        console.log("Request Body:", JSON.stringify(body, null, 2));
+
+        const { name, email, contact, password, referredBy } = body;
 
         // validations (same as your code)...
 

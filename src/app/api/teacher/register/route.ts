@@ -22,7 +22,11 @@ export async function POST(req: Request) {
     try {
         await connectDB();
 
-        const { name, email, contact, password, designation, course, experience, dateOfJoining } = await req.json();
+        const body = await req.json();
+        console.log("=== API TEACHER REGISTER CALLED ===");
+        console.log("Request Body:", JSON.stringify(body, null, 2));
+
+        const { name, email, contact, password, designation, course, experience, dateOfJoining } = body;
 
         if (!name || !email || !contact || !password || !designation || !course || !experience || !dateOfJoining) {
             return NextResponse.json(

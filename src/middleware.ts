@@ -79,8 +79,11 @@ export function middleware(req: NextRequest) {
                 return NextResponse.redirect(new URL("/signin", req.url));
             }
         }
-
-        if (path.startsWith("/teacher") && activeStudentRole !== "teacher") {
+        if (
+            path.startsWith("/teacher") &&
+            !path.startsWith("/teacher/register") &&
+            activeStudentRole !== "teacher"
+        ) {
             return NextResponse.redirect(new URL("/signin", req.url));
         }
 

@@ -57,6 +57,17 @@ export async function POST(req: Request) {
             );
         }
 
+        // 2b. Check teacher approval status
+        if (user.role === "teacher" && user.approvalStatus !== "approved") {
+            const statusMsg = user.approvalStatus === "rejected"
+                ? "Your teacher registration has been rejected by the admin."
+                : "Your teacher account is pending admin approval. You will be able to sign in once approved.";
+            return NextResponse.json(
+                { message: statusMsg },
+                { status: 403 }
+            );
+        }
+
         // For students: generate a new loginToken (invalidates previous sessions).
         // For admins: skip overwriting so multiple concurrent sessions are allowed.
         let loginToken: string | null = null;

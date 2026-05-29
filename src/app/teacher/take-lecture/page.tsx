@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Users, ClipboardCheck, Video, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function TeacherTakeLecture() {
-  // Form State
-  const [selectedCourse, setSelectedCourse] = useState("");
+  const [batches, setBatches] = useState<any[]>([]);
+  const [batchDetails, setBatchDetails] = useState<any>(null);
   const [selectedBatch, setSelectedBatch] = useState("");
   const [selectedTopic, setSelectedTopic] = useState("");
   const [customTopic, setCustomTopic] = useState("");
@@ -16,87 +16,129 @@ export default function TeacherTakeLecture() {
   const [recordingLink, setRecordingLink] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loadingBatches, setLoadingBatches] = useState(true);
+  const [loadingSyllabus, setLoadingSyllabus] = useState(false);
 
-  // Mock course syllabus
-  const courseSyllabus: Record<string, string[]> = {
-    "course-1": [
-      "Next.js App Router & Client vs Server Components",
-      "Next.js Authentication Middleware & JWT Protection",
-      "Mongoose Joins & Populate course schemas",
-      "Redux Toolkit State Slices and Hydration",
-      "REST APIs with Express and Mongoose Models",
-      "Tailwind Responsive Design Principles"
-    ],
-    "course-2": [
-      "RTK Query Mutation & Cache Revalidation",
-      "React Server Components & Suspense Boundaries",
-      "React Context API vs Redux Toolkit State Management",
-      "Custom Hook patterns for fetching local storage tokens"
-    ],
-    "course-3": [
-      "Design systems & Component Libraries",
-      "Typography guidelines and HSL color tailoring",
-      "Micro-animations & Interactive Figma prototypes"
-    ]
-  };
+  useEffect(() => {
+    const loadBatches = async () => {
+      setLoadingBatches(true);
+      try {
+        const res = await fetch("/api/teacher/batches");
+        const data = await res.json();
+        setBatches(data.batches || []);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingBatches(false);
+      }
+    };
 
-  const batches = [
-    { id: "batch-a", name: "Batch A - Morning", courseId: "course-1" },
-    { id: "batch-b", name: "Batch B - Evening", courseId: "course-1" },
-    { id: "batch-c", name: "Batch C - Afternoon", courseId: "course-2" },
-    { id: "batch-d", name: "Batch D - Weekend Fasttrack", courseId: "course-1" },
-    { id: "batch-e", name: "Batch E - Morning Studio", courseId: "course-3" }
-  ];
+    loadBatches();
+  }, []);
 
-  const courses = [
-    { id: "course-1", name: "MERN Stack Development" },
-    { id: "course-2", name: "React & Redux Advanced" },
-    { id: "course-3", name: "UI/UX Design Masterclass" }
-  ];
+  useEffect(() => {
+    if (!selectedBatch) {
+      setBatchDetails(null);
+      setSelectedTopic("");
+      return;
+    }
 
-  // Filter batches based on selected course
-  const filteredBatches = selectedCourse
-    ? batches.filter((b) => b.courseId === selectedCourse)
-    : [];
+    const loadBatchDetails = async () => {
+      setLoadingSyllabus(true);
+      try {
+        const res = await fetch(`/api/teacher/batches/${selectedBatch}/syllabus`);
+        const data = await res.json();
+        setBatchDetails(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoadingSyllabus(false);
+      }
+    };
 
-  const handleCourseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedCourse(e.target.value);
-    setSelectedBatch("");
-    setSelectedTopic("");
-  };
+    loadBatchDetails();
+  }, [selectedBatch]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const courseName = batchDetails?.batch?.courseId?.name || "";
+
+  const topicOptions = useMemo(() => {
+    if (!batchDetails?.modules || !Array.isArray(batchDetails.modules)) {
+      return [];
+    }
+
+    return batchDetails.modules.flatMap((module: any) => {
+      const moduleTopics = batchDetails.topics?.filter((topic: any) => topic.moduleId === module._id) || [];
+      return moduleTopics.map((topic: any) => ({
+        id: topic._id,
+        label: topic.title,
+        moduleTitle: module.title,
+      }));
+    });
+  }, [batchDetails]);
+
+  const selectedTopicLabel = useMemo(() => {
+    const found = topicOptions.find((topic: any) => topic.id === selectedTopic);
+    return found ? found.label : "";
+  }, [selectedTopic, topicOptions]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCourse || !selectedBatch || (!selectedTopic && !customTopic)) {
-      alert("Please fill in all required fields.");
+    setErrorMessage("");
+
+    if (!selectedBatch || (!selectedTopic && !customTopic)) {
+      setErrorMessage("Please select a batch and topic for the lecture.");
       return;
     }
 
     setIsSubmitting(true);
 
-    // Mock submission delay
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const payload = {
+        batchId: selectedBatch,
+        topicId: selectedTopic || undefined,
+        customTopic: selectedTopic === "custom" ? customTopic : undefined,
+        lectureTitle: selectedTopicLabel || customTopic || "Lecture update",
+        summary: notes,
+        homework,
+        recordingLink,
+        durationHours: Number(duration),
+        completed: true,
+      };
+
+      const response = await fetch("/api/teacher/lectures", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result?.error || "Unable to submit lecture report.");
+      }
+
       setShowSuccess(true);
-      
-      // Reset form
-      setSelectedCourse("");
-      setSelectedBatch("");
       setSelectedTopic("");
       setCustomTopic("");
       setDuration("2.0");
       setNotes("");
       setHomework("");
       setRecordingLink("");
+      setErrorMessage("");
+      setSelectedBatch("");
+      setBatchDetails(null);
 
-      // Hide success banner after 4 seconds
       setTimeout(() => setShowSuccess(false), 4000);
-    }, 1200);
+    } catch (error: any) {
+      console.error(error);
+      setErrorMessage(error.message || "Failed to send lecture update.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold text-[#1e293b] mb-1">
           Log Lecture Progress
@@ -106,7 +148,6 @@ export default function TeacherTakeLecture() {
         </p>
       </div>
 
-      {/* Success Notification */}
       <AnimatePresence>
         {showSuccess && (
           <motion.div
@@ -119,41 +160,22 @@ export default function TeacherTakeLecture() {
             <div>
               <h4 className="font-bold text-sm">Lecture Logged Successfully!</h4>
               <p className="text-xs text-green-700 mt-0.5">
-                The syllabus checklist has been updated, and students have been notified of their notes/recording.
+                The syllabus checklist has been updated for {courseName || "your batch"}.
               </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Main Form Panel */}
+      {errorMessage ? (
+        <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-2xl">
+          {errorMessage}
+        </div>
+      ) : null}
+
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            {/* Course Select */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
-                Select Course <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedCourse}
-                  onChange={handleCourseChange}
-                  required
-                  className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2C4276]/20 focus:border-[#2C4276] text-sm text-gray-700 transition appearance-none"
-                >
-                  <option value="">-- Select Assigned Course --</option>
-                  {courses.map((course) => (
-                    <option key={course.id} value={course.id}>
-                      {course.name}
-                    </option>
-                  ))}
-                </select>
-                <BookOpen size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Batch Select */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
                 Select Batch <span className="text-red-500">*</span>
@@ -161,26 +183,39 @@ export default function TeacherTakeLecture() {
               <div className="relative">
                 <select
                   value={selectedBatch}
-                  onChange={(e) => setSelectedBatch(e.target.value)}
-                  disabled={!selectedCourse}
+                  onChange={(e) => {
+                    setSelectedBatch(e.target.value);
+                    setSelectedTopic("");
+                    setCustomTopic("");
+                  }}
                   required
+                  disabled={loadingBatches}
                   className="w-full pl-4 pr-10 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2C4276]/20 focus:border-[#2C4276] text-sm text-gray-700 transition appearance-none disabled:opacity-50"
                 >
-                  <option value="">
-                    {selectedCourse ? "-- Select Active Batch --" : "Select course first"}
-                  </option>
-                  {filteredBatches.map((batch) => (
-                    <option key={batch.id} value={batch.id}>
-                      {batch.name}
+                  <option value="">-- Select Active Batch --</option>
+                  {batches.map((batch) => (
+                    <option key={batch._id} value={batch._id}>
+                      {batch.name} {batch.courseId?.name ? `• ${batch.courseId.name}` : ""}
                     </option>
                   ))}
                 </select>
                 <Users size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
               </div>
             </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
+                Course
+              </label>
+              <input
+                type="text"
+                value={courseName}
+                disabled
+                className="w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-700"
+              />
+            </div>
           </div>
 
-          {/* Topic Section */}
           <div className="space-y-3.5 border-t border-gray-50 pt-5">
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
@@ -192,22 +227,24 @@ export default function TeacherTakeLecture() {
                   setSelectedTopic(e.target.value);
                   if (e.target.value !== "custom") setCustomTopic("");
                 }}
-                disabled={!selectedCourse}
+                disabled={!selectedBatch || loadingSyllabus}
                 required={!customTopic}
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2C4276]/20 focus:border-[#2C4276] text-sm text-gray-700 transition disabled:opacity-50"
               >
                 <option value="">-- Choose Syllabus Topic --</option>
-                {selectedCourse &&
-                  courseSyllabus[selectedCourse]?.map((topic, idx) => (
-                    <option key={idx} value={topic}>
-                      {topic}
+                {topicOptions.length > 0 ? (
+                  topicOptions.map((topic: any) => (
+                    <option key={topic.id} value={topic.id}>
+                      {topic.moduleTitle} › {topic.label}
                     </option>
-                  ))}
+                  ))
+                ) : (
+                  <option value="">No topics loaded yet</option>
+                )}
                 <option value="custom">Other / Custom Topic...</option>
               </select>
             </div>
 
-            {/* Custom Topic Input */}
             {selectedTopic === "custom" && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
@@ -230,7 +267,6 @@ export default function TeacherTakeLecture() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 border-t border-gray-50 pt-5">
-            {/* Lecture Duration */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
                 Duration (Hours) <span className="text-red-500">*</span>
@@ -252,7 +288,6 @@ export default function TeacherTakeLecture() {
               </div>
             </div>
 
-            {/* Recording Link */}
             <div className="space-y-1.5 sm:col-span-2">
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
                 Class Recording Link
@@ -270,7 +305,6 @@ export default function TeacherTakeLecture() {
             </div>
           </div>
 
-          {/* Notes & Topics Covered */}
           <div className="space-y-1.5 border-t border-gray-50 pt-5">
             <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
               Lecture Notes / Summary
@@ -284,7 +318,6 @@ export default function TeacherTakeLecture() {
             />
           </div>
 
-          {/* Homework / Assignments */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">
               Homework / Assignment for Students
@@ -298,7 +331,6 @@ export default function TeacherTakeLecture() {
             />
           </div>
 
-          {/* Alert Tip */}
           <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-2.5 text-xs text-[#2C4276] font-medium leading-relaxed">
             <AlertCircle size={16} className="flex-shrink-0 mt-0.5 text-blue-600" />
             <p>
@@ -306,7 +338,6 @@ export default function TeacherTakeLecture() {
             </p>
           </div>
 
-          {/* Submit button */}
           <button
             type="submit"
             disabled={isSubmitting}

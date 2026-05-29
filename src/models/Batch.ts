@@ -27,11 +27,16 @@ const BatchSchema = new mongoose.Schema(
 
         syllabusProgress: [
             {
-                topicId: String,
+                topicId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "Topic",
+                },
                 completed: { type: Boolean, default: false },
                 completedAt: Date
             }
         ],
+
+        lastLectureAt: Date,
 
         status: {
             type: String,

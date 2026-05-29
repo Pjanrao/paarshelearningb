@@ -113,6 +113,12 @@ const courseSchema = new mongoose.Schema(
         introVideo: String,
 
         syllabus: [syllabusSchema],
+        modules: [
+            {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Module",
+            },
+        ],
         benefits: [simpleBlockSchema],
         whyJoin: [simpleBlockSchema],
         testimonials: [testimonialSchema],

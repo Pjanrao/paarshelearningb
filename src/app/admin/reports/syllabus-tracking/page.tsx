@@ -1,151 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Users, BarChart3, Clock, Calendar, CheckCircle2, Circle, PlayCircle, Search, UserCheck } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function AdminSyllabusTracking() {
-  // Filter States
   const [selectedCourse, setSelectedCourse] = useState("all");
   const [selectedTeacher, setSelectedTeacher] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [batchSummaries, setBatchSummaries] = useState<any[]>([]);
+  const [teacherProductivity, setTeacherProductivity] = useState<any[]>([]);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [teachers, setTeachers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock Admin Data
-  const courses = [
-    { id: "mern", name: "MERN Stack Development" },
-    { id: "react", name: "React & Redux Advanced" },
-    { id: "uiux", name: "UI/UX Design Masterclass" }
-  ];
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/admin/reports/syllabus-tracking");
+        const data = await res.json();
+        setBatchSummaries(data.batchSummaries || []);
+        setTeacherProductivity(data.teacherProductivity || []);
+        setRecentActivity(data.recentActivity || []);
 
-  const teachers = [
-    { id: "john", name: "Prof. John Doe" },
-    { id: "sarah", name: "Sarah Connor" },
-    { id: "alex", name: "Alex Mercer" }
-  ];
+        const courseOptions = Array.from(new Set((data.batchSummaries || []).map((batch: any) => batch.course))).map((name: string) => ({ id: name, name }));
+        const teacherOptions = Array.from(new Set((data.batchSummaries || []).map((batch: any) => batch.teacher))).map((name: string) => ({ id: name, name }));
 
-  const batchProgress = [
-    {
-      id: "batch-a",
-      name: "Batch A - Morning",
-      course: "MERN Stack Development",
-      courseId: "mern",
-      teacher: "Prof. John Doe",
-      teacherId: "john",
-      progress: 88,
-      completedTopics: 21,
-      pendingTopics: 3,
-      lecturesTaken: 42,
-      duration: "84 hours",
-      startDate: "Jan 12, 2026",
-      status: "Active"
-    },
-    {
-      id: "batch-b",
-      name: "Batch B - Evening",
-      course: "MERN Stack Development",
-      courseId: "mern",
-      teacher: "Prof. John Doe",
-      teacherId: "john",
-      progress: 74,
-      completedTopics: 18,
-      pendingTopics: 6,
-      lecturesTaken: 36,
-      duration: "72 hours",
-      startDate: "Feb 18, 2026",
-      status: "Active"
-    },
-    {
-      id: "batch-c",
-      name: "Batch C - Afternoon",
-      course: "React & Redux Advanced",
-      courseId: "react",
-      teacher: "Sarah Connor",
-      teacherId: "sarah",
-      progress: 68,
-      completedTopics: 8,
-      pendingTopics: 4,
-      lecturesTaken: 16,
-      duration: "32 hours",
-      startDate: "Mar 05, 2026",
-      status: "Active"
-    },
-    {
-      id: "batch-d",
-      name: "Batch D - Weekend Fasttrack",
-      course: "MERN Stack Development",
-      courseId: "mern",
-      teacher: "Prof. John Doe",
-      teacherId: "john",
-      progress: 42,
-      completedTopics: 10,
-      pendingTopics: 14,
-      lecturesTaken: 20,
-      duration: "60 hours",
-      startDate: "Apr 10, 2026",
-      status: "Active"
-    },
-    {
-      id: "batch-e",
-      name: "Batch E - Morning Studio",
-      course: "UI/UX Design Masterclass",
-      courseId: "uiux",
-      teacher: "Alex Mercer",
-      teacherId: "alex",
-      progress: 45,
-      completedTopics: 7,
-      pendingTopics: 9,
-      lecturesTaken: 14,
-      duration: "28 hours",
-      startDate: "Apr 22, 2026",
-      status: "Active"
-    }
-  ];
+        setCourses(courseOptions);
+        setTeachers(teacherOptions);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const teacherProductivity = [
-    { name: "Prof. John Doe", activeBatches: 3, totalHours: "216 hrs", completedSyllabusRate: "68%" },
-    { name: "Sarah Connor", activeBatches: 1, totalHours: "32 hrs", completedSyllabusRate: "68%" },
-    { name: "Alex Mercer", activeBatches: 1, totalHours: "28 hrs", completedSyllabusRate: "45%" }
-  ];
+    loadData();
+  }, []);
 
-  const recentActivity = [
-    {
-      teacher: "Prof. John Doe",
-      action: "Completed 'Next.js App Router Structure & Layouts'",
-      batch: "Batch A - Morning",
-      time: "2 hours ago",
-      duration: "2.0 hrs"
-    },
-    {
-      teacher: "Sarah Connor",
-      action: "In-Progress 'Query Mutations & Cache Invalidation'",
-      batch: "Batch C - Afternoon",
-      time: "Yesterday",
-      duration: "1.5 hrs"
-    },
-    {
-      teacher: "Prof. John Doe",
-      action: "Completed 'REST APIs with Express and Mongoose Models'",
-      batch: "Batch B - Evening",
-      time: "May 26, 2026",
-      duration: "2.0 hrs"
-    },
-    {
-      teacher: "Alex Mercer",
-      action: "Completed 'Figma Typography & Responsive Layout Grid'",
-      batch: "Batch E - Morning Studio",
-      time: "May 25, 2026",
-      duration: "2.0 hrs"
-    }
-  ];
+  const filteredBatches = useMemo(
+    () => batchSummaries.filter((batch) => {
+      const matchesCourse = selectedCourse === "all" || batch.course === selectedCourse;
+      const matchesTeacher = selectedTeacher === "all" || batch.teacher === selectedTeacher;
+      const matchesSearch = batch.name.toLowerCase().includes(searchQuery.toLowerCase()) || batch.course.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCourse && matchesTeacher && matchesSearch;
+    }),
+    [batchSummaries, selectedCourse, selectedTeacher, searchQuery]
+  );
 
-  // Filtering Logic
-  const filteredBatches = batchProgress.filter((batch) => {
-    const matchesCourse = selectedCourse === "all" || batch.courseId === selectedCourse;
-    const matchesTeacher = selectedTeacher === "all" || batch.teacherId === selectedTeacher;
-    const matchesSearch = batch.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          batch.course.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCourse && matchesTeacher && matchesSearch;
-  });
+  if (loading) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        Loading syllabus tracking data...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
