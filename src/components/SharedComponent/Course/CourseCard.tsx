@@ -46,9 +46,12 @@ const CourseCard = ({ course }: { course: Course }) => {
 
   return (
     <motion.div
-      whileHover={{ y: -6, boxShadow: "0 20px 40px -12px rgba(44,66,118,0.18)" }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="group bg-white dark:bg-darkmode rounded-2xl shadow-md overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-800"
+      whileHover={{ 
+        y: -10, 
+        boxShadow: "0 25px 50px -12px rgba(44,66,118,0.25)",
+        transition: { duration: 0.3, ease: "easeOut" }
+      }}
+      className="group bg-white dark:bg-darkmode rounded-2xl shadow-md overflow-hidden flex flex-col h-full border border-gray-100 dark:border-gray-800 transition-colors duration-300"
     >
       {/* Course Image */}
       <div className="relative aspect-[16/9] overflow-hidden">
@@ -58,10 +61,12 @@ const CourseCard = ({ course }: { course: Course }) => {
               src={courseImage}
               alt={name}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-110"
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
             />
+            <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors duration-300"></div>
           </div>
         </Link>
+
       </div>
 
       {/* Course Content */}
@@ -102,7 +107,7 @@ const CourseCard = ({ course }: { course: Course }) => {
 
           <Link
             href={`/Course/${generatedSlug}`}
-            className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[9px] sm:text-[10px] rounded-lg transition-all shadow-md shadow-blue-200 dark:shadow-none hover:translate-y-[-2px] whitespace-nowrap"
+            className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[9px] sm:text-[10px] rounded-lg transition-all shadow-md shadow-blue-200 dark:shadow-none hover:shadow-lg hover:shadow-blue-500/40 active:scale-95 whitespace-nowrap"
           >
             Details
           </Link>

@@ -4,6 +4,22 @@ import { Icon } from '@iconify/react';
 import CourseCard from '@/components/SharedComponent/Course/CourseCard';
 import { useGetCoursesQuery } from "@/redux/api/courseApi";
 import { useGetCategoriesQuery } from "@/redux/api/categoryApi";
+import { motion, AnimatePresence } from "framer-motion";
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6 }
+};
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
+
 
 const CoursePage = () => {
   const [activeCategory, setActiveCategory] = useState("all");
@@ -28,20 +44,46 @@ const CoursePage = () => {
       <section className="relative bg-gradient-to-br from-blue-900 via-indigo-200 to-white py-20 px-4 overflow-hidden border-b border-gray-100 dark:border-none">
         {/* Background Decorations */}
         <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-[-50px] left-[-30px] w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl"></div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
+            className="absolute top-10 right-10 w-64 h-64 bg-blue-400/10 rounded-full blur-3xl"
+          ></motion.div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 1.2 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+            className="absolute bottom-[-50px] left-[-30px] w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl"
+          ></motion.div>
         </div>
 
-        <div className="container mx-auto max-w-4xl relative z-10 text-center">
-          <h1 className="text-3xl md:text-4xl font-bold text-blue-950 mb-6 drop-shadow-sm -mt-10">
+        <motion.div 
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+          className="container mx-auto max-w-4xl relative z-10 text-center"
+        >
+          <motion.h1 
+            variants={fadeInUp}
+            className="text-3xl md:text-4xl font-bold text-blue-950 mb-6 drop-shadow-sm -mt-10"
+          >
             Our Courses
-          </h1>
-          <p className="text-blue-900/70 text-lg md:text-lg mb-10 opacity-90 max-w-2xl mx-auto font-medium">
+          </motion.h1>
+          <motion.p 
+            variants={fadeInUp}
+            className="text-blue-900/70 text-lg md:text-lg mb-10 opacity-90 max-w-2xl mx-auto font-medium"
+          >
             Our Digital Marketing Course in Nashik is designed for students, job seekers, and entrepreneurs. Learn SEO, social media marketing, content marketing, and paid advertising with hands-on experience and live projects.
-          </p>
+          </motion.p>
 
           {/* Search Bar */}
-          <div className="max-w-md mx-auto relative group">
+          <motion.div 
+            variants={fadeInUp}
+            className="max-w-md mx-auto relative group"
+          >
+
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <Icon icon="solar:magnifer-linear" className="text-gray-400 w-5 h-5 group-focus-within:text-blue-500 transition-colors" />
             </div>
@@ -64,15 +106,30 @@ const CoursePage = () => {
                 <Icon icon="solar:close-circle-linear" className="w-6 h-6" />
               </button>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Categories & Filter Tabs */}
       <section className="container mx-auto max-w-7xl px-4 -mt-24 relative z-20">
-        <div className="bg-white dark:bg-gray-900 p-2 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 backdrop-blur-md">
-          <div className="flex items-center gap-2 overflow-x-auto py-1 px-1 no-scrollbar">
-            <button
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="bg-white dark:bg-gray-900 p-2 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-800 backdrop-blur-md"
+        >
+          <motion.div 
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+            className="flex items-center gap-2 overflow-x-auto py-1 px-1 no-scrollbar"
+          >
+            <motion.button
+              variants={fadeInUp}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+
               onClick={() => {
                 setActiveCategory("all");
                 setPage(1);
@@ -85,10 +142,13 @@ const CoursePage = () => {
                 `}
             >
               All Courses
-            </button>
+            </motion.button>
             {categories.map((cat: any) => (
-              <button
+              <motion.button
                 key={cat._id}
+                variants={fadeInUp}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   setActiveCategory(cat._id);
                   setPage(1);
@@ -101,32 +161,54 @@ const CoursePage = () => {
                 `}
               >
                 {cat.name}
-              </button>
+              </motion.button>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Courses Grid */}
       <section className="container mx-auto max-w-7xl px-4 -mt-20 pb-20">
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : courses.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {courses.map((course: any) => (
-              <CourseCard key={course._id} course={course} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-3xl shadow-inner border border-dashed border-gray-300 dark:border-gray-700">
-            <Icon icon="solar:document-add-linear" className="w-20 h-20 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-500 dark:text-gray-400">No courses found</h3>
-            <p className="text-gray-400">Try adjusting your search or category filter</p>
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div 
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex justify-center items-center py-20"
+            >
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </motion.div>
+          ) : courses.length > 0 ? (
+            <motion.div 
+              key="grid"
+              initial="initial"
+              animate="animate"
+              variants={staggerContainer}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6"
+            >
+              {courses.map((course: any) => (
+                <motion.div key={course._id} variants={fadeInUp}>
+                  <CourseCard course={course} />
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="no-courses"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-20 bg-white dark:bg-gray-900 rounded-3xl shadow-inner border border-dashed border-gray-300 dark:border-gray-700"
+            >
+              <Icon icon="solar:document-add-linear" className="w-20 h-20 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-gray-500 dark:text-gray-400">No courses found</h3>
+              <p className="text-gray-400">Try adjusting your search or category filter</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </section>
+
     </div>
   );
 };

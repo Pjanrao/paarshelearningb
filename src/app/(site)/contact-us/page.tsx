@@ -287,6 +287,7 @@ import {
   Send,
   Navigation
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { validateEmail, validatePhone } from "@/utils/validation";
 import { useSiteImages } from "@/hooks/useSiteImages";
 
@@ -322,6 +323,23 @@ const ContactPage = () => {
     };
     fetchSettings();
   }, []);
+
+  const fadeInUp = {
+    initial: { opacity: 0, y: 20 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true },
+    transition: { duration: 0.6 }
+  };
+
+  const staggerContainer = {
+    initial: {},
+    whileInView: {
+      transition: {
+        staggerChildren: 0.1
+      }
+    },
+    viewport: { once: true }
+  };
 
   const mapLocations = {
     Pune: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1936066.2420780319!2d71.30676269531253!3d18.601998315229597!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2bb84a53dcf37%3A0x6fe3dbdb8a330ab0!2sPaarsh%20Infotech%20Pvt%20Ltd!5e0!3m2!1sen!2sin!4v1776681169804!5m2!1sen!2sin",
@@ -401,7 +419,12 @@ const ContactPage = () => {
 
         <div className="container mx-auto px-4 max-w-7xl relative z-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10">
-            <div className="md:w-1/2">
+            <motion.div 
+              className="md:w-1/2"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
               <nav className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 mb-6 font-medium">
                 <Link href="/" className="hover:text-[#01A0E2] transition-colors">Home</Link>
                 <ChevronRight size={14} className="opacity-50" />
@@ -415,9 +438,14 @@ const ContactPage = () => {
               <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 font-medium max-w-md leading-relaxed">
                 Have questions or ready to start your journey? Our expert team is here to support your path to excellence.
               </p>
-            </div>
+            </motion.div>
 
-            <div className="md:w-1/2 relative flex justify-center">
+            <motion.div 
+              className="md:w-1/2 relative flex justify-center"
+              initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+            >
               <div className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] md:w-[500px] md:h-[500px] flex items-center justify-center">
 
                 <div className="absolute inset-0 bg-gradient-to-tr from-[#2B4278]/10 via-[#01A0E2]/5 to-[#2B4278]/10 rounded-full blur-2xl transform rotate-12 scale-110"></div>
@@ -433,20 +461,28 @@ const ContactPage = () => {
                   <div className="absolute inset-0 bg-[#2B4278]/10 group-hover:bg-transparent transition-colors duration-500"></div>
                 </div>
 
-                <div className="absolute -top-4 -right-4 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-xl border border-[#01A0E2]/20 dark:border-slate-700 animate-float">
+                <motion.div 
+                  className="absolute -top-4 -right-4 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-xl border border-[#01A0E2]/20 dark:border-slate-700"
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                >
                   <div className="w-10 h-10 bg-[#2B4278] rounded-xl flex items-center justify-center text-white font-bold">
                     <Mail size={20} />
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-xl border border-[#01A0E2]/10 dark:border-slate-700 animate-float-delayed">
+                <motion.div 
+                  className="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-xl border border-[#01A0E2]/10 dark:border-slate-700"
+                  animate={{ y: [0, 10, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                >
                   <div className="w-10 h-10 bg-[#01A0E2] rounded-xl flex items-center justify-center text-white font-bold">
                     <Phone size={20} />
                   </div>
-                </div>
+                </motion.div>
 
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -459,90 +495,109 @@ const ContactPage = () => {
           {/* LEFT COLUMN */}
           <div className="space-y-6">
 
-            <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-4 border border-slate-100 dark:border-white/5 shadow-2xl shadow-[#2B4278]/5">
+            <motion.div 
+              className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-4 border border-slate-100 dark:border-white/5 shadow-2xl shadow-[#2B4278]/5"
+              variants={fadeInUp}
+              initial="initial"
+              whileInView="whileInView"
+              viewport={{ once: true }}
+            >
 
               <h2 className="text-2xl font-black text-[#2B4278] dark:text-white mb-6">
                 Contact Information
               </h2>
 
-              <div className="space-y-4">
+              <motion.div className="space-y-4" variants={staggerContainer} initial="initial" whileInView="whileInView" viewport={{ once: true }}>
 
-                <div className="flex items-center gap-4 p-2 rounded-2xl hover:bg-[#01A0E2]/5">
-                  <div className="w-12 h-12 bg-[#01A0E2] rounded-xl flex items-center justify-center shrink-0">
+                <motion.div className="flex items-center gap-4 p-2 rounded-2xl hover:bg-[#01A0E2]/5 transition-colors group cursor-pointer" variants={fadeInUp}>
+                  <div className="w-12 h-12 bg-[#01A0E2] rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-[#01A0E2]/20">
                     <Phone className="text-white" size={20} />
                   </div>
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Call Us</p>
-                    <Link href={`tel:${settings?.contactDetails?.phone?.replace(/\s/g, "") || "+919075201033"}`} className="text-[#2B4278] dark:text-white">
+                    <Link href={`tel:${settings?.contactDetails?.phone?.replace(/\s/g, "") || "+919075201033"}`} className="text-[#2B4278] dark:text-white font-bold hover:text-[#01A0E2] transition-colors">
                       {settings?.contactDetails?.phone || "+91 90752 01033"}
                     </Link>
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="flex items-center gap-4 p-2 rounded-2xl hover:bg-[#2B4278]/5">
-                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center shrink-0">
+                <motion.div className="flex items-center gap-4 p-2 rounded-2xl hover:bg-[#2B4278]/5 transition-colors group cursor-pointer" variants={fadeInUp}>
+                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-[#2B4278]/20">
                     <Mail className="text-white" size={20} />
                   </div>
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Email Us</p>
-                    <Link href={`mailto:${settings?.contactDetails?.email || "paarshelearning@gmail.com"}`} className="text-[#2B4278] dark:text-white">
+                    <Link href={`mailto:${settings?.contactDetails?.email || "paarshelearning@gmail.com"}`} className="text-[#2B4278] dark:text-white font-bold hover:text-[#01A0E2] transition-colors">
                       {settings?.contactDetails?.email || "paarshelearning@gmail.com"}
                     </Link>
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="flex items-start gap-4 p-2 rounded-2xl hover:bg-[#01A0E2]/5">
-                  <div className="w-12 h-12 bg-[#01A0E2] rounded-xl flex items-center justify-center shrink-0">
+                <motion.div className="flex items-start gap-4 p-2 rounded-2xl hover:bg-[#01A0E2]/5 transition-colors group cursor-pointer" variants={fadeInUp}>
+                  <div className="w-12 h-12 bg-[#01A0E2] rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-[#01A0E2]/20">
                     <MapPin className="text-white" size={20} />
                   </div>
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Pune Office</p>
-                    <p className="text-[#2B4278] dark:text-white">
+                    <p className="text-[#2B4278] dark:text-white font-bold leading-relaxed">
                       {settings?.contactDetails?.puneAddress || "Second Floor, Wisteriaa Fortune, Wakad, Maharashtra 411057"}
                     </p>
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="flex items-start gap-4 p-2 rounded-2xl hover:bg-[#01A0E2]/5">
-                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center shrink-0">
+                <motion.div className="flex items-start gap-4 p-2 rounded-2xl hover:bg-[#2B4278]/5 transition-colors group cursor-pointer" variants={fadeInUp}>
+                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-[#2B4278]/20">
                     <MapPin className="text-white" size={20} />
                   </div>
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Nashik Office</p>
-                    <p className="text-[#2B4278] dark:text-white">
+                    <p className="text-[#2B4278] dark:text-white font-bold leading-relaxed">
                       {settings?.contactDetails?.nashikAddress || "Bhakti Apartment, Suchita Nagar, Mumbai Naka, Nashik"}
                     </p>
                   </div>
-                </div>
+                </motion.div>
 
-                <div className="flex items-center gap-4 p-2 rounded-2xl hover:bg-[#2B4278]/5">
-                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center shrink-0">
+                <motion.div className="flex items-center gap-4 p-2 rounded-2xl hover:bg-[#2B4278]/5 transition-colors group cursor-pointer" variants={fadeInUp}>
+                  <div className="w-12 h-12 bg-[#2B4278] rounded-xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform shadow-lg shadow-[#2B4278]/20">
                     <Clock className="text-white" size={20} />
                   </div>
                   <div>
                     <p className="text-slate-400 text-sm font-bold uppercase">Open Hours</p>
-                    <p className="text-[#2B4278] dark:text-white">
+                    <p className="text-[#2B4278] dark:text-white font-bold">
                       {settings?.contactDetails?.openHours || "Mon - Fri, 9:30 AM - 7:30 PM"}
                     </p>
                   </div>
-                </div>
+                </motion.div>
 
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
 
           {/* RIGHT COLUMN */}
-          <div className="space-y-6">
+          <motion.div 
+            className="space-y-6"
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
 
-            <Link
-              href="/inquiry"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#01A0E2]/10 rounded-full border border-[#01A0E2]/20 hover:bg-[#01A0E2]/20"
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
             >
-              <span className="w-2 h-2 bg-[#01A0E2] rounded-full animate-pulse"></span>
-              <span className="text-xs font-bold text-[#01A0E2] uppercase tracking-widest">
-                Inquiry Form
-              </span>
-            </Link>
+              <Link
+                href="/inquiry"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#01A0E2]/10 rounded-full border border-[#01A0E2]/20 hover:bg-[#01A0E2]/20 transition-all hover:scale-105 active:scale-95"
+              >
+                <span className="w-2 h-2 bg-[#01A0E2] rounded-full animate-pulse"></span>
+                <span className="text-xs font-bold text-[#01A0E2] uppercase tracking-widest">
+                  Inquiry Form
+                </span>
+              </Link>
+            </motion.div>
 
             <h2 className="text-3xl font-black text-[#2B4278] dark:text-white">
               Get In <span className="text-[#01A0E2]">Touch</span>
@@ -556,60 +611,66 @@ const ContactPage = () => {
 
               <div className="grid md:grid-cols-2 gap-4">
 
-                <input
+                <motion.input
+                  whileFocus={{ scale: 1.02 }}
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Full Name"
                   required
-                  className="w-full px-6 py-4 rounded-xl border border-slate-200"
+                  className="w-full px-6 py-4 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#01A0E2]/20 transition-all"
                 />
 
-                <input
+                <motion.input
+                  whileFocus={{ scale: 1.02 }}
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Email Address"
                   required
-                  className="w-full px-6 py-4 rounded-xl border border-slate-200"
+                  className="w-full px-6 py-4 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#01A0E2]/20 transition-all"
                 />
 
               </div>
 
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.01 }}
                 type="tel"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="Phone Number"
                 required
-                className="w-full px-6 py-4 rounded-xl border border-slate-200"
+                className="w-full px-6 py-4 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#01A0E2]/20 transition-all"
               />
 
-              <textarea
+              <motion.textarea
+                whileFocus={{ scale: 1.01 }}
                 name="message"
                 value={formData.message}
                 onChange={handleChange}
                 rows={4}
                 placeholder="How can we help you?"
                 required
-                className="w-full px-6 py-4 rounded-xl border border-slate-200"
+                className="w-full px-6 py-4 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#01A0E2]/20 transition-all resize-none"
               />
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02, backgroundColor: "#2B4278" }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[#01A0E2] hover:bg-[#2B4278] text-white font-bold py-4 px-8 rounded-xl flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-[#01A0E2] text-white font-bold py-4 px-8 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed w-full md:w-fit shadow-lg shadow-[#01A0E2]/20 transition-colors"
               >
                 {isSubmitting ? "Sending..." : "Send Message"}
                 <Send size={18} />
-              </button>
+              </motion.button>
 
             </form>
 
-          </div>
+          </motion.div>
 
         </div>
 
@@ -638,7 +699,13 @@ const ContactPage = () => {
             </button>
           </div>
 
-          <div className="w-full h-[350px] md:h-[450px] rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-white/5 relative group">
+          <motion.div 
+            className="w-full h-[350px] md:h-[450px] rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-white/5 relative group"
+            variants={fadeInUp}
+            initial="initial"
+            whileInView="whileInView"
+            viewport={{ once: true }}
+          >
             <iframe
               src={mapLocations[activeMap as keyof typeof mapLocations]}
               width="100%"
@@ -656,32 +723,47 @@ const ContactPage = () => {
                 </span>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* CTA */}
-        <section className="mt-8 lg:mt-12 relative overflow-hidden">
+        <motion.section 
+          className="mt-8 lg:mt-12 relative overflow-hidden"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
 
-          <div className="bg-[#2B4278] rounded-[3rem] w-fit mx-auto py-6 px-8 text-center text-white">
+          <div className="bg-[#2B4278] rounded-[3rem] w-fit mx-auto py-8 px-10 text-center text-white relative overflow-hidden group">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:scale-125 transition-transform duration-1000"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#01A0E2]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
 
-            <h2 className="text-xl lg:text-3xl font-black">
+            <h2 className="text-xl lg:text-3xl font-black relative z-10">
               Ready to Accelerate Your <span className="text-[#01A0E2]">Career?</span>
             </h2>
 
-            <p className="text-lg text-blue-50 mt-3 max-w-xl mx-auto">
+            <p className="text-lg text-blue-50/80 mt-3 max-w-xl mx-auto relative z-10">
               Join our community of graduates who transformed their careers.
             </p>
 
-            <Link
-              href="/Course"
-              className="inline-flex items-center px-6 py-3 bg-white text-[#2B4278] font-black rounded-2xl mt-6 hover:bg-[#01A0E2] hover:text-white"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative z-10"
             >
-              Explore All Courses
-            </Link>
+              <Link
+                href="/Course"
+                className="inline-flex items-center px-8 py-4 bg-white text-[#2B4278] font-black rounded-2xl mt-6 hover:bg-[#01A0E2] hover:text-white transition-all shadow-xl shadow-black/10 group"
+              >
+                Explore All Courses
+                <ChevronRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </motion.div>
 
           </div>
 
-        </section>
+        </motion.section>
 
       </main>
 
