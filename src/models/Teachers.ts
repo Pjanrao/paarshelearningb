@@ -45,6 +45,15 @@ const TeacherSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        approvalStatus: {
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            default: "approved",
+        },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
     },
     { timestamps: true }
 );

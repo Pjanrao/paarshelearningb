@@ -60,7 +60,9 @@ export function middleware(req: NextRequest) {
         path.startsWith("/images") ||
         path.startsWith("/uploads") ||
         path.startsWith("/promo") ||
-        path.startsWith("/favicon.ico")
+        path.startsWith("/favicon.ico") ||
+        path.startsWith("/teacher/register") ||
+        path.startsWith("/api/teacher/register")
     ) {
         return NextResponse.next();
     }

@@ -20,6 +20,19 @@ const BatchSchema = new mongoose.Schema(
         startDate: Date,
         endDate: Date,
 
+        assignedTeacher: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        },
+
+        syllabusProgress: [
+            {
+                topicId: String,
+                completed: { type: Boolean, default: false },
+                completedAt: Date
+            }
+        ],
+
         status: {
             type: String,
             enum: ["Upcoming", "Active", "Completed"],

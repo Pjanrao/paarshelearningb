@@ -30,18 +30,26 @@ export const authOptions: NextAuthOptions = {
               user.password
             );
 
-              if (isMatch) {
-                if (user.status === "deleted") {
-                  throw new Error("Account not found");
-                }
-                return {
-                  id: user._id.toString(),
-                  email: user.email,
-                  name: user.name,
-                  role: user.role,
-                  image: user.image || ""
-                };
+            if (isMatch) {
+              if (user.status === "deleted") {
+                throw new Error("Account not found");
               }
+
+              if (user.role === "teacher" && user.approvalStatus === "pending") {
+                throw new Error("Account pending admin approval");
+              }
+
+              if (user.role === "teacher" && user.approvalStatus === "rejected") {
+                throw new Error("Teacher account application was rejected");
+              }
+              return {
+                id: user._id.toString(),
+                email: user.email,
+                name: user.name,
+                role: user.role,
+                image: user.image || ""
+              };
+            }
           }
         } catch (error) {
           console.error("DB auth error:", error);

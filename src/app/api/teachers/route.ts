@@ -11,6 +11,7 @@ export async function GET(req: Request) {
     const search = searchParams.get("search") || "";
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "50");
+    const status = searchParams.get("status") || "";
     const skip = (page - 1) * limit;
 
     const query: any = {};
@@ -19,6 +20,9 @@ export async function GET(req: Request) {
         { name: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
       ];
+    }
+    if (status) {
+      query.approvalStatus = status;
     }
 
     const [teachers, total] = await Promise.all([
@@ -51,7 +55,7 @@ export async function POST(req: Request) {
       const filename = `${Date.now()}-teacher-avatar.${extension}`;
       const relativePath = `/uploads/courses/images/${filename}`;
       const fullPath = path.join(process.cwd(), "public", relativePath);
-      
+
       // Ensure directory exists
       const dir = path.dirname(fullPath);
       if (!fs.existsSync(dir)) {

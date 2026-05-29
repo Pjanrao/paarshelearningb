@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, Pencil, Trash2, Plus, Search, Loader2, X, Star } from "lucide-react";
+import { Eye, Pencil, Trash2, Plus, Search, Loader2, X, Star, CheckCircle, XCircle } from "lucide-react";
 import DeleteCourseDialog from "@/components/dashboard/courses/DeleteCourseDialog";
 
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
@@ -28,6 +28,7 @@ interface Teacher {
     totalStudents: number;
     rating: number;
     createdAt: string;
+    approvalStatus?: string;
 }
 
 interface TeacherFormData {
@@ -42,6 +43,7 @@ interface TeacherFormData {
     assignedCourses: string[];
     totalStudents: number;
     rating: number;
+    approvalStatus?: string;
 }
 
 export default function TeachersPage() {
@@ -52,6 +54,7 @@ export default function TeachersPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [total, setTotal] = useState(0);
     const [teachersPerPage, setTeachersPerPage] = useState<number | "all">(10);
+    const [activeTab, setActiveTab] = useState<"all" | "pending" | "approved" | "rejected">("all");
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -74,6 +77,7 @@ export default function TeachersPage() {
         assignedCourses: [],
         totalStudents: 0,
         rating: 0,
+        approvalStatus: "approved",
     });
 
     const fetchTeachers = async () => {
@@ -81,8 +85,9 @@ export default function TeachersPage() {
             setLoading(true);
             const limit = teachersPerPage === "all" ? 99999 : teachersPerPage;
             setErrorMsg(null);
+            const statusParam = activeTab !== "all" ? `&status=${activeTab}` : "";
             const response = await fetch(
-                `/api/teachers?search=${searchQuery}&page=${currentPage}&limit=${limit}`
+                `/api/teachers?search=${searchQuery}&page=${currentPage}&limit=${limit}${statusParam}`
             );
 
             if (!response.ok) {
@@ -108,7 +113,7 @@ export default function TeachersPage() {
         }, 300);
 
         return () => clearTimeout(debounceTimer);
-    }, [searchQuery, currentPage, teachersPerPage]);
+    }, [searchQuery, currentPage, teachersPerPage, activeTab]);
 
     const handleAddTeacher = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -183,6 +188,24 @@ export default function TeachersPage() {
             alert("Failed to delete teacher");
         } finally {
             setDeleteLoading(false);
+        }
+    };
+
+    const handleStatusUpdate = async (id: string, status: string) => {
+        try {
+            const response = await fetch(`/api/teachers/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ approvalStatus: status }),
+            });
+            if (response.ok) {
+                fetchTeachers();
+            } else {
+                alert("Failed to update status");
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+            alert("Failed to update status");
         }
     };
 
@@ -284,6 +307,25 @@ export default function TeachersPage() {
                         </button>
                     </div>
                 </div>
+
+                {/* Tabs */}
+                <div className="flex gap-2 mt-4 flex-wrap">
+                    {(["all", "pending", "approved", "rejected"] as const).map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
+                            className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all capitalize ${activeTab === tab
+                                    ? tab === "pending" ? "bg-yellow-500 text-white border-yellow-500"
+                                        : tab === "approved" ? "bg-green-600 text-white border-green-600"
+                                            : tab === "rejected" ? "bg-red-500 text-white border-red-500"
+                                                : "bg-[#2C4276] text-white border-[#2C4276]"
+                                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                                }`}
+                        >
+                            {tab === "all" ? "All Teachers" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {errorMsg && (
@@ -325,6 +367,7 @@ export default function TeachersPage() {
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Students</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Joined Date</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Rating</th>
+                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
@@ -385,10 +428,24 @@ export default function TeachersPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                <span className={`px-2 py-1 rounded-full font-bold text-xs ${teacher.approvalStatus === "pending" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
+                                                    teacher.approvalStatus === "rejected" ? "bg-red-100 text-red-800 border-red-200" :
+                                                        "bg-green-100 text-green-800 border-green-200"
+                                                    } border`}>
+                                                    {teacher.approvalStatus ? teacher.approvalStatus.charAt(0).toUpperCase() + teacher.approvalStatus.slice(1) : "Approved"}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                 <div className="flex items-center gap-2">
-                                                    <button onClick={() => openViewModal(teacher)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="View Details"><Eye size={18} /></button>
-                                                    <button onClick={() => openEditModal(teacher)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Teacher"><Pencil size={18} /></button>
-                                                    <button onClick={() => setDeleteId({ id: teacher._id, name: teacher.name })} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Teacher"><Trash2 size={18} /></button>
+                                                    {teacher.approvalStatus === "pending" && (
+                                                        <>
+                                                            <button onClick={() => handleStatusUpdate(teacher._id, "approved")} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Approve"><CheckCircle size={18} /></button>
+                                                            <button onClick={() => handleStatusUpdate(teacher._id, "rejected")} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Reject"><XCircle size={18} /></button>
+                                                        </>
+                                                    )}
+                                                    <button onClick={() => openViewModal(teacher)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Details"><Eye size={18} /></button>
+                                                    <button onClick={() => openEditModal(teacher)} className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Teacher"><Pencil size={18} /></button>
+                                                    <button onClick={() => setDeleteId({ id: teacher._id, name: teacher.name })} className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors" title="Delete Teacher"><Trash2 size={18} /></button>
                                                 </div>
                                             </td>
                                         </tr>

@@ -6,6 +6,7 @@ export interface IUser extends mongoose.Document {
     contact: string;
     password?: string;
     role: "student" | "teacher" | "admin";
+    approvalStatus: "pending" | "approved" | "rejected";
     image: string;
     status: "active" | "deleted";
     deletionReason: string;
@@ -49,6 +50,11 @@ const userSchema = new mongoose.Schema<IUser>(
             type: String,
             enum: ["student", "teacher", "admin"],
             default: "student",
+        },
+        approvalStatus: {
+            type: String,
+            enum: ["pending", "approved", "rejected"],
+            default: "approved",
         },
         image: {
             type: String,

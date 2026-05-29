@@ -3,6 +3,7 @@ import { connectDB } from "@/lib/db";
 import Teachers from "@/models/Teachers";
 import fs from "fs";
 import path from "path";
+import User from "@/models/User";
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -25,7 +26,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
           console.error("Error deleting old avatar:", err);
         }
       }
-      
+
       // 2. Save new
       const base64Data = body.avatar.replace(/^data:image\/\w+;base64,/, "");
       const extension = body.avatar.split(';')[0].split('/')[1] || 'png';
@@ -33,7 +34,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       const filename = `${Date.now()}-teacher-avatar.${extension}`;
       const relativePath = `/uploads/courses/images/${filename}`;
       const fullPath = path.join(process.cwd(), "public", relativePath);
-      
+
       // Ensure directory exists
       const dir = path.dirname(fullPath);
       if (!fs.existsSync(dir)) {
@@ -46,6 +47,14 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     const teacher = await Teachers.findByIdAndUpdate(id, body, { new: true });
     if (!teacher) return NextResponse.json({ error: "Teacher not found" }, { status: 404 });
+
+    if (body.approvalStatus) {
+      await User.findOneAndUpdate(
+        { email: teacher.email },
+        { approvalStatus: body.approvalStatus }
+      );
+    }
+
     return NextResponse.json(teacher);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
