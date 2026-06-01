@@ -8,6 +8,19 @@ export default function TeacherDashboard() {
     const [batches, setBatches] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
+    const [teacherProfile, setTeacherProfile] = useState<any>(null);
+    const [lastUpdated, setLastUpdated] = useState<string>("");
+
+    const fetchTeacherProfile = async () => {
+        try {
+            const res = await fetch("/api/teacher/profile");
+            if (!res.ok) throw new Error("Failed to load teacher profile");
+            const data = await res.json();
+            setTeacherProfile(data.teacher || null);
+        } catch (error: any) {
+            console.warn("Teacher profile unavailable:", error.message || error);
+        }
+    };
 
     const fetchBatches = async () => {
         try {
@@ -23,8 +36,27 @@ export default function TeacherDashboard() {
         }
     };
 
+    const refreshData = async () => {
+        await Promise.all([fetchTeacherProfile(), fetchBatches()]);
+        setLastUpdated(new Date().toLocaleTimeString());
+    };
+
     useEffect(() => {
-        fetchBatches();
+        refreshData();
+
+        const onFocus = () => {
+            refreshData();
+        };
+
+        const intervalId = window.setInterval(() => {
+            refreshData();
+        }, 30000);
+
+        window.addEventListener("focus", onFocus);
+        return () => {
+            window.removeEventListener("focus", onFocus);
+            window.clearInterval(intervalId);
+        };
     }, []);
 
     const toggleSyllabusStatus = async (batchId: string, topicId: string, currentStatus: boolean) => {
@@ -72,10 +104,33 @@ export default function TeacherDashboard() {
 
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold text-gray-900">Assigned Batches</h1>
-                <p className="text-sm text-gray-500">Manage your batches and track syllabus completion</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Assigned Batches</h1>
+                    <p className="text-sm text-gray-500">Manage your batches and track syllabus completion</p>
+                    {lastUpdated && (
+                        <p className="text-xs text-gray-400 mt-1">Last refreshed at {lastUpdated}</p>
+                    )}
+                </div>
+                <button
+                    type="button"
+                    onClick={refreshData}
+                    className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition"
+                >
+                    Refresh
+                </button>
             </div>
+            {teacherProfile?.assignedCourses?.length ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {teacherProfile.assignedCourses.map((course: string, index: number) => (
+                            <span key={index} className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                                <BookOpen size={14} /> {course}
+                            </span>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-sm text-gray-400 mt-3">No assigned courses yet.</p>
+                )}
 
             {batches.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-sm p-8 text-center border">

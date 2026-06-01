@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, Pencil, Trash2, Plus, Search, Loader2, X, Star, CheckCircle, XCircle } from "lucide-react";
-import DeleteCourseDialog from "@/components/dashboard/courses/DeleteCourseDialog";
+import { Eye, Pencil, Trash2, Plus, Search, Loader2, X, Star, CheckCircle, XCircle, BookOpen, Layers } from "lucide-react";
 
 import {
     AlertDialog,
@@ -29,6 +28,7 @@ interface Teacher {
     rating: number;
     createdAt: string;
     approvalStatus?: string;
+    userId?: string;
 }
 
 interface TeacherFormData {
@@ -60,6 +60,17 @@ export default function TeachersPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+    const [selectedTeacherForAssign, setSelectedTeacherForAssign] = useState<Teacher | null>(null);
+    const [isAssignCourseModalOpen, setIsAssignCourseModalOpen] = useState(false);
+    const [isAssignBatchModalOpen, setIsAssignBatchModalOpen] = useState(false);
+    const [courses, setCourses] = useState<any[]>([]);
+    const [courseSearch, setCourseSearch] = useState("");
+    const [availableBatches, setAvailableBatches] = useState<any[]>([]);
+    const [selectedAssignedCourses, setSelectedAssignedCourses] = useState<string[]>([]);
+    const [selectedBatchId, setSelectedBatchId] = useState<string>("");
+    const [batchFilterCourseId, setBatchFilterCourseId] = useState<string>("");
+    const [isLoadingCourses, setIsLoadingCourses] = useState(false);
+    const [isLoadingBatches, setIsLoadingBatches] = useState(false);
     const [formLoading, setFormLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [deleteId, setDeleteId] = useState<{ id: string, name: string } | null>(null);
@@ -265,6 +276,117 @@ export default function TeachersPage() {
         }
     };
 
+    const fetchCourses = async () => {
+        try {
+            setIsLoadingCourses(true);
+            const response = await fetch("/api/courses?limit=200&page=1");
+            if (!response.ok) throw new Error("Failed to load courses");
+            const data = await response.json();
+            setCourses(data.courses || []);
+        } catch (error) {
+            console.error("Error loading courses:", error);
+        } finally {
+            setIsLoadingCourses(false);
+        }
+    };
+
+    const fetchBatches = async (courseId?: string) => {
+        try {
+            setIsLoadingBatches(true);
+            const query = courseId ? `?courseId=${courseId}` : "";
+            const response = await fetch(`/api/batches${query}`);
+            if (!response.ok) throw new Error("Failed to load batches");
+            const data = await response.json();
+            setAvailableBatches(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error loading batches:", error);
+        } finally {
+            setIsLoadingBatches(false);
+        }
+    };
+
+    const openAssignCourseModal = (teacher: Teacher) => {
+        setSelectedTeacherForAssign(teacher);
+        setSelectedAssignedCourses(teacher.assignedCourses || []);
+        setCourseSearch("");
+        setIsAssignCourseModalOpen(true);
+        fetchCourses();
+    };
+
+    const openAssignBatchModal = async (teacher: Teacher) => {
+        setSelectedTeacherForAssign(teacher);
+        setSelectedBatchId("");
+        setBatchFilterCourseId("");
+        setCourseSearch("");
+        setIsAssignBatchModalOpen(true);
+        await fetchCourses();
+        await fetchBatches();
+    };
+
+    const toggleCourseSelection = (courseName: string) => {
+        setSelectedAssignedCourses((prev) =>
+            prev.includes(courseName)
+                ? prev.filter((item) => item !== courseName)
+                : [...prev, courseName]
+        );
+    };
+
+    const handleAssignCoursesSave = async () => {
+        if (!selectedTeacherForAssign) return;
+        try {
+            const response = await fetch(`/api/teachers/${selectedTeacherForAssign._id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ assignedCourses: selectedAssignedCourses }),
+            });
+            if (!response.ok) throw new Error("Failed to save assigned courses");
+            setIsAssignCourseModalOpen(false);
+            setSelectedTeacherForAssign(null);
+            fetchTeachers();
+        } catch (error) {
+            console.error("Error assigning courses:", error);
+            alert("Failed to assign courses. Try again.");
+        }
+    };
+
+    const handleAssignBatchSave = async () => {
+        if (!selectedTeacherForAssign || !selectedBatchId) {
+            alert("Please select a batch to assign.");
+            return;
+        }
+
+        const teacherUserId = selectedTeacherForAssign.userId ? String(selectedTeacherForAssign.userId) : "";
+        if (!teacherUserId) {
+            alert("Teacher does not have a linked user account to assign to this batch.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/batches/${selectedBatchId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ assignedTeacher: teacherUserId }),
+            });
+            if (!response.ok) throw new Error("Failed to assign batch");
+            setIsAssignBatchModalOpen(false);
+            setSelectedTeacherForAssign(null);
+            setSelectedBatchId("");
+            fetchTeachers();
+        } catch (error) {
+            console.error("Error assigning batch:", error);
+            alert("Failed to assign batch. Try again.");
+        }
+    };
+
+    const handleBatchCourseFilterChange = async (courseId: string) => {
+        setBatchFilterCourseId(courseId);
+        await fetchBatches(courseId);
+    };
+
+    const filteredCourses = courses.filter((course) =>
+        course.name?.toLowerCase().includes(courseSearch.toLowerCase())
+    );
+
     const formatDate = (dateString: string) => {
         if (!dateString) return "N/A";
         const date = new Date(dateString);
@@ -355,29 +477,28 @@ export default function TeachersPage() {
                     </div>
                 ) : (
                     <>
-                        <div className="custom-scrollbar-container overflow-auto h-[430px] sm:max-h-[600px] border-x rounded-t-xl">
-                            <table className="w-full divide-y divide-gray-200 min-w-[1000px]">
-                                <thead className="bg-gray-50 border-b sticky top-0 z-10">
+                        <div className="overflow-x-auto border-x border-b border-gray-200 rounded-b-xl">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50 border-b">
                                     <tr>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Teacher</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Contact</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role & Exp</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Courses</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Students</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Joined Date</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Rating</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">#</th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">Teacher</th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">Contact</th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">Role & Exp</th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">Students</th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">Joined</th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">Rating</th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">Status</th>
+                                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 bg-white">
                                     {teachers.map((teacher, index) => (
                                         <tr key={teacher._id} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500 font-mono">
                                                 {(currentPage - 1) * (teachersPerPage as number) + index + 1}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-4 py-3 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2C4276] to-blue-500 flex items-center justify-center text-white font-bold shadow-inner uppercase overflow-hidden">
                                                         {teacher.avatar ? (
@@ -396,46 +517,34 @@ export default function TeachersPage() {
                                                     <div className="text-sm font-bold text-gray-900">{teacher.name}</div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-xs text-gray-600 font-medium">{teacher.email}</div>
-                                                <div className="text-xs text-gray-400">{teacher.contact || "N/A"}</div>
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                                                <div className="text-sm font-semibold text-gray-900">{teacher.email}</div>
+                                                <div className="text-xs text-gray-500">{teacher.contact || "N/A"}</div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-xs font-bold text-gray-700">{teacher.designation || "N/A"}</div>
-                                                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{teacher.experience || "N/A"} Exp</div>
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                                                <div className="font-semibold text-gray-900">{teacher.designation || "N/A"}</div>
+                                                <div className="text-xs text-gray-400 uppercase tracking-wide">{teacher.experience || "N/A"} Exp</div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex flex-wrap gap-1 max-w-[200px]">
-                                                    {teacher.assignedCourses?.slice(0, 2).map((c, i) => (
-                                                        <span key={i} className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-100 uppercase tracking-tight">
-                                                            {c}
-                                                        </span>
-                                                    ))}
-                                                    {teacher.assignedCourses?.length > 2 && (
-                                                        <span className="text-[10px] text-gray-400 font-bold">+{teacher.assignedCourses.length - 2} more</span>
-                                                    )}
-                                                </div>
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
+                                                <span className="font-semibold text-gray-900">{teacher.totalStudents || 0}</span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                <span className="font-bold text-gray-900">{teacher.totalStudents || 0}</span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                                                 {formatDate(teacher.dateOfJoining || teacher.createdAt)}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <span className="bg-yellow-50 text-yellow-700 border border-yellow-100 px-2 py-1 rounded-full font-bold flex items-center gap-1 w-fit">
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                                                <span className="bg-yellow-50 text-yellow-700 border border-yellow-100 px-2 py-1 rounded-full font-semibold flex items-center gap-1 w-fit">
                                                     <Star size={12} className="fill-yellow-700" /> {teacher.rating || 0}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                <span className={`px-2 py-1 rounded-full font-bold text-xs ${teacher.approvalStatus === "pending" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                                                <span className={`px-2 py-1 rounded-full font-semibold text-xs ${teacher.approvalStatus === "pending" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
                                                     teacher.approvalStatus === "rejected" ? "bg-red-100 text-red-800 border-red-200" :
                                                         "bg-green-100 text-green-800 border-green-200"
                                                     } border`}>
                                                     {teacher.approvalStatus ? teacher.approvalStatus.charAt(0).toUpperCase() + teacher.approvalStatus.slice(1) : "Approved"}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm">
                                                 <div className="flex items-center gap-2">
                                                     {teacher.approvalStatus === "pending" && (
                                                         <>
@@ -443,6 +552,8 @@ export default function TeachersPage() {
                                                             <button onClick={() => handleStatusUpdate(teacher._id, "rejected")} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Reject"><XCircle size={18} /></button>
                                                         </>
                                                     )}
+                                                    <button onClick={() => openAssignCourseModal(teacher)} className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors" title="Assign Courses"><BookOpen size={18} /></button>
+                                                    <button onClick={() => openAssignBatchModal(teacher)} className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Assign Batch"><Layers size={18} /></button>
                                                     <button onClick={() => openViewModal(teacher)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="View Details"><Eye size={18} /></button>
                                                     <button onClick={() => openEditModal(teacher)} className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Edit Teacher"><Pencil size={18} /></button>
                                                     <button onClick={() => setDeleteId({ id: teacher._id, name: teacher.name })} className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors" title="Delete Teacher"><Trash2 size={18} /></button>
@@ -617,6 +728,141 @@ export default function TeachersPage() {
                                 {formLoading && <Loader2 className="animate-spin" size={16} />}
                                 {isAddModalOpen ? "Save Teacher" : "Update Changes"}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isAssignCourseModalOpen && selectedTeacherForAssign && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
+                            <div>
+                                <h2 className="text-xl font-bold text-[#2C4276]">Assign Courses to {selectedTeacherForAssign.name}</h2>
+                                <p className="text-sm text-gray-500">Select courses for this teacher from the available list.</p>
+                            </div>
+                            <button onClick={() => setIsAssignCourseModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={24} /></button>
+                        </div>
+                        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                            <div className="space-y-2">
+                                <label className="block text-sm font-semibold text-gray-700">Available Courses</label>
+                                <input
+                                    type="text"
+                                    value={courseSearch}
+                                    placeholder="Search courses..."
+                                    onChange={(e) => setCourseSearch(e.target.value)}
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                />
+                            </div>
+                            <div className="grid gap-3 sm:grid-cols-2">
+                                {isLoadingCourses ? (
+                                    <div className="col-span-full p-8 text-center text-gray-500">Loading courses...</div>
+                                ) : filteredCourses.length === 0 ? (
+                                    <div className="col-span-full p-8 text-center text-gray-500">No courses available.</div>
+                                ) : (
+                                    filteredCourses.map((course) => {
+                                        const isSelected = selectedAssignedCourses.includes(course.name);
+                                        return (
+                                            <button
+                                                key={course._id}
+                                                type="button"
+                                                onClick={() => toggleCourseSelection(course.name)}
+                                                className={`w-full text-left p-4 rounded-2xl border transition-all ${isSelected ? "border-[#2C4276] bg-[#EFF6FF]" : "border-gray-200 bg-white hover:border-[#2C4276]"}`}
+                                            >
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div>
+                                                        <p className="font-semibold text-gray-900">{course.name}</p>
+                                                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">{course.shortDescription || "No description provided."}</p>
+                                                    </div>
+                                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${isSelected ? "bg-[#2C4276] text-white" : "bg-gray-100 text-gray-600"}`}>
+                                                        {isSelected ? "Selected" : "Select"}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
+                            <button onClick={() => { setIsAssignCourseModalOpen(false); setSelectedTeacherForAssign(null); }} className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+                            <button onClick={handleAssignCoursesSave} className="px-6 py-2 bg-[#2C4276] text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold">Save Courses</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isAssignBatchModalOpen && selectedTeacherForAssign && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
+                            <div>
+                                <h2 className="text-xl font-bold text-[#2C4276]">Assign Batch to {selectedTeacherForAssign.name}</h2>
+                                <p className="text-sm text-gray-500">Choose an available batch for the selected teacher.</p>
+                            </div>
+                            <button onClick={() => setIsAssignBatchModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={24} /></button>
+                        </div>
+                        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Filter by course</label>
+                                    <select
+                                        value={batchFilterCourseId}
+                                        onChange={(e) => handleBatchCourseFilterChange(e.target.value)}
+                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    >
+                                        <option value="">All courses</option>
+                                        {courses.map((course) => (
+                                            <option key={course._id} value={course._id}>{course.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex items-end gap-2">
+                                    <button type="button" onClick={() => { setBatchFilterCourseId(""); fetchBatches(); }} className="w-full px-4 py-2 bg-gray-100 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Reset Filter</button>
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                {!selectedTeacherForAssign?.userId && (
+                                    <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-orange-700">
+                                        This teacher does not have a linked user account yet. Batch assignment requires a teacher user ID to be set.
+                                    </div>
+                                )}
+                                {isLoadingBatches ? (
+                                    <div className="p-6 text-center text-gray-500">Loading batches...</div>
+                                ) : availableBatches.length === 0 ? (
+                                    <div className="p-6 text-center text-gray-500">No batches available.</div>
+                                ) : (
+                                    availableBatches.map((batch) => {
+                                        const assignedTeacherId = batch.assignedTeacher ? String(batch.assignedTeacher) : "";
+                                        const teacherUserId = selectedTeacherForAssign?.userId ? String(selectedTeacherForAssign.userId) : "";
+                                        const alreadyAssignedToTeacher = assignedTeacherId !== "" && assignedTeacherId === teacherUserId;
+                                        const isDisabled = assignedTeacherId !== "" && !alreadyAssignedToTeacher;
+                                        return (
+                                            <button
+                                                key={batch._id}
+                                                type="button"
+                                                onClick={() => setSelectedBatchId(batch._id)}
+                                                disabled={isDisabled}
+                                                className={`w-full text-left p-4 rounded-2xl border transition-all ${selectedBatchId === batch._id ? "border-[#2C4276] bg-[#EFF6FF]" : "border-gray-200 bg-white hover:border-[#2C4276]"} ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`}
+                                            >
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div>
+                                                        <p className="font-semibold text-gray-900">{batch.name}</p>
+                                                        <p className="text-xs text-gray-500 mt-1">{batch.courseId?.name || "Unknown course"}</p>
+                                                    </div>
+                                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${alreadyAssignedToTeacher ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}>
+                                                        {alreadyAssignedToTeacher ? "Assigned" : isDisabled ? "Already assigned" : selectedBatchId === batch._id ? "Selected" : "Select"}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
+                            <button onClick={() => { setIsAssignBatchModalOpen(false); setSelectedTeacherForAssign(null); setSelectedBatchId(""); }} className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+                            <button onClick={handleAssignBatchSave} disabled={!selectedBatchId || !selectedTeacherForAssign?.userId} className="px-6 py-2 bg-[#2C4276] text-white rounded-lg hover:bg-opacity-90 transition-all font-semibold disabled:opacity-50">Save Batch</button>
                         </div>
                     </div>
                 </div>

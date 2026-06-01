@@ -5,6 +5,18 @@ import Link from "next/link";
 import { BookOpen, Users, CheckCircle2, Circle, PlayCircle, ChevronDown, ChevronUp, Clock, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface Topic {
+  title: string;
+  status: string;
+  lastUpdated?: string;
+  duration?: string;
+}
+
+interface Module {
+  moduleName: string;
+  topics: Topic[];
+}
+
 export default function TeacherSyllabusProgress() {
   const [batches, setBatches] = useState<any[]>([]);
   const [selectedBatchId, setSelectedBatchId] = useState<string>("");
@@ -161,7 +173,7 @@ export default function TeacherSyllabusProgress() {
             No syllabus modules were found for this batch. Go to <Link href="/teacher/take-lecture" className="underline font-bold">Take Lecture</Link> to submit an update after a syllabus item has been created.
           </div>
         ) : (
-          syllabus.map((mod, modIdx) => {
+          syllabus.map((mod: Module, modIdx: number) => {
             const isOpen = !!openModules[modIdx];
             return (
               <div key={modIdx} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -183,7 +195,7 @@ export default function TeacherSyllabusProgress() {
                       className="overflow-hidden"
                     >
                       <div className="p-5 divide-y divide-gray-50">
-                        {mod.topics.map((topic, topicIdx) => (
+                        {mod.topics.map((topic: Topic, topicIdx: number) => (
                           <div key={topicIdx} className="py-3.5 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
                             <div className="flex items-center gap-3">
                               {topic.status === "Completed" ? (
@@ -195,8 +207,8 @@ export default function TeacherSyllabusProgress() {
                               )}
                               <div>
                                 <p className={`font-semibold text-sm sm:text-base ${topic.status === "Completed"
-                                    ? "text-gray-500 line-through"
-                                    : "text-gray-800"
+                                  ? "text-gray-500 line-through"
+                                  : "text-gray-800"
                                   }`}>
                                   {topic.title}
                                 </p>
@@ -216,10 +228,10 @@ export default function TeacherSyllabusProgress() {
                                 </span>
                               )}
                               <span className={`text-[10px] font-bold py-1 px-2.5 rounded-full uppercase tracking-wider ${topic.status === "Completed"
-                                  ? "bg-green-50 text-green-700 border border-green-100"
-                                  : topic.status === "In-Progress"
-                                    ? "bg-blue-50 text-blue-700 border border-blue-100"
-                                    : "bg-gray-100 text-gray-600 border border-gray-200"
+                                ? "bg-green-50 text-green-700 border border-green-100"
+                                : topic.status === "In-Progress"
+                                  ? "bg-blue-50 text-blue-700 border border-blue-100"
+                                  : "bg-gray-100 text-gray-600 border border-gray-200"
                                 }`}>
                                 {topic.status}
                               </span>
