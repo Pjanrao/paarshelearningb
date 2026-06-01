@@ -13,6 +13,9 @@ export function middleware(req: NextRequest) {
     const studentToken = req.cookies.get("studentToken")?.value;
     const studentRole = req.cookies.get("studentRole")?.value;
 
+    const teacherToken = req.cookies.get("teacherToken")?.value;
+    const teacherRole = req.cookies.get("teacherRole")?.value;
+
     const rawPath = req.nextUrl.pathname;
     const path = rawPath.length > 1 && rawPath.endsWith("/") ? rawPath.slice(0, -1) : rawPath;
 
@@ -23,7 +26,10 @@ export function middleware(req: NextRequest) {
     const activeStudentToken = studentToken || legacyToken;
     const activeStudentRole = studentRole || legacyRole;
 
-    console.log(`Middleware running: ${rawPath} | adminToken: ${activeAdminToken ? 'yes' : 'no'} | studentToken: ${activeStudentToken ? 'yes' : 'no'}`);
+    const activeTeacherToken = teacherToken || legacyToken;
+    const activeTeacherRole = teacherRole || legacyRole;
+
+    console.log(`Middleware running: ${rawPath} | admin: ${!!activeAdminToken} | teacher: ${!!activeTeacherToken} | std: ${!!activeStudentToken}`);
 
     // 1. Allow root and public auth paths
     if (
@@ -81,13 +87,14 @@ export function middleware(req: NextRequest) {
         }
         if (
             path.startsWith("/teacher") &&
-            !path.startsWith("/teacher/register") &&
-            activeStudentRole !== "teacher"
+            !path.startsWith("/teacher/register")
         ) {
-            return NextResponse.redirect(new URL("/signin", req.url));
+            if (!activeTeacherToken || activeTeacherToken === "undefined" || activeTeacherToken === "null" || activeTeacherToken.length < 10 || activeTeacherRole !== "teacher") {
+                return NextResponse.redirect(new URL("/signin", req.url));
+            }
         }
 
-        if (path.startsWith("/student") && activeStudentRole !== "student") {
+        if (path.startsWith("/student") && (!activeStudentToken || activeStudentToken === "undefined" || activeStudentToken === "null" || activeStudentToken.length < 10 || activeStudentRole !== "student")) {
             return NextResponse.redirect(new URL("/signin", req.url));
         }
     }

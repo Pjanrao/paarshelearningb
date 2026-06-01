@@ -131,7 +131,7 @@ export default function TeachersPage() {
         setFormLoading(true);
 
         try {
-            const response = await fetch("/api/teachers", {
+            const response = await fetch("/api/teachers/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -159,7 +159,7 @@ export default function TeachersPage() {
         setFormLoading(true);
 
         try {
-            const response = await fetch(`/api/teachers/${selectedTeacher._id}`, {
+            const response = await fetch(`/api/teachers/${selectedTeacher._id}/`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -184,7 +184,7 @@ export default function TeachersPage() {
         if (!deleteId) return;
         setDeleteLoading(true);
         try {
-            const response = await fetch(`/api/teachers/${deleteId.id}`, {
+            const response = await fetch(`/api/teachers/${deleteId.id}/`, {
                 method: "DELETE",
             });
 
@@ -204,7 +204,7 @@ export default function TeachersPage() {
 
     const handleStatusUpdate = async (id: string, status: string) => {
         try {
-            const response = await fetch(`/api/teachers/${id}`, {
+            const response = await fetch(`/api/teachers/${id}/`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ approvalStatus: status }),
@@ -334,7 +334,7 @@ export default function TeachersPage() {
     const handleAssignCoursesSave = async () => {
         if (!selectedTeacherForAssign) return;
         try {
-            const response = await fetch(`/api/teachers/${selectedTeacherForAssign._id}`, {
+            const response = await fetch(`/api/teachers/${selectedTeacherForAssign._id}/`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ assignedCourses: selectedAssignedCourses }),
@@ -362,7 +362,7 @@ export default function TeachersPage() {
         }
 
         try {
-            const response = await fetch(`/api/batches/${selectedBatchId}`, {
+            const response = await fetch(`/api/batches/${selectedBatchId}/`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ assignedTeacher: teacherUserId }),
@@ -437,11 +437,11 @@ export default function TeachersPage() {
                             key={tab}
                             onClick={() => { setActiveTab(tab); setCurrentPage(1); }}
                             className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all capitalize ${activeTab === tab
-                                    ? tab === "pending" ? "bg-yellow-500 text-white border-yellow-500"
-                                        : tab === "approved" ? "bg-green-600 text-white border-green-600"
-                                            : tab === "rejected" ? "bg-red-500 text-white border-red-500"
-                                                : "bg-[#2C4276] text-white border-[#2C4276]"
-                                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                                ? tab === "pending" ? "bg-yellow-500 text-white border-yellow-500"
+                                    : tab === "approved" ? "bg-green-600 text-white border-green-600"
+                                        : tab === "rejected" ? "bg-red-500 text-white border-red-500"
+                                            : "bg-[#2C4276] text-white border-[#2C4276]"
+                                : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
                                 }`}
                         >
                             {tab === "all" ? "All Teachers" : tab.charAt(0).toUpperCase() + tab.slice(1)}

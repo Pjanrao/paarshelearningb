@@ -12,8 +12,12 @@ interface AuthState {
   adminUser: any | null;
 
   studentToken: string | null;
-  studentRole: "student" | "teacher" | null;
+  studentRole: "student" | null;
   studentUser: any | null;
+
+  teacherToken: string | null;
+  teacherRole: "teacher" | null;
+  teacherUser: any | null;
 }
 
 const initialState: AuthState = {
@@ -28,6 +32,10 @@ const initialState: AuthState = {
   studentToken: null,
   studentRole: null,
   studentUser: null,
+
+  teacherToken: null,
+  teacherRole: null,
+  teacherUser: null,
 };
 
 const authSlice = createSlice({
@@ -79,12 +87,28 @@ const authSlice = createSlice({
       state.studentRole = null;
       state.studentUser = null;
     },
+
+    // Teacher specific
+    setTeacherAuth: (
+      state,
+      action: PayloadAction<{ token: string; role: AuthState["teacherRole"]; user?: any }>
+    ) => {
+      state.teacherToken = action.payload.token;
+      state.teacherRole = action.payload.role;
+      state.teacherUser = action.payload.user || null;
+    },
+    logoutTeacher: (state) => {
+      state.teacherToken = null;
+      state.teacherRole = null;
+      state.teacherUser = null;
+    },
   },
 });
 
 export const {
   setAuth, logout,
   setAdminAuth, logoutAdmin,
-  setStudentAuth, logoutStudent
+  setStudentAuth, logoutStudent,
+  setTeacherAuth, logoutTeacher
 } = authSlice.actions;
 export default authSlice.reducer;

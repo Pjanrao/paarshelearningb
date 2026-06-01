@@ -22,6 +22,11 @@ const topicSchema = new mongoose.Schema(
       default: 1,
     },
     estimatedDuration: String,
+    subtopics: [
+      {
+        title: { type: String, required: true },
+      },
+    ],
   },
   { timestamps: true }
 );

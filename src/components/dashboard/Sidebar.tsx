@@ -129,7 +129,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     { name: "Dashboard", path: "/teacher", icon: LayoutDashboard },
     { name: "My Courses", path: "/teacher/courses", icon: BookOpen },
     { name: "My Batches", path: "/teacher/batches", icon: Users },
-    { name: "Take Lecture", path: "/teacher/take-lecture", icon: PenBox },
+    { name: "Meetings", path: "/teacher/meetings", icon: Video },
     { name: "Syllabus Progress", path: "/teacher/syllabus-progress", icon: BarChart3 },
   ];
 

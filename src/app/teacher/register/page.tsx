@@ -25,7 +25,7 @@ export default function TeacherRegister() {
         setLoading(true);
 
         try {
-            const res = await fetch("/api/teacher/register", {
+            const res = await fetch("/api/teacher/register/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),

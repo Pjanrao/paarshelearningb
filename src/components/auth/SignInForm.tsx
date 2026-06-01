@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { validateEmail } from "@/utils/validation";
 import { useDispatch } from "react-redux";
-import { setAuth, setAdminAuth, setStudentAuth } from "@/redux/authSlice";
+import { setAuth, setAdminAuth, setStudentAuth, setTeacherAuth } from "@/redux/authSlice";
 import { useSiteImages } from "@/hooks/useSiteImages";
 
 interface SignInFormProps {
@@ -95,6 +95,18 @@ export default function SignInForm({ isAdmin = false }: SignInFormProps) {
 
         document.cookie = `adminToken=${data.token}; path=/; Max-Age=86400`;
         document.cookie = `adminRole=${data.role}; path=/; Max-Age=86400`;
+      } else if (data.role === "teacher") {
+        dispatch(setTeacherAuth({
+          token: data.token,
+          role: data.role,
+          user: { _id: data._id, name: data.name, email: data.email, contact: data.contact, image: data.image }
+        }));
+        localStorage.setItem("teacherToken", data.token);
+        localStorage.setItem("teacherRole", data.role);
+        localStorage.setItem("teacherUser", JSON.stringify({ _id: data._id, name: data.name, email: data.email, contact: data.contact, image: data.image, role: data.role }));
+
+        document.cookie = `teacherToken=${data.token}; path=/; Max-Age=86400`;
+        document.cookie = `teacherRole=${data.role}; path=/; Max-Age=86400`;
       } else {
         dispatch(setStudentAuth({
           token: data.token,

@@ -18,7 +18,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ batchId:
 
     const { batchId } = await params;
     const batch = await Batch.findById(batchId)
-      .populate({ path: "courseId", model: Course, select: "name modules" })
+      .populate({ path: "courseId", model: Course, select: "name modules syllabus" })
       .lean();
 
     if (!batch) {
@@ -34,14 +34,28 @@ export async function GET(req: Request, { params }: { params: Promise<{ batchId:
       return NextResponse.json({ error: "Course not linked to batch" }, { status: 400 });
     }
 
-    const modules = await Module.find({ courseId })
+    let modules = await Module.find({ courseId })
       .sort({ sequence: 1, createdAt: 1 })
       .lean();
 
     const moduleIds = modules.map((m) => m._id);
-    const topics = await Topic.find({ moduleId: { $in: moduleIds } })
+    let topics = await Topic.find({ moduleId: { $in: moduleIds } })
       .sort({ sequence: 1, createdAt: 1 })
       .lean();
+
+    // Fallback if the course syllabus is populated directly in the Course model (embedded array),
+    // and no standalone Modules/Topics exist.
+    if (modules.length === 0 && batch.courseId?.syllabus?.length > 0) {
+      modules = [{ _id: "embedded_module", title: "Course Syllabus", sequence: 1 }];
+      topics = batch.courseId.syllabus.map((s: any, idx: number) => ({
+        _id: s._id,
+        moduleId: "embedded_module",
+        title: s.title,
+        description: s.description,
+        sequence: idx + 1,
+        subtopics: s.subtopics || []
+      }));
+    }
 
     const progressMap = (batch.syllabusProgress || []).reduce((map: any, item: any) => {
       map[item.topicId?.toString()] = item;
@@ -70,7 +84,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ batchId
     }
 
     const { batchId } = await params;
-    const { topicId, completed } = await req.json();
+    const payload = await req.json();
+    const { topicId } = payload;
 
     if (!topicId) {
       return NextResponse.json({ error: "Topic ID is required" }, { status: 400 });
@@ -89,19 +104,34 @@ export async function POST(req: Request, { params }: { params: Promise<{ batchId
       batch.syllabusProgress = [];
     }
 
-    const topicIndex = batch.syllabusProgress.findIndex((p: any) => p.topicId?.toString() === topicId);
+    let topicIndex = batch.syllabusProgress.findIndex((p: any) => p.topicId?.toString() === topicId);
 
-    if (topicIndex >= 0) {
-      batch.syllabusProgress[topicIndex].completed = completed;
-      if (completed) {
-        batch.syllabusProgress[topicIndex].completedAt = new Date();
-      }
-    } else {
+    if (topicIndex < 0) {
       batch.syllabusProgress.push({
         topicId,
-        completed,
-        completedAt: completed ? new Date() : undefined,
+        completed: false,
+        completedSubtopics: []
       });
+      topicIndex = batch.syllabusProgress.length - 1;
+    }
+
+    if (payload.hasOwnProperty("completed")) {
+      batch.syllabusProgress[topicIndex].completed = payload.completed;
+      batch.syllabusProgress[topicIndex].completedAt = payload.completed ? new Date() : undefined;
+    }
+
+    if (payload.hasOwnProperty("subtopicId")) {
+      let arr = batch.syllabusProgress[topicIndex].completedSubtopics || [];
+      if (payload.subtopicCompleted) {
+        if (!arr.includes(payload.subtopicId)) arr.push(payload.subtopicId);
+      } else {
+        arr = arr.filter((id: string) => id !== payload.subtopicId);
+      }
+      batch.syllabusProgress[topicIndex].completedSubtopics = arr;
+    }
+
+    if (payload.hasOwnProperty("completedSubtopicsArr")) {
+      batch.syllabusProgress[topicIndex].completedSubtopics = payload.completedSubtopicsArr;
     }
 
     await batch.save();

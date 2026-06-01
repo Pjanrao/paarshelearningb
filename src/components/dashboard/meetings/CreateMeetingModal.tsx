@@ -7,11 +7,14 @@ import { useGetTeachersQuery } from "@/redux/api/teachersApi";
 import { useCreateMeetingMutation } from "@/redux/api/meetingApi";
 import { useGetBatchesQuery } from "@/redux/api/batchApi";
 import { toast } from "sonner";
+import { useSelector } from "react-redux";
 
-export default function CreateMeetingModal({ onClose }: any) {
+export default function CreateMeetingModal({ onClose, isTeacher }: any) {
+    const teacherUser = useSelector((state: any) => state.auth?.teacherUser);
+
     const [form, setForm] = useState({
         title: "",
-        teacher: "",
+        teacher: isTeacher && teacherUser ? teacherUser._id : "",
         description: "",
         date: "",
         startTime: "",
@@ -44,38 +47,38 @@ export default function CreateMeetingModal({ onClose }: any) {
     });
 
 
-const generateTimeOptions = (): string[] => {
-    const times: string[] = [];
-    const now = new Date();
+    const generateTimeOptions = (): string[] => {
+        const times: string[] = [];
+        const now = new Date();
 
-    for (let h = 0; h < 24; h++) {
-        for (let m of [0, 30]) {
+        for (let h = 0; h < 24; h++) {
+            for (let m of [0, 30]) {
 
-            const date = new Date();
-            date.setHours(h);
-            date.setMinutes(m);
+                const date = new Date();
+                date.setHours(h);
+                date.setMinutes(m);
 
-            // ✅ If selected date is today → block past time
-            if (form.date) {
-                const selectedDate = new Date(form.date);
-                const today = new Date();
+                // ✅ If selected date is today → block past time
+                if (form.date) {
+                    const selectedDate = new Date(form.date);
+                    const today = new Date();
 
-                const isToday =
-                    selectedDate.toDateString() === today.toDateString();
+                    const isToday =
+                        selectedDate.toDateString() === today.toDateString();
 
-                if (isToday && date < now) continue; // ❌ skip past time
+                    if (isToday && date < now) continue; // ❌ skip past time
+                }
+
+                const hour = h % 12 || 12;
+                const ampm = h < 12 ? "AM" : "PM";
+                const minute = m === 0 ? "00" : "30";
+
+                times.push(`${hour}:${minute} ${ampm}`);
             }
-
-            const hour = h % 12 || 12;
-            const ampm = h < 12 ? "AM" : "PM";
-            const minute = m === 0 ? "00" : "30";
-
-            times.push(`${hour}:${minute} ${ampm}`);
         }
-    }
 
-    return times;
-};
+        return times;
+    };
 
     const addOneHour = (time: string) => {
         const [hourMin, period] = time.split(" ");
@@ -108,37 +111,40 @@ const generateTimeOptions = (): string[] => {
     };
 
     const timeOptions = generateTimeOptions();
-const now = new Date();
+    const now = new Date();
 
-// convert time string → proper Date
-const convertToDate = (date: string, time: string) => {
-    if (!date || !time) return null;
+    // convert time string → proper Date
+    const convertToDate = (date: string, time: string) => {
+        if (!date || !time) return null;
 
-    const [hourMin, period] = time.split(" ");
-    let [hour, min] = hourMin.split(":").map(Number);
+        const [hourMin, period] = time.split(" ");
+        let [hour, min] = hourMin.split(":").map(Number);
 
-    if (period === "PM" && hour !== 12) hour += 12;
-    if (period === "AM" && hour === 12) hour = 0;
+        if (period === "PM" && hour !== 12) hour += 12;
+        if (period === "AM" && hour === 12) hour = 0;
 
-    const d = new Date(date);
-    d.setHours(hour);
-    d.setMinutes(min);
-    d.setSeconds(0);
+        const d = new Date(date);
+        d.setHours(hour);
+        d.setMinutes(min);
+        d.setSeconds(0);
 
-    return d;
-};
+        return d;
+    };
 
-const selected = convertToDate(form.date, form.startTime);
+    const selected = convertToDate(form.date, form.startTime);
 
-if (selected && selected < now) {
-toast.error("Cannot select past date/time");
-    return;
-}
+    if (selected && selected < now) {
+        toast.error("Cannot select past date/time");
+        return;
+    }
     const handleSubmit = async () => {
         try {
-            await createMeeting({
-                ...form,
-            }).unwrap();
+            const submitData = { ...form };
+            if (isTeacher && teacherUser) {
+                submitData.teacher = teacherUser._id;
+            }
+
+            await createMeeting(submitData).unwrap();
 
             onClose(); // ✅ this will auto refresh table
 
@@ -179,41 +185,50 @@ toast.error("Cannot select past date/time");
                             </div>
 
                             {/* Instructor */}
-                            <div className="relative">
-                                <label className={labelClass}>Instructor*</label>
-
-                                {/* Trigger */}
-                                <div
-                                    onClick={() => {
-                                        closeAllDropdowns();
-                                        setOpenInstructor(true);
-                                    }}
-                                    className="w-full border border-gray-200 rounded-lg h-10 px-3 text-sm flex items-center justify-between cursor-pointer"
-                                >
-                                    {form.teacher
-                                        ? instructors.find((i: any) => i._id === form.teacher)?.name
-                                        : "Select Instructor"}
-                                    <Icon icon="mdi:chevron-down" />
-                                </div>
-
-                                {/* Dropdown */}
-                                {openInstructor && (
-                                    <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                                        {instructors.map((inst: any) => (
-                                            <div
-                                                key={inst._id}
-                                                onClick={() => {
-                                                    setForm({ ...form, teacher: inst._id });
-                                                    setOpenInstructor(false);
-                                                }}
-                                                className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer"
-                                            >
-                                                {inst.name}
-                                            </div>
-                                        ))}
+                            {isTeacher ? (
+                                <div>
+                                    <label className={labelClass}>Instructor*</label>
+                                    <div className="w-full border border-gray-200 rounded-lg h-10 px-3 text-sm flex items-center bg-gray-50 text-gray-600 font-medium cursor-not-allowed">
+                                        {teacherUser?.name || "Loading..."}
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            ) : (
+                                <div className="relative">
+                                    <label className={labelClass}>Instructor*</label>
+
+                                    {/* Trigger */}
+                                    <div
+                                        onClick={() => {
+                                            closeAllDropdowns();
+                                            setOpenInstructor(true);
+                                        }}
+                                        className="w-full border border-gray-200 rounded-lg h-10 px-3 text-sm flex items-center justify-between cursor-pointer"
+                                    >
+                                        {form.teacher
+                                            ? instructors.find((i: any) => i._id === form.teacher)?.name
+                                            : "Select Instructor"}
+                                        <Icon icon="mdi:chevron-down" />
+                                    </div>
+
+                                    {/* Dropdown */}
+                                    {openInstructor && (
+                                        <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                            {instructors.map((inst: any) => (
+                                                <div
+                                                    key={inst._id}
+                                                    onClick={() => {
+                                                        setForm({ ...form, teacher: inst._id });
+                                                        setOpenInstructor(false);
+                                                    }}
+                                                    className="px-3 py-2 text-sm hover:bg-blue-50 cursor-pointer"
+                                                >
+                                                    {inst.name}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             <div className="relative">
                                 <label className={labelClass}>Course*</label>
@@ -315,11 +330,11 @@ toast.error("Cannot select past date/time");
                             <div>
                                 <label className={labelClass}>Date*</label>
                                 <input
-    type="date"
-    min={new Date().toLocaleDateString("en-CA")}
-    className="border px-3 py-2 rounded-lg w-full text-sm"
-    onChange={(e) => setForm({ ...form, date: e.target.value })}
-/>
+                                    type="date"
+                                    min={new Date().toLocaleDateString("en-CA")}
+                                    className="border px-3 py-2 rounded-lg w-full text-sm"
+                                    onChange={(e) => setForm({ ...form, date: e.target.value })}
+                                />
                             </div>
 
                             {/* Platform */}

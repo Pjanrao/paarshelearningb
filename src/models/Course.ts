@@ -33,9 +33,14 @@ import "./Category";
 import "./Subcategory";
 import "./Teachers";
 
+const subtopicSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+});
+
 const syllabusSchema = new mongoose.Schema({
     title: { type: String },
     description: { type: String },
+    subtopics: [subtopicSchema],
 });
 
 const simpleBlockSchema = new mongoose.Schema({

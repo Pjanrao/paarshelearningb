@@ -32,7 +32,8 @@ const BatchSchema = new mongoose.Schema(
                     ref: "Topic",
                 },
                 completed: { type: Boolean, default: false },
-                completedAt: Date
+                completedAt: Date,
+                completedSubtopics: [{ type: String }]
             }
         ],
 

@@ -14,13 +14,29 @@ const Header: React.FC = () => {
   const router = useRouter()
   const dispatch = useDispatch()
 
-  const reduxUser = useSelector((state: any) => state.auth.studentUser || (state.auth.user?.role === 'student' ? state.auth.user : null));
+  // Only resolve a user if they are a STUDENT — teachers and admins should not appear as logged-in on the public website
+  const reduxUser = useSelector((state: any) => {
+    const studentUser = state.auth.studentUser;
+    if (studentUser?.role === 'student') return studentUser;
+    const user = state.auth.user;
+    if (user?.role === 'student') return user;
+    return null;
+  });
 
   const user =
     reduxUser ||
     (typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("studentUser") || "null") || 
-        (localStorage.getItem("role") === "student" ? JSON.parse(localStorage.getItem("user") || "null") : null)
+      ? (() => {
+        // Check studentUser key first
+        const studentUser = JSON.parse(localStorage.getItem("studentUser") || "null");
+        if (studentUser?.role === 'student') return studentUser;
+        // Check generic user key — only accept if role is student
+        const role = localStorage.getItem("role") || localStorage.getItem("studentRole");
+        if (role === 'student') {
+          return JSON.parse(localStorage.getItem("studentUser") || localStorage.getItem("user") || "null");
+        }
+        return null;
+      })()
       : null);
 
   const role = user?.role;
@@ -94,14 +110,14 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <motion.header 
+      <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6 }}
         className={`fixed top-0 z-999 w-full transition-all duration-300 ${sticky
-        ? 'py-2 bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100'
-        : 'py-4 bg-transparent shadow-none'
-        }`}>
+          ? 'py-2 bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-100'
+          : 'py-4 bg-transparent shadow-none'
+          }`}>
 
         <div className='container mx-auto max-w-7xl flex items-center justify-between px-4 sm:px-6 lg:px-8'>
 
@@ -191,12 +207,12 @@ const Header: React.FC = () => {
       {/* Mobile Menu */}
       <AnimatePresence>
         {navbarOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className='fixed inset-0 bg-black/60 z-[1000] backdrop-blur-sm' 
-            onClick={() => setNavbarOpen(false)} 
+            className='fixed inset-0 bg-black/60 z-[1000] backdrop-blur-sm'
+            onClick={() => setNavbarOpen(false)}
           />
         )}
       </AnimatePresence>
@@ -211,67 +227,67 @@ const Header: React.FC = () => {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className={`lg:hidden fixed top-0 right-0 h-full w-[300px] bg-white dark:bg-[#1a1c23] shadow-[-10px_0_30px_rgba(0,0,0,0.1)] z-[1001] flex flex-col`}>
 
-        <div className='flex items-center justify-between p-6 border-b dark:border-gray-800'>
-          <Logo />
-          <button
-            onClick={() => setNavbarOpen(false)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
-          >
-            ✕
-          </button>
-        </div>
+            <div className='flex items-center justify-between p-6 border-b dark:border-gray-800'>
+              <Logo />
+              <button
+                onClick={() => setNavbarOpen(false)}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/5 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
 
-        <nav className='flex-1 overflow-y-auto p-6 space-y-2'>
-          {headerData.map((item, index) => (
-            <MobileHeaderLink key={index} item={item} />
-          ))}
+            <nav className='flex-1 overflow-y-auto p-6 space-y-2'>
+              {headerData.map((item, index) => (
+                <MobileHeaderLink key={index} item={item} />
+              ))}
 
-          <div className='pt-8 mt-4 border-t dark:border-gray-800 flex flex-col gap-4'>
-            {user ? (
-              <>
-                <button
-                  onClick={() => {
-                    if (role === 'admin') router.push('/admin')
-                    else if (role === 'teacher') router.push('/teacher')
-                    else router.push('/student')
-                    setNavbarOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl bg-primary text-white shadow-lg transition-all active:scale-95"
-                >
-                  Dashboard
-                </button>
+              <div className='pt-8 mt-4 border-t dark:border-gray-800 flex flex-col gap-4'>
+                {user ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        if (role === 'admin') router.push('/admin')
+                        else if (role === 'teacher') router.push('/teacher')
+                        else router.push('/student')
+                        setNavbarOpen(false);
+                      }}
+                      className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl bg-primary text-white shadow-lg transition-all active:scale-95"
+                    >
+                      Dashboard
+                    </button>
 
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setNavbarOpen(false);
-                  }}
-                  className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/5 transition-all"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  href='/signin'
-                  onClick={() => setNavbarOpen(false)}
-                  className='w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl border border-primary text-primary hover:bg-primary/5 transition-all'>
-                  Sign In
-                </Link>
-                <Link
-                  href='/signup'
-                  onClick={() => setNavbarOpen(false)}
-                  className='w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl bg-primary text-white shadow-lg hover:shadow-xl transition-all active:scale-95'>
-                  Sign Up
-                </Link>
-              </>
-            )}
-          </div>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setNavbarOpen(false);
+                      }}
+                      className="w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/5 transition-all"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href='/signin'
+                      onClick={() => setNavbarOpen(false)}
+                      className='w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl border border-primary text-primary hover:bg-primary/5 transition-all'>
+                      Sign In
+                    </Link>
+                    <Link
+                      href='/signup'
+                      onClick={() => setNavbarOpen(false)}
+                      className='w-full flex items-center justify-center font-bold px-6 py-3 rounded-xl bg-primary text-white shadow-lg hover:shadow-xl transition-all active:scale-95'>
+                      Sign Up
+                    </Link>
+                  </>
+                )}
+              </div>
 
-        </nav>
-      </motion.div>
-      )}
+            </nav>
+          </motion.div>
+        )}
       </AnimatePresence>
     </>
   )

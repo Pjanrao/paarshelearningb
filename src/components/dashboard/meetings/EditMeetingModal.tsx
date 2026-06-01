@@ -9,7 +9,7 @@ import { useGetBatchesQuery } from "@/redux/api/batchApi";
 import { toast } from "sonner";
 
 
-export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
+export default function EditMeetingModal({ meeting, onClose, onUpdate, isTeacher }: any) {
 
     console.log("🔥 MEETING PROP:", meeting);
 
@@ -132,60 +132,60 @@ export default function EditMeetingModal({ meeting, onClose, onUpdate }: any) {
     }, [meeting]);
 
     // ⏰ TIME OPTIONS
-//   const generateTimeOptions = (): string[] => {
-//     const times: string[] = [];
+    //   const generateTimeOptions = (): string[] => {
+    //     const times: string[] = [];
 
-//     for (let h = 0; h < 24; h++) {
-//         for (let m of [0, 30]) {
-//             const hour = h % 12 || 12;
-//             const ampm = h < 12 ? "AM" : "PM";
-//             const minute = m === 0 ? "00" : "30";
+    //     for (let h = 0; h < 24; h++) {
+    //         for (let m of [0, 30]) {
+    //             const hour = h % 12 || 12;
+    //             const ampm = h < 12 ? "AM" : "PM";
+    //             const minute = m === 0 ? "00" : "30";
 
-//             times.push(`${hour}:${minute} ${ampm}`);
-//         }
-//     }
+    //             times.push(`${hour}:${minute} ${ampm}`);
+    //         }
+    //     }
 
-//     return times;
-// };
-const generateTimeOptions = (): string[] => {
-    const times: string[] = [];
-    const now = new Date();
+    //     return times;
+    // };
+    const generateTimeOptions = (): string[] => {
+        const times: string[] = [];
+        const now = new Date();
 
-    const selectedDate = form.date ? new Date(form.date) : null;
-    const today = new Date();
+        const selectedDate = form.date ? new Date(form.date) : null;
+        const today = new Date();
 
-    const isToday =
-        selectedDate &&
-        selectedDate.toDateString() === today.toDateString();
+        const isToday =
+            selectedDate &&
+            selectedDate.toDateString() === today.toDateString();
 
-    const isPastDate =
-        selectedDate &&
-        selectedDate < new Date(today.toDateString());
+        const isPastDate =
+            selectedDate &&
+            selectedDate < new Date(today.toDateString());
 
-    for (let h = 0; h < 24; h++) {
-        for (let m of [0, 30]) {
+        for (let h = 0; h < 24; h++) {
+            for (let m of [0, 30]) {
 
-            const slot = new Date();
-            slot.setHours(h);
-            slot.setMinutes(m);
-            slot.setSeconds(0);
+                const slot = new Date();
+                slot.setHours(h);
+                slot.setMinutes(m);
+                slot.setSeconds(0);
 
-            // ✅ ONLY restrict for TODAY
-            if (isToday && slot < now) continue;
+                // ✅ ONLY restrict for TODAY
+                if (isToday && slot < now) continue;
 
-            // ✅ allow all for past date
-            // ✅ allow all for future date
+                // ✅ allow all for past date
+                // ✅ allow all for future date
 
-            const hour = h % 12 || 12;
-            const ampm = h < 12 ? "AM" : "PM";
-            const minute = m === 0 ? "00" : "30";
+                const hour = h % 12 || 12;
+                const ampm = h < 12 ? "AM" : "PM";
+                const minute = m === 0 ? "00" : "30";
 
-            times.push(`${hour}:${minute} ${ampm}`);
+                times.push(`${hour}:${minute} ${ampm}`);
+            }
         }
-    }
 
-    return times;
-};
+        return times;
+    };
     const timeOptions = generateTimeOptions();
 
     // ✅ UPDATE API
@@ -198,7 +198,7 @@ const generateTimeOptions = (): string[] => {
                     // startTime: convertToISO(form.date, form.startTime),
                     // endTime: convertToISO(form.date, form.endTime),
                     startTime: form.startTime,
-endTime: form.endTime,
+                    endTime: form.endTime,
                 },
             }).unwrap();
 
@@ -243,36 +243,47 @@ endTime: form.endTime,
                     </div>
 
                     {/* Instructor */}
-                    <div className="relative">
-                        <label className={labelClass}>Instructor*</label>
-
-                        <div
-                            onClick={() => setOpenInstructor(!openInstructor)}
-                            className="border h-10 px-3 rounded-lg flex items-center justify-between cursor-pointer"
-                        >
-                            {form.teacher
-                                ? instructors.find((i: any) => i._id === form.teacher)?.name
-                                : "Select Instructor"}
-                            <Icon icon="mdi:chevron-down" />
-                        </div>
-
-                        {openInstructor && (
-                            <div className="absolute z-50 bg-white border rounded-lg mt-1 w-full max-h-40 overflow-y-auto">
-                                {instructors.map((inst: any) => (
-                                    <div
-                                        key={inst._id}
-                                        onClick={() => {
-                                            setForm({ ...form, teacher: inst._id });
-                                            setOpenInstructor(false);
-                                        }}
-                                        className="p-2 hover:bg-blue-50 cursor-pointer"
-                                    >
-                                        {inst.name}
-                                    </div>
-                                ))}
+                    {isTeacher ? (
+                        <div>
+                            <label className={labelClass}>Instructor*</label>
+                            <div className="border h-10 px-3 rounded-lg flex items-center bg-gray-50 text-gray-600 font-medium cursor-not-allowed">
+                                {form.teacher
+                                    ? instructors.find((i: any) => i._id === form.teacher)?.name
+                                    : "Loading..."}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    ) : (
+                        <div className="relative">
+                            <label className={labelClass}>Instructor*</label>
+
+                            <div
+                                onClick={() => setOpenInstructor(!openInstructor)}
+                                className="border h-10 px-3 rounded-lg flex items-center justify-between cursor-pointer"
+                            >
+                                {form.teacher
+                                    ? instructors.find((i: any) => i._id === form.teacher)?.name
+                                    : "Select Instructor"}
+                                <Icon icon="mdi:chevron-down" />
+                            </div>
+
+                            {openInstructor && (
+                                <div className="absolute z-50 bg-white border rounded-lg mt-1 w-full max-h-40 overflow-y-auto">
+                                    {instructors.map((inst: any) => (
+                                        <div
+                                            key={inst._id}
+                                            onClick={() => {
+                                                setForm({ ...form, teacher: inst._id });
+                                                setOpenInstructor(false);
+                                            }}
+                                            className="p-2 hover:bg-blue-50 cursor-pointer"
+                                        >
+                                            {inst.name}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Course */}
                     <div className="relative">
@@ -356,13 +367,13 @@ endTime: form.endTime,
                     {/* Date */}
                     <div>
                         <label className={labelClass}>Date*</label>
-                       <input
-    type="date"
-    value={form.date}
-    min={new Date().toLocaleDateString("en-CA")}   // ✅ ADD THIS
-    onChange={(e) => setForm({ ...form, date: e.target.value })}
-    className="border px-3 py-2 rounded-lg w-full"
-/>
+                        <input
+                            type="date"
+                            value={form.date}
+                            min={new Date().toLocaleDateString("en-CA")}   // ✅ ADD THIS
+                            onChange={(e) => setForm({ ...form, date: e.target.value })}
+                            className="border px-3 py-2 rounded-lg w-full"
+                        />
 
                     </div>
 

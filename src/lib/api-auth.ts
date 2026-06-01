@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { verifyToken } from "./jwt";
 import { getToken } from "next-auth/jwt";
 import User from "@/models/User";
@@ -11,12 +11,25 @@ import User from "@/models/User";
 export async function getAuthUser() {
     try {
         const cookieStore = await cookies();
-        
+
         const studentToken = cookieStore.get("studentToken")?.value;
+        const teacherToken = cookieStore.get("teacherToken")?.value;
         const adminToken = cookieStore.get("adminToken")?.value;
         const genericToken = cookieStore.get("token")?.value;
 
-        const token = studentToken || adminToken || genericToken;
+        // Use the Referer to detect context, solving concurrent session collisions
+        const headerStore = await headers();
+        const referer = headerStore.get("referer") || "";
+
+        let token = studentToken || adminToken || teacherToken || genericToken;
+
+        if (referer.includes("/admin")) {
+            token = adminToken || token;
+        } else if (referer.includes("/teacher")) {
+            token = teacherToken || token;
+        } else if (referer.includes("/student")) {
+            token = studentToken || token;
+        }
 
         if (!token) return null;
 

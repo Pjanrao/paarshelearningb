@@ -25,6 +25,7 @@ export default function DashboardLayout({
   const router = useRouter();
 
   const isAdminRoute = pathname.startsWith("/admin");
+  const isTeacherRoute = pathname.startsWith("/teacher");
 
   const legacyToken = authState.token;
   const legacyRole = authState.role;
@@ -35,12 +36,18 @@ export default function DashboardLayout({
   const studentToken = authState.studentToken;
   const studentRole = authState.studentRole;
 
+  const teacherToken = (authState as any).teacherToken;
+  const teacherRole = (authState as any).teacherRole;
+
   let activeToken = legacyToken;
   let activeRole = legacyRole;
 
   if (isAdminRoute) {
     activeToken = adminToken || legacyToken;
     activeRole = adminRole || legacyRole;
+  } else if (isTeacherRoute) {
+    activeToken = teacherToken || legacyToken;
+    activeRole = teacherRole || legacyRole;
   } else {
     activeToken = studentToken || legacyToken;
     activeRole = studentRole || legacyRole;
