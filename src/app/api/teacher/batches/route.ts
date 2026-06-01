@@ -4,23 +4,22 @@ import Batch from "@/models/Batch";
 import Course from "@/models/Course";
 import Topic from "@/models/Topic";
 import LectureTracking from "@/models/LectureTracking";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getUserFromAuth } from "@/lib/api-auth";
 
 export async function GET(req: Request) {
     try {
         await connectDB();
-        const session = await getServerSession(authOptions);
+        const dbUser = await getUserFromAuth(req);
 
-        if (!session || !(session.user as any)?.id) {
+        if (!dbUser) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        if ((session!.user as any).role !== "teacher") {
+        if (dbUser.role !== "teacher") {
             return NextResponse.json({ error: "Access denied" }, { status: 403 });
         }
 
-        const teacherId = (session!.user as any).id;
+        const teacherId = dbUser._id;
         const batches = await Batch.find({ assignedTeacher: teacherId })
             .populate({
                 path: "courseId",

@@ -25,8 +25,31 @@ export default function AdminSyllabusTracking() {
         setTeacherProductivity(data.teacherProductivity || []);
         setRecentActivity(data.recentActivity || []);
 
-        const courseOptions = Array.from(new Set((data.batchSummaries || []).map((batch: any) => batch.course))).map((name: string) => ({ id: name, name }));
-        const teacherOptions = Array.from(new Set((data.batchSummaries || []).map((batch: any) => batch.teacher))).map((name: string) => ({ id: name, name }));
+       const courseOptions = (
+  Array.from(
+    new Set(
+      (data.batchSummaries || []).map(
+        (batch: any) => batch.course as string
+      )
+    )
+  ) as string[]
+).map((name) => ({
+  id: name,
+  name,
+}));
+
+const teacherOptions = (
+  Array.from(
+    new Set(
+      (data.batchSummaries || []).map(
+        (batch: any) => batch.teacher as string
+      )
+    )
+  ) as string[]
+).map((name) => ({
+  id: name,
+  name,
+}));
 
         setCourses(courseOptions);
         setTeachers(teacherOptions);

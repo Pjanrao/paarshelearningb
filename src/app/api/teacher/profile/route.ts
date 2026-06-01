@@ -1,23 +1,22 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Teacher from "@/models/Teachers";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getUserFromAuth } from "@/lib/api-auth";
 
 export async function GET(req: Request) {
   try {
     await connectDB();
 
-    const session = await getServerSession(authOptions);
-    if (!session || !(session.user as any)?.id) {
+    const dbUser = await getUserFromAuth(req);
+    if (!dbUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if ((session.user as any).role !== "teacher") {
+    if (dbUser.role !== "teacher") {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    const teacher = await Teacher.findOne({ userId: (session.user as any).id }).lean();
+    const teacher = await Teacher.findOne({ userId: dbUser._id }).lean();
     if (!teacher) {
       return NextResponse.json({ error: "Teacher profile not found" }, { status: 404 });
     }

@@ -5,15 +5,14 @@ import Course from "@/models/Course";
 import Module from "@/models/Module";
 import Topic from "@/models/Topic";
 import LectureTracking from "@/models/LectureTracking";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getUserFromAuth } from "@/lib/api-auth";
 
 export async function GET(req: Request, { params }: { params: Promise<{ batchId: string }> }) {
   try {
     await connectDB();
-    const session = await getServerSession(authOptions);
+    const dbUser = await getUserFromAuth(req);
 
-    if (!session || !(session.user as any)?.id || (session.user as any).role !== "teacher") {
+    if (!dbUser || dbUser.role !== "teacher") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -26,7 +25,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ batchId:
       return NextResponse.json({ error: "Batch not found" }, { status: 404 });
     }
 
-    if (batch.assignedTeacher?.toString() !== (session!.user as any).id) {
+    if (batch.assignedTeacher?.toString() !== dbUser._id.toString()) {
       return NextResponse.json({ error: "Not authorized for this batch" }, { status: 403 });
     }
 
@@ -64,9 +63,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ batchId:
 export async function POST(req: Request, { params }: { params: Promise<{ batchId: string }> }) {
   try {
     await connectDB();
-    const session = await getServerSession(authOptions);
+    const dbUser = await getUserFromAuth(req);
 
-    if (!session || !(session.user as any)?.id || (session.user as any).role !== "teacher") {
+    if (!dbUser || dbUser.role !== "teacher") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -82,7 +81,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ batchId
       return NextResponse.json({ error: "Batch not found" }, { status: 404 });
     }
 
-    if (batch.assignedTeacher?.toString() !== (session!.user as any).id) {
+    if (batch.assignedTeacher?.toString() !== dbUser._id.toString()) {
       return NextResponse.json({ error: "Not authorized for this batch" }, { status: 403 });
     }
 

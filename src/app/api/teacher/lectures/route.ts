@@ -5,19 +5,18 @@ import Course from "@/models/Course";
 import Topic from "@/models/Topic";
 import LectureTracking from "@/models/LectureTracking";
 import SyllabusProgress from "@/models/SyllabusProgress";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { getUserFromAuth } from "@/lib/api-auth";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
-    const session = await getServerSession(authOptions);
+    const dbUser = await getUserFromAuth(req);
 
-    if (!session || !(session.user as any)?.id || (session.user as any).role !== "teacher") {
+    if (!dbUser || dbUser.role !== "teacher") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const teacherId = (session.user as any).id;
+    const teacherId = dbUser._id;
     const body = await req.json();
     const { batchId, topicId, lectureTitle, summary, homework, recordingLink, durationHours, completed = true, customTopic } = body;
 
@@ -30,7 +29,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Batch not found" }, { status: 404 });
     }
 
-    if (batch.assignedTeacher?.toString() !== teacherId) {
+    if (batch.assignedTeacher?.toString() !== teacherId.toString()) {
       return NextResponse.json({ error: "Not authorized for this batch" }, { status: 403 });
     }
 
@@ -65,8 +64,9 @@ export async function POST(req: Request) {
     });
 
     if (topic && completed) {
-      const progressIndex = batch.syllabusProgress.findIndex((p) => p.topicId?.toString() === topic._id.toString());
-      if (progressIndex >= 0) {
+const progressIndex = batch.syllabusProgress.findIndex(
+  (p: any) => p.topicId?.toString() === topic._id.toString()
+);      if (progressIndex >= 0) {
         batch.syllabusProgress[progressIndex].completed = true;
         batch.syllabusProgress[progressIndex].completedAt = new Date();
       } else {
@@ -82,8 +82,9 @@ export async function POST(req: Request) {
     await batch.save();
 
     const totalTopics = await Topic.countDocuments({ courseId: course._id });
-    const completedTopics = batch.syllabusProgress.filter((item) => item.completed).length;
-    const completionPercent = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+const completedTopics = batch.syllabusProgress.filter(
+  (item: any) => item.completed
+).length;    const completionPercent = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
     const overdueDays = Math.max(0, Math.floor((Date.now() - batch.lastLectureAt.getTime()) / (1000 * 60 * 60 * 24)));
 
     await SyllabusProgress.findOneAndUpdate(

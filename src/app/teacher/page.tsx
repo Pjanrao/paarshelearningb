@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -18,98 +19,150 @@ import { RootState } from "@/redux/store";
 
 export default function TeacherDashboard() {
   const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser);
+  const [teacherProfile, setTeacherProfile] = useState<any>(null);
+  const [batches, setBatches] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Static Mock Data
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const [profileRes, batchesRes] = await Promise.all([
+        fetch("/api/teacher/profile"),
+        fetch("/api/teacher/batches"),
+      ]);
+
+      if (!profileRes.ok) {
+        const errorData = await profileRes.json().catch(() => null);
+        throw new Error(errorData?.error || "Failed to load teacher profile");
+      }
+
+      if (!batchesRes.ok) {
+        const errorData = await batchesRes.json().catch(() => null);
+        throw new Error(errorData?.error || "Failed to load batches");
+      }
+
+      const profileData = await profileRes.json();
+      const batchesData = await batchesRes.json();
+
+      setTeacherProfile(profileData.teacher || null);
+      setBatches(Array.isArray(batchesData.batches) ? batchesData.batches : []);
+    } catch (err: any) {
+      setError(err.message || "Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const assignedCourses = teacherProfile?.assignedCourses?.length
+    ? teacherProfile.assignedCourses
+    : Array.from(new Set(batches.map((batch) => batch.courseId?.name).filter(Boolean)));
+
+  const totalLectures = batches.reduce((sum, batch) => sum + (batch.lecturesTaken || 0), 0);
+  const averageProgress = batches.length
+    ? Math.round(batches.reduce((sum, batch) => sum + (batch.progress || 0), 0) / batches.length)
+    : 0;
+
   const stats = [
     {
       title: "Assigned Courses",
-      value: "3",
-      desc: "MERN, React, UI/UX",
+      value: assignedCourses.length.toString(),
+      desc: assignedCourses.length ? assignedCourses.slice(0, 3).join(", ") : "No assigned courses",
       icon: BookOpen,
       color: "bg-blue-500",
       link: "/teacher/courses",
-      action: "View Courses"
+      action: "View Courses",
     },
     {
       title: "Active Batches",
-      value: "5",
-      desc: "140+ active students",
+      value: batches.length.toString(),
+      desc: `${batches.length} assigned batch${batches.length === 1 ? "" : "es"}`,
       icon: Users,
       color: "bg-green-500",
       link: "/teacher/batches",
-      action: "View Batches"
+      action: "View Batches",
     },
     {
-      title: "Lectures Taken",
-      value: "84",
-      desc: "Total hours: 168h",
+      title: "Lectures Logged",
+      value: totalLectures.toString(),
+      desc: "Total tracked lectures",
       icon: ClipboardCheck,
       color: "bg-orange-500",
       link: "/teacher/take-lecture",
-      action: "Take Lecture"
+      action: "Log Lecture",
     },
     {
       title: "Syllabus Progress",
-      value: "76%",
-      desc: "Avg progress across batches",
+      value: `${averageProgress}%`,
+      desc: batches.length ? "Avg completion across batches" : "No syllabus data yet",
       icon: BarChart3,
       color: "bg-purple-500",
       link: "/teacher/syllabus-progress",
-      action: "Track Syllabus"
-    }
+      action: "Track Progress",
+    },
   ];
 
-  const recentLectures = [
-    {
-      id: "lec-1",
-      course: "MERN Stack Development",
-      batch: "Batch A - Morning",
-      topic: "Introduction to Next.js App Router & Layouts",
-      date: "Today at 10:00 AM",
-      duration: "2 hours",
-      homework: "Create an active navigation sidebar with Next.js Link components.",
-      recording: "https://zoom.us/rec/play/xyz123"
-    },
-    {
-      id: "lec-2",
-      course: "React & Redux Advanced",
-      batch: "Batch C - Afternoon",
-      topic: "Redux Toolkit State Slices and Hydration",
-      date: "Yesterday at 2:30 PM",
-      duration: "1.5 hours",
-      homework: "Implement product wishlist slice in your ecommerce project.",
-      recording: "https://zoom.us/rec/play/abc987"
-    },
-    {
-      id: "lec-3",
-      course: "MERN Stack Development",
-      batch: "Batch B - Evening",
-      topic: "REST APIs with Express and Mongoose Models",
-      date: "May 26, 2026",
-      duration: "2 hours",
-      homework: "Build course and teacher MongoDB schema matching our project structures.",
-      recording: "https://zoom.us/rec/play/mern456"
-    }
-  ];
+  const recentActivities = batches
+    .slice()
+    .sort((a, b) => new Date(b.lastLectureAt || 0).getTime() - new Date(a.lastLectureAt || 0).getTime())
+    .slice(0, 3)
+    .map((batch) => ({
+      id: batch._id,
+      course: batch.courseId?.name || "Unnamed Course",
+      batch: batch.name,
+      topic: batch.courseId?.name ? `${batch.courseId.name} progress update` : "Batch update",
+      date: batch.lastLectureAt ? new Date(batch.lastLectureAt).toLocaleString() : "No lectures yet",
+      duration: `${batch.lecturesTaken || 0} lecture${batch.lecturesTaken === 1 ? "" : "s"}`,
+      homework: batch.status ? `Status: ${batch.status}` : "Pending batch updates",
+      recording: "",
+    }));
 
-  const schedule = [
-    { time: "09:00 AM - 11:00 AM", batch: "Batch A (MERN Stack)", room: "Online Zoom Room A", status: "Completed" },
-    { time: "02:00 PM - 03:30 PM", batch: "Batch C (React & Redux)", room: "Lab 2 - Offline", status: "Upcoming" },
-    { time: "06:00 PM - 08:00 PM", batch: "Batch B (MERN Stack)", room: "Online Zoom Room B", status: "Upcoming" }
-  ];
+  const schedule = batches
+    .slice()
+    .sort((a, b) => new Date(a.startDate || a.lastLectureAt || 0).getTime() - new Date(b.startDate || b.lastLectureAt || 0).getTime())
+    .slice(0, 3)
+    .map((batch) => ({
+      time: batch.startDate
+        ? new Date(batch.startDate).toLocaleString([], { hour: "2-digit", minute: "2-digit" })
+        : batch.lastLectureAt
+        ? new Date(batch.lastLectureAt).toLocaleString([], { hour: "2-digit", minute: "2-digit" })
+        : "TBD",
+      batch: `${batch.name} (${batch.courseId?.name || "Course"})`,
+      room: batch.status === "Active" ? "Live batch" : batch.status === "Upcoming" ? "Planned session" : "Completed",
+      status: batch.status || "Unknown",
+    }));
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-20">
+        <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Welcome Message */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#1e293b] mb-1">
-            Welcome Back, {user?.name || "Instructor"}!
+            Welcome Back, {user?.name || teacherProfile?.name || "Instructor"}!
           </h1>
           <p className="text-gray-500 text-sm">
             Monitor syllabus progress, assign lectures, and manage your batches.
           </p>
+          <p className="text-sm text-gray-600 mt-2">
+            {assignedCourses.length > 0
+              ? `Assigned courses: ${assignedCourses.join(", ")}`
+              : "No courses assigned yet."}
+          </p>
         </div>
+
         <Link
           href="/teacher/take-lecture"
           className="flex items-center gap-2 bg-[#2C4276] hover:bg-[#1e2e54] text-white px-5 py-2.5 rounded-full shadow-md font-semibold transition active:scale-95 text-sm"
@@ -119,7 +172,12 @@ export default function TeacherDashboard() {
         </Link>
       </div>
 
-      {/* Grid Stats */}
+      {error && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 text-red-700 p-4">
+          {error}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {stats.map((stat, idx) => (
           <motion.div
@@ -148,15 +206,12 @@ export default function TeacherDashboard() {
         ))}
       </div>
 
-      {/* Main Grid Panels */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Recent Lecture Submissions */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden lg:col-span-2">
           <div className="bg-gray-50/50 p-4 border-b border-gray-100 flex justify-between items-center">
             <h3 className="text-[#1e293b] font-bold text-base flex items-center gap-2">
               <ClipboardCheck size={20} className="text-[#2C4276]" />
-              Recent Lecture Activity
+              Recent Batch Activity
             </h3>
             <Link href="/teacher/syllabus-progress" className="text-xs text-[#2C4276] hover:underline font-bold">
               View All Progress
@@ -164,44 +219,37 @@ export default function TeacherDashboard() {
           </div>
 
           <div className="p-4 space-y-4">
-            {recentLectures.map((lec) => (
-              <div key={lec.id} className="p-4 rounded-xl border border-gray-100 hover:border-blue-100 hover:bg-blue-50/10 transition space-y-2">
-                <div className="flex justify-between items-start gap-2">
-                  <div>
-                    <span className="inline-block bg-blue-100 text-blue-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1">
-                      {lec.batch}
-                    </span>
-                    <h4 className="font-bold text-[#1e293b] text-sm sm:text-base">
-                      {lec.topic}
-                    </h4>
-                    <p className="text-xs text-gray-400 font-medium">{lec.course}</p>
+            {recentActivities.length > 0 ? (
+              recentActivities.map((activity) => (
+                <div key={activity.id} className="p-4 rounded-xl border border-gray-100 hover:border-blue-100 hover:bg-blue-50/10 transition space-y-2">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <span className="inline-block bg-blue-100 text-blue-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider mb-1">
+                        {activity.batch}
+                      </span>
+                      <h4 className="font-bold text-[#1e293b] text-sm sm:text-base">{activity.topic}</h4>
+                      <p className="text-xs text-gray-400 font-medium">{activity.course}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs text-gray-500 font-semibold flex items-center justify-end gap-1">
+                        <Clock size={12} />
+                        {activity.duration}
+                      </span>
+                      <p className="text-[10px] text-gray-400 mt-1">{activity.date}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs text-gray-500 font-semibold flex items-center justify-end gap-1">
-                      <Clock size={12} />
-                      {lec.duration}
-                    </span>
-                    <p className="text-[10px] text-gray-400 mt-1">{lec.date}</p>
-                  </div>
-                </div>
 
-                <div className="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg space-y-1">
-                  <p><strong className="text-gray-700">Homework:</strong> {lec.homework}</p>
-                  {lec.recording && (
-                    <p className="flex items-center gap-1.5 text-blue-600 font-medium mt-1">
-                      <Play size={10} className="fill-current" />
-                      <a href={lec.recording} target="_blank" rel="noopener noreferrer" className="hover:underline">
-                        Class Recording Link
-                      </a>
-                    </p>
-                  )}
+                  <div className="text-xs text-gray-600 bg-gray-50 p-2.5 rounded-lg space-y-1">
+                    <p><strong className="text-gray-700">Batch update:</strong> {activity.homework}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No recent batch activity found. Start by logging a lecture.</p>
+            )}
           </div>
         </div>
 
-        {/* Weekly Schedule & Quick Nav */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
           <div className="bg-gray-50/50 p-4 border-b border-gray-100">
             <h3 className="text-[#1e293b] font-bold text-base flex items-center gap-2">
@@ -212,22 +260,26 @@ export default function TeacherDashboard() {
 
           <div className="p-4 flex-1 flex flex-col justify-between">
             <div className="space-y-3.5">
-              {schedule.map((item, idx) => (
-                <div key={idx} className="flex justify-between items-center p-3 rounded-xl border border-gray-50 hover:border-gray-100 hover:bg-gray-50/30 transition">
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-400 font-medium">{item.time}</p>
-                    <p className="font-bold text-sm text-[#1e293b]">{item.batch}</p>
-                    <p className="text-[10px] text-gray-500">{item.room}</p>
+              {schedule.length > 0 ? (
+                schedule.map((item, idx) => (
+                  <div key={idx} className="flex justify-between items-center p-3 rounded-xl border border-gray-50 hover:border-gray-100 hover:bg-gray-50/30 transition">
+                    <div className="space-y-1">
+                      <p className="text-xs text-gray-400 font-medium">{item.time}</p>
+                      <p className="font-bold text-sm text-[#1e293b]">{item.batch}</p>
+                      <p className="text-[10px] text-gray-500">{item.room}</p>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      item.status === "Completed"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800 animate-pulse"
+                    }`}>
+                      {item.status}
+                    </span>
                   </div>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                    item.status === "Completed" 
-                      ? "bg-green-100 text-green-800" 
-                      : "bg-yellow-100 text-yellow-800 animate-pulse"
-                  }`}>
-                    {item.status}
-                  </span>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No scheduled lectures found for your assigned batches.</p>
+              )}
             </div>
 
             <div className="mt-6 bg-[#2C4276]/5 p-4 rounded-xl border border-[#2C4276]/10 text-center">
@@ -242,7 +294,6 @@ export default function TeacherDashboard() {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
