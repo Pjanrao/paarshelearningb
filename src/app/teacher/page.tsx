@@ -18,7 +18,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 
 export default function TeacherDashboard() {
-  const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser);
+  const user = useSelector((state: RootState) => (state.auth as any).teacherUser || state.auth.user);
   const [teacherProfile, setTeacherProfile] = useState<any>(null);
   const [batches, setBatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,8 +131,8 @@ export default function TeacherDashboard() {
       time: batch.startDate
         ? new Date(batch.startDate).toLocaleString([], { hour: "2-digit", minute: "2-digit" })
         : batch.lastLectureAt
-        ? new Date(batch.lastLectureAt).toLocaleString([], { hour: "2-digit", minute: "2-digit" })
-        : "TBD",
+          ? new Date(batch.lastLectureAt).toLocaleString([], { hour: "2-digit", minute: "2-digit" })
+          : "TBD",
       batch: `${batch.name} (${batch.courseId?.name || "Course"})`,
       room: batch.status === "Active" ? "Live batch" : batch.status === "Upcoming" ? "Planned session" : "Completed",
       status: batch.status || "Unknown",
@@ -268,11 +268,10 @@ export default function TeacherDashboard() {
                       <p className="font-bold text-sm text-[#1e293b]">{item.batch}</p>
                       <p className="text-[10px] text-gray-500">{item.room}</p>
                     </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      item.status === "Completed"
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.status === "Completed"
                         ? "bg-green-100 text-green-800"
                         : "bg-yellow-100 text-yellow-800 animate-pulse"
-                    }`}>
+                      }`}>
                       {item.status}
                     </span>
                   </div>

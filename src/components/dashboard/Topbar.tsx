@@ -4,7 +4,7 @@ import { Search, Loader2, ArrowRight, User, GraduationCap, BookOpen, FileText, L
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { logout, logoutAdmin, logoutStudent } from "@/redux/authSlice";
+import { logout, logoutAdmin, logoutStudent, logoutTeacher } from "@/redux/authSlice";
 import { Menu } from "lucide-react";
 
 interface SearchResult {
@@ -75,29 +75,49 @@ export default function Topbar({
 
   const handleLogout = () => {
     const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
-    document.cookie = `token=; path=/; expires=${pastDate}`;
-    document.cookie = `role=; path=/; expires=${pastDate}`;
-    document.cookie = `adminToken=; path=/; expires=${pastDate}`;
-    document.cookie = `adminRole=; path=/; expires=${pastDate}`;
-    document.cookie = `studentToken=; path=/; expires=${pastDate}`;
-    document.cookie = `studentRole=; path=/; expires=${pastDate}`;
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("user");
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminRole");
-    localStorage.removeItem("adminUser");
-    localStorage.removeItem("studentToken");
-    localStorage.removeItem("studentRole");
-    localStorage.removeItem("studentUser");
-
-    dispatch(logout());
-    dispatch(logoutAdmin());
-    dispatch(logoutStudent());
-
-    // Redirect to home or sign-in
-    window.location.href = "/";
+    if (role === "admin") {
+      // Clear only admin tokens
+      document.cookie = `adminToken=; path=/; expires=${pastDate}`;
+      document.cookie = `adminRole=; path=/; expires=${pastDate}`;
+      // Also clear legacy tokens if they were set as admin
+      document.cookie = `token=; path=/; expires=${pastDate}`;
+      document.cookie = `role=; path=/; expires=${pastDate}`;
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminRole");
+      localStorage.removeItem("adminUser");
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("user");
+      dispatch(logoutAdmin());
+      dispatch(logout());
+      window.location.href = "/admin/signin";
+    } else if (role === "teacher") {
+      // Clear only teacher tokens
+      document.cookie = `teacherToken=; path=/; expires=${pastDate}`;
+      document.cookie = `teacherRole=; path=/; expires=${pastDate}`;
+      localStorage.removeItem("teacherToken");
+      localStorage.removeItem("teacherRole");
+      localStorage.removeItem("teacherUser");
+      dispatch(logoutTeacher());
+      window.location.href = "/signin";
+    } else {
+      // Clear only student tokens
+      document.cookie = `studentToken=; path=/; expires=${pastDate}`;
+      document.cookie = `studentRole=; path=/; expires=${pastDate}`;
+      // Also clear legacy tokens if they were set as student
+      document.cookie = `token=; path=/; expires=${pastDate}`;
+      document.cookie = `role=; path=/; expires=${pastDate}`;
+      localStorage.removeItem("studentToken");
+      localStorage.removeItem("studentRole");
+      localStorage.removeItem("studentUser");
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("user");
+      dispatch(logoutStudent());
+      dispatch(logout());
+      window.location.href = "/signin";
+    }
   };
 
   return (

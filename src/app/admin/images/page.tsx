@@ -63,6 +63,24 @@ export default function ImageManagementPage() {
         fetchImages();
     }, []);
 
+    const [blogPosts, setBlogPosts] = useState<Array<{slug:string,title:string,coverImage?:string}>>([]);
+
+    const fetchBlogPosts = async () => {
+        try {
+            const res = await fetch('/api/admin/blog-posts');
+            if (res.ok) {
+                const data = await res.json();
+                setBlogPosts(data || []);
+            }
+        } catch (e) {
+            console.error('Failed to fetch blog posts', e);
+        }
+    }
+
+    useEffect(() => {
+        fetchBlogPosts();
+    }, []);
+
     const handleUpload = async (key: string, label: string, category: string, file: File) => {
         setUpdatingKey(key);
         try {
@@ -122,6 +140,37 @@ export default function ImageManagementPage() {
             }
         } catch (error: any) {
             toast.error(error.message);
+        } finally {
+            setUpdatingKey(null);
+        }
+    };
+
+    const handleBlogUpload = async (slug: string, title: string, file: File) => {
+        const key = `BLOG_${slug}`;
+        setUpdatingKey(key);
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('folder', 'blog');
+
+            const uploadRes = await fetch('/api/upload', { method: 'POST', body: formData });
+            const uploadData = await uploadRes.json();
+            if (!uploadRes.ok) throw new Error(uploadData.error || 'Upload failed');
+
+            const saveRes = await fetch('/api/admin/site-images', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key, label: title, category: 'Blog', url: uploadData.url }),
+            });
+
+            if (saveRes.ok) {
+                toast.success(`${title} image updated`);
+                fetchImages();
+            } else {
+                throw new Error('Failed to save blog image metadata');
+            }
+        } catch (err: any) {
+            toast.error(err.message || 'Upload failed');
         } finally {
             setUpdatingKey(null);
         }
@@ -279,6 +328,61 @@ export default function ImageManagementPage() {
                     })}
                 </div>
             )}
+
+            {/* Blog images section */}
+            <div className="mt-10">
+                <h2 className="text-2xl font-bold mb-4">Blog Images</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {blogPosts.map((post) => {
+                        const key = `BLOG_${post.slug}`;
+                        const savedImage = getImageForKey(key);
+                        const isUpdating = updatingKey === key;
+
+                        return (
+                            <div key={post.slug} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+                                <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
+                                    <div>
+                                        <h3 className="font-bold text-gray-800 text-sm">{post.title}</h3>
+                                        <p className="text-xs text-gray-500">{post.slug}</p>
+                                    </div>
+                                    <div className={`w-2 h-2 rounded-full ${savedImage ? 'bg-green-500' : 'bg-amber-400'} shadow-sm`} />
+                                </div>
+
+                                <div className="relative aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
+                                    { (savedImage || post.coverImage) ? (
+                                        <img src={(savedImage && savedImage.url) ? savedImage.url : (post.coverImage || '')} alt={post.title} className="w-full h-full object-contain p-2" />
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-2 text-gray-400">
+                                            <ImageIcon size={40} strokeWidth={1.5} />
+                                            <span className="text-xs font-medium">No Image Configured</span>
+                                        </div>
+                                    )}
+
+                                    {isUpdating && (
+                                        <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] flex flex-col items-center justify-center z-10">
+                                            <Loader2 className="animate-spin text-[#2C4276] mb-2" size={32} />
+                                            <span className="text-xs font-bold text-[#2C4276] animate-pulse uppercase tracking-wider">Uploading...</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="p-4 bg-white mt-auto">
+                                    <div className="flex items-center gap-2">
+                                        <label className={`flex-1 cursor-pointer flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[11px] font-bold bg-[#2C4276] text-white`}>
+                                            <Upload size={14} />
+                                            Upload
+                                            <input type="file" className="hidden" accept="image/*" disabled={isUpdating} onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) handleBlogUpload(post.slug, post.title, file);
+                                            }} />
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
 
             <div className="mt-10 bg-blue-50/50 rounded-2xl p-5 border border-blue-100 flex gap-4 items-start">
                 <div className="mt-1 bg-blue-100 p-2 rounded-lg text-blue-600">

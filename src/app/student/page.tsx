@@ -33,7 +33,7 @@ import { RootState } from "@/redux/store";
 import { useEffect, useState } from "react";
 
 export default function StudentDashboard() {
-    const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser);
+    const user = useSelector((state: RootState) => state.auth.studentUser || state.auth.user);
     const userId = user?._id || user?.id;
 
     // Data Fetching

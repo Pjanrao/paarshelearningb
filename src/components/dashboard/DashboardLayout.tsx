@@ -53,16 +53,21 @@ export default function DashboardLayout({
     activeRole = studentRole || legacyRole;
   }
 
+  const isValidRole =
+    (isAdminRoute && activeRole === "admin") ||
+    (isTeacherRoute && activeRole === "teacher") ||
+    (!isAdminRoute && !isTeacherRoute && activeRole === "student");
+
   useEffect(() => {
     // If on admin sign in, do not redirect
     if (pathname === "/admin/signin" || pathname === "/admin/signin/") {
       return;
     }
 
-    if (!activeToken && !activeRole) {
+    if (!activeToken || !activeRole || !isValidRole) {
       // Small timeout to allow hydration if it hasn't finished (should be fast though)
       const timer = setTimeout(() => {
-        if (!activeToken && !activeRole) {
+        if (!activeToken || !activeRole || !isValidRole) {
           if (isAdminRoute) {
             router.push("/admin/signin");
           } else {
@@ -72,14 +77,14 @@ export default function DashboardLayout({
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [activeToken, activeRole, router, pathname]);
+  }, [activeToken, activeRole, isValidRole, router, pathname, isAdminRoute]);
 
   // BYPASS DASHBOARD SHELL FOR ADMIN SIGN IN PAGE
   if (pathname === "/admin/signin" || pathname === "/admin/signin/") {
     return <>{children}</>;
   }
 
-  if (!activeRole) {
+  if (!activeRole || !isValidRole) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2C4276]"></div>

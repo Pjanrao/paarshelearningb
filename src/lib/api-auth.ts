@@ -17,18 +17,21 @@ export async function getAuthUser() {
         const adminToken = cookieStore.get("adminToken")?.value;
         const genericToken = cookieStore.get("token")?.value;
 
-        // Use the Referer to detect context, solving concurrent session collisions
+        // Select token strictly based on route context derived from Referer header.
+        // This prevents cross-role contamination when multiple users are logged in simultaneously.
         const headerStore = await headers();
         const referer = headerStore.get("referer") || "";
-
-        let token = studentToken || adminToken || teacherToken || genericToken;
+        let token: string | undefined;
 
         if (referer.includes("/admin")) {
-            token = adminToken || token;
+            token = adminToken || genericToken;
         } else if (referer.includes("/teacher")) {
-            token = teacherToken || token;
+            token = teacherToken || genericToken;
         } else if (referer.includes("/student")) {
-            token = studentToken || token;
+            token = studentToken || genericToken;
+        } else {
+            // No clear route context: prioritize by most-specific token available
+            token = teacherToken || adminToken || studentToken || genericToken;
         }
 
         if (!token) return null;

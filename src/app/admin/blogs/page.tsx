@@ -18,7 +18,8 @@ interface Blog {
     _id: string;
     title: string;
     content: string;
-    imageUrl: string;
+    coverImage?: string;
+    imageUrl?: string;
     author: {
         name: string;
         role: string;
@@ -32,7 +33,7 @@ interface Blog {
 interface BlogFormData {
     title: string;
     content: string;
-    imageUrl: string;
+    coverImage: string;
     author: {
         name: string;
         role: string;
@@ -55,13 +56,14 @@ export default function BlogsPage() {
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedBlog, setSelectedBlog] = useState<Blog | null>(null);
     const [formLoading, setFormLoading] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
 
     const [formData, setFormData] = useState<BlogFormData>({
         title: "",
         content: "",
-        imageUrl: "",
+        coverImage: "",
         author: {
             name: "",
             role: "",
@@ -110,6 +112,7 @@ export default function BlogsPage() {
                 body: JSON.stringify({
                     ...formData,
                     tags: formData.tags.split(",").map((tag) => tag.trim()),
+                    coverImage: formData.coverImage,
                 }),
             });
 
@@ -141,6 +144,7 @@ export default function BlogsPage() {
                 body: JSON.stringify({
                     ...formData,
                     tags: formData.tags.split(",").map((tag) => tag.trim()),
+                    coverImage: formData.coverImage,
                 }),
             });
 
@@ -191,7 +195,7 @@ export default function BlogsPage() {
         setFormData({
             title: blog.title,
             content: blog.content,
-            imageUrl: blog.imageUrl || "",
+            coverImage: blog.coverImage || blog.imageUrl || "",
             author: {
                 name: blog.author.name,
                 role: blog.author.role,
@@ -207,11 +211,37 @@ export default function BlogsPage() {
         setIsViewModalOpen(true);
     };
 
+    const uploadCoverImage = async (file: File) => {
+        setUploadingImage(true);
+        try {
+            const formDataUpload = new FormData();
+            formDataUpload.append("file", file);
+            formDataUpload.append("folder", "blog");
+
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formDataUpload,
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Image upload failed");
+            }
+
+            setFormData((prev) => ({ ...prev, coverImage: data.url }));
+        } catch (error: any) {
+            console.error("Image upload error:", error);
+            alert(error.message || "Failed to upload image");
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
     const resetForm = () => {
         setFormData({
             title: "",
             content: "",
-            imageUrl: "",
+            coverImage: "",
             author: { name: "", role: "" },
             tags: "",
             status: "draft",
@@ -305,8 +335,8 @@ export default function BlogsPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden border border-gray-200">
-                                                    {blog.imageUrl ? (
-                                                        <img src={blog.imageUrl} alt="" className="w-full h-full object-cover" />
+                                                    {(blog.coverImage || blog.imageUrl) ? (
+                                                        <img src={blog.coverImage || blog.imageUrl} alt="" className="w-full h-full object-cover" />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-gray-400 font-bold text-lg">
                                                             {blog.title.charAt(0)}
@@ -448,11 +478,31 @@ export default function BlogsPage() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Cover Image URL</label>
-                                <input type="text" value={formData.imageUrl} onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="/blog1.png" />
-                                {formData.imageUrl && (
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Cover Image</label>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) uploadCoverImage(file);
+                                        }}
+                                        className="w-full text-sm text-gray-500 file:bg-[#2C4276] file:text-white file:px-4 file:py-2 file:rounded-lg file:border-0 file:cursor-pointer"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={formData.coverImage}
+                                        onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
+                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400"
+                                        placeholder="/uploads/blog/your-image.jpg"
+                                    />
+                                </div>
+                                {uploadingImage && (
+                                    <p className="mt-2 text-sm text-blue-600">Uploading image…</p>
+                                )}
+                                {formData.coverImage && (
                                     <div className="mt-2 rounded-lg overflow-hidden border border-gray-200 h-32">
-                                        <img src={formData.imageUrl} alt="Cover preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                                        <img src={formData.coverImage} alt="Cover preview" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
                                     </div>
                                 )}
                             </div>
@@ -520,9 +570,9 @@ export default function BlogsPage() {
                                 </div>
                                 <h1 className="text-3xl font-bold text-gray-900 leading-tight mb-6">{selectedBlog.title}</h1>
 
-                                {selectedBlog.imageUrl && (
+                                {(selectedBlog.coverImage || selectedBlog.imageUrl) && (
                                     <div className="rounded-xl overflow-hidden border border-gray-100 mb-6 h-56">
-                                        <img src={selectedBlog.imageUrl} alt={selectedBlog.title} className="w-full h-full object-cover" />
+                                        <img src={selectedBlog.coverImage || selectedBlog.imageUrl} alt={selectedBlog.title} className="w-full h-full object-cover" />
                                     </div>
                                 )}
 

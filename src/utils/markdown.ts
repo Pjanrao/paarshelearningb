@@ -1,6 +1,8 @@
 import fs from "fs";
 import matter from "gray-matter";
 import { join } from "path";
+import { connectDB } from "@/lib/db";
+import SiteImage from "@/models/SiteImage";
 
 const postsDirectory = join(process.cwd(), "markdown/Blog");
 
@@ -50,6 +52,23 @@ export function getPostBySlug(slug: string, fields: string[] = []) {
   return items;
 }
 
+// Attach DB override for single post (coverImage)
+export async function getPostBySlugWithOverrides(slug: string, fields: string[] = []) {
+  const items = getPostBySlug(slug, fields);
+  try {
+    await connectDB();
+    const realSlug = (slug || "").replace(/\.mdx$/, "");
+    const key = `BLOG_${realSlug}`;
+    const img = await SiteImage.findOne({ key });
+    if (img && img.url) {
+      items.coverImage = img.url;
+    }
+  } catch (e) {
+    // ignore DB errors and return items as-is
+  }
+  return items;
+}
+
 export function getAllPosts(fields: string[] = []) {
   const slugs = getPostSlugs();
   const posts = slugs
@@ -58,4 +77,23 @@ export function getAllPosts(fields: string[] = []) {
     .sort((post1, post2) => (post1.date > post2.date ? -1 : 1));
 
   return posts;
+}
+
+// Helper to attach DB overrides for cover images (key: BLOG_<slug>)
+export async function attachBlogImageOverrides(posts: any[]) {
+  try {
+    await connectDB();
+    const keys = posts.map((p) => `BLOG_${p.slug}`);
+    const images = await SiteImage.find({ key: { $in: keys } });
+    const imgMap: Record<string, string> = {};
+    images.forEach((img) => {
+      imgMap[img.key] = img.url;
+    });
+    return posts.map((p) => ({
+      ...p,
+      coverImage: imgMap[`BLOG_${p.slug}`] || p.coverImage || null,
+    }));
+  } catch (e) {
+    return posts;
+  }
 }

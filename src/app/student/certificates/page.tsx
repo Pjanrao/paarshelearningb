@@ -27,7 +27,7 @@ export default function StudentCertificatesPage() {
     const logoRef = useRef<HTMLImageElement | null>(null);
 
     const user = useSelector(
-        (state: RootState) => state.auth.user || state.auth.studentUser
+        (state: RootState) => state.auth.studentUser || state.auth.user
     );
 
     // Load logo

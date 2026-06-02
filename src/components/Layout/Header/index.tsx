@@ -7,7 +7,7 @@ import Logo from './Logo'
 import HeaderLink from '../Header/Navigation/HeaderLink'
 import MobileHeaderLink from '../Header/Navigation/MobileHeaderLink'
 import { useSelector, useDispatch } from "react-redux";
-import { logout, logoutAdmin, logoutStudent } from '@/redux/authSlice'
+import { logout, logoutAdmin, logoutStudent, logoutTeacher } from '@/redux/authSlice'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const Header: React.FC = () => {
@@ -55,27 +55,25 @@ const Header: React.FC = () => {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("user");
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminRole");
-    localStorage.removeItem("adminUser");
+    // Header is on the public website and only shows student login.
+    // We ONLY clear the student session here — teacher and admin sessions remain untouched
+    // so multi-login works correctly across all three roles.
+    const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
     localStorage.removeItem("studentToken");
     localStorage.removeItem("studentRole");
     localStorage.removeItem("studentUser");
+    // Also clear legacy keys if they were set as student
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
 
-    const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
-    document.cookie = `token=; path=/; expires=${pastDate}`;
-    document.cookie = `role=; path=/; expires=${pastDate}`;
-    document.cookie = `adminToken=; path=/; expires=${pastDate}`;
-    document.cookie = `adminRole=; path=/; expires=${pastDate}`;
     document.cookie = `studentToken=; path=/; expires=${pastDate}`;
     document.cookie = `studentRole=; path=/; expires=${pastDate}`;
+    document.cookie = `token=; path=/; expires=${pastDate}`;
+    document.cookie = `role=; path=/; expires=${pastDate}`;
 
-    dispatch(logout());
-    dispatch(logoutAdmin());
     dispatch(logoutStudent());
+    dispatch(logout());
 
     router.push("/");
     window.location.href = "/";

@@ -1,37 +1,40 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import BlogCard from "@/app/(site)/blog/BlogCard";
 import Link from "next/link";
 import { Icon } from "@iconify/react";
 
+type AdminBlog = {
+    _id: string;
+    title: string;
+    coverImage?: string;
+    author: { name: string };
+    publishedDate: string;
+    tags: string[];
+};
+
 const BlogSection = () => {
-    const blogs = [
-        {
-            _id: "ai-in-digital-marketing",
-            title: "The Future of AI in Digital Marketing: Trends to Watch",
-            coverImage: "ai-blog.png",
-            author: { name: "Paarsh eLearning" },
-            publishedDate: new Date().toISOString(),
-            tags: ["AI"]
-        },
-        {
-            _id: "digital-marketing-internship",
-            title: "How to Land Your Dream Digital Marketing Internship",
-            coverImage: "internship-blog.png",
-            author: { name: "Paarsh eLearning" },
-            publishedDate: new Date().toISOString(),
-            tags: ["Internship"]
-        },
-        {
-            _id: "top-digital-marketing-courses",
-            title: "Top Digital Marketing Courses to Accelerate Your Career",
-            coverImage: "courses-blog.png",
-            author: { name: "Paarsh eLearning" },
-            publishedDate: new Date().toISOString(),
-            tags: ["Courses"]
-        }
-    ];
+    const [posts, setPosts] = useState<AdminBlog[]>([]);
+
+    useEffect(() => {
+        const fetchBlogs = async () => {
+            try {
+                const response = await fetch("/api/blogs?limit=3");
+                if (!response.ok) {
+                    throw new Error("Failed to load blogs");
+                }
+
+                const data = await response.json();
+                const blogPosts: AdminBlog[] = Array.isArray(data.blogs) ? data.blogs : [];
+                setPosts(blogPosts.slice(0, 3));
+            } catch (error) {
+                console.error("Failed to fetch admin blogs:", error);
+            }
+        };
+
+        fetchBlogs();
+    }, []);
 
     return (
         <section className="py-10 lg:py-24 bg-white dark:bg-darkmode" id="blog">
@@ -59,15 +62,15 @@ const BlogSection = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                    {blogs.map((blog, index) => (
-                        <div key={blog._id} data-aos="fade-up" data-aos-delay={index * 200} data-aos-duration="1000">
+                    {posts.map((post, index) => (
+                        <div key={post._id} data-aos="fade-up" data-aos-delay={index * 200} data-aos-duration="1000">
                             <BlogCard blog={{
-                                id: blog._id,
-                                title: blog.title,
-                                coverImage: blog.coverImage,
-                                author: blog.author.name,
-                                date: new Date(blog.publishedDate).toLocaleDateString("en-GB"),
-                                tags: blog.tags
+                                id: post._id,
+                                title: post.title,
+                                coverImage: post.coverImage || "",
+                                author: post.author?.name || "Admin",
+                                date: new Date(post.publishedDate).toLocaleDateString("en-GB"),
+                                tags: post.tags || [],
                             }} />
                         </div>
                     ))}

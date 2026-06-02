@@ -1,4 +1,4 @@
-import { getAllPosts, getPostBySlug } from "@/utils/markdown";
+import { getAllPosts, getPostBySlug, getPostBySlugWithOverrides } from "@/utils/markdown";
 import markdownToHtml from "@/utils/markdownToHtml";
 import { format } from "date-fns";
 import Image from "next/image";
@@ -9,7 +9,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props) {
     const posts = getAllPosts(["title", "date", "excerpt", "coverImage", "slug"]);
-    const post = getPostBySlug(params.slug, [
+    const post = await getPostBySlugWithOverrides(params.slug, [
         "title",
         "author",
         "content",
@@ -61,7 +61,7 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function BlogHead({ params }: Props) {
     const posts = getAllPosts(["title", "date", "excerpt", "coverImage", "slug"]);
-    const post = getPostBySlug(params.slug, [
+    const post = await getPostBySlugWithOverrides(params.slug, [
         "title",
         "author",
         "authorImage",
@@ -104,6 +104,17 @@ export default async function BlogHead({ params }: Props) {
                             </div>
                         </div>
                     </div>
+                    {post.coverImage && (
+                        <div className="mt-8 w-full h-64 relative">
+                            <Image
+                                src={post.coverImage}
+                                alt={post.title || 'cover image'}
+                                fill
+                                sizes="100vw"
+                                style={{ objectFit: 'cover' }}
+                            />
+                        </div>
+                    )}
                 </div>
             </section>
         </>

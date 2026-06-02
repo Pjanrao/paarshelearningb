@@ -79,23 +79,25 @@ export function middleware(req: NextRequest) {
             return NextResponse.redirect(new URL("/admin/signin", req.url));
         }
     } else {
-        // Website / student paths
-        if (!activeStudentToken || activeStudentToken === "undefined" || activeStudentToken === "null" || activeStudentToken.length < 10) {
-            if (!path.startsWith("/api")) {
-                return NextResponse.redirect(new URL("/signin", req.url));
-            }
-        }
-        if (
-            path.startsWith("/teacher") &&
-            !path.startsWith("/teacher/register")
-        ) {
+        // Teacher paths
+        if (path.startsWith("/teacher") && !path.startsWith("/teacher/register")) {
             if (!activeTeacherToken || activeTeacherToken === "undefined" || activeTeacherToken === "null" || activeTeacherToken.length < 10 || activeTeacherRole !== "teacher") {
                 return NextResponse.redirect(new URL("/signin", req.url));
             }
         }
-
-        if (path.startsWith("/student") && (!activeStudentToken || activeStudentToken === "undefined" || activeStudentToken === "null" || activeStudentToken.length < 10 || activeStudentRole !== "student")) {
-            return NextResponse.redirect(new URL("/signin", req.url));
+        // Student paths
+        else if (path.startsWith("/student")) {
+            if (!activeStudentToken || activeStudentToken === "undefined" || activeStudentToken === "null" || activeStudentToken.length < 10 || activeStudentRole !== "student") {
+                return NextResponse.redirect(new URL("/signin", req.url));
+            }
+        }
+        // Default catch-all for other non-whitelisted non-api paths -> assume they require student login (legacy behavior)
+        else {
+            if (!activeStudentToken || activeStudentToken === "undefined" || activeStudentToken === "null" || activeStudentToken.length < 10) {
+                if (!path.startsWith("/api")) {
+                    return NextResponse.redirect(new URL("/signin", req.url));
+                }
+            }
         }
     }
 
