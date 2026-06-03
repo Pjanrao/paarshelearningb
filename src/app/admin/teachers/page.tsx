@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, Pencil, Trash2, Plus, Search, Loader2, X, Star, CheckCircle, XCircle, BookOpen, Layers } from "lucide-react";
+import { Eye, Pencil, Trash2, Plus, Search, Loader2, X, Star, CheckCircle, XCircle, BookOpen, Layers, AlertCircle } from "lucide-react";
 
 import {
     AlertDialog,
@@ -35,6 +35,7 @@ interface TeacherFormData {
     name: string;
     email: string;
     contact: string;
+    password?: string;
     avatar: string;
     designation: string;
     course: string;
@@ -44,6 +45,10 @@ interface TeacherFormData {
     totalStudents: number;
     rating: number;
     approvalStatus?: string;
+}
+
+interface FormErrors {
+    [key: string]: string;
 }
 
 export default function TeachersPage() {
@@ -73,6 +78,7 @@ export default function TeachersPage() {
     const [isLoadingBatches, setIsLoadingBatches] = useState(false);
     const [formLoading, setFormLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [formErrors, setFormErrors] = useState<FormErrors>({});
     const [deleteId, setDeleteId] = useState<{ id: string, name: string } | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -80,6 +86,7 @@ export default function TeachersPage() {
         name: "",
         email: "",
         contact: "",
+        password: "",
         avatar: "",
         designation: "",
         course: "",
@@ -90,6 +97,25 @@ export default function TeachersPage() {
         rating: 0,
         approvalStatus: "approved",
     });
+
+    const validateForm = (): boolean => {
+        const newErrors: FormErrors = {};
+
+        if (!formData.name.trim()) newErrors.name = "Full name is required";
+        if (!formData.email.trim()) newErrors.email = "Email is required";
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Invalid email format";
+        if (!formData.contact.trim()) newErrors.contact = "Contact number is required";
+        else if (!/^\d{10}$/.test(formData.contact)) newErrors.contact = "Contact must be 10 digits";
+        if (isAddModalOpen && !formData.password?.trim()) newErrors.password = "Password is required";
+        if (isAddModalOpen && formData.password && formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
+        if (!formData.designation.trim()) newErrors.designation = "Designation is required";
+        if (!formData.course.trim()) newErrors.course = "Course domain is required";
+        if (!formData.experience.trim()) newErrors.experience = "Experience is required";
+        if (!formData.dateOfJoining) newErrors.dateOfJoining = "Date of joining is required";
+
+        setFormErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const fetchTeachers = async () => {
         try {
@@ -128,6 +154,11 @@ export default function TeachersPage() {
 
     const handleAddTeacher = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        if (!validateForm()) {
+            return;
+        }
+
         setFormLoading(true);
 
         try {
@@ -137,16 +168,18 @@ export default function TeachersPage() {
                 body: JSON.stringify(formData),
             });
 
+            const data = await response.json();
+
             if (response.ok) {
                 setIsAddModalOpen(false);
                 resetForm();
                 fetchTeachers();
             } else {
-                alert("Failed to create teacher");
+                setFormErrors({ submit: data.message || "Failed to create teacher" });
             }
         } catch (error) {
             console.error("Error creating teacher:", error);
-            alert("Failed to create teacher");
+            setFormErrors({ submit: "Failed to create teacher" });
         } finally {
             setFormLoading(false);
         }
@@ -156,25 +189,37 @@ export default function TeachersPage() {
         e.preventDefault();
         if (!selectedTeacher) return;
 
+        if (!validateForm()) {
+            return;
+        }
+
         setFormLoading(true);
 
         try {
+            const updateData = { ...formData };
+            // Don't send password on edit if empty
+            if (!updateData.password) {
+                delete updateData.password;
+            }
+
             const response = await fetch(`/api/teachers/${selectedTeacher._id}/`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
+                body: JSON.stringify(updateData),
             });
+
+            const data = await response.json();
 
             if (response.ok) {
                 setIsEditModalOpen(false);
                 resetForm();
                 fetchTeachers();
             } else {
-                alert("Failed to update teacher");
+                setFormErrors({ submit: data.message || "Failed to update teacher" });
             }
         } catch (error) {
             console.error("Error updating teacher:", error);
-            alert("Failed to update teacher");
+            setFormErrors({ submit: "Failed to update teacher" });
         } finally {
             setFormLoading(false);
         }
@@ -222,6 +267,7 @@ export default function TeachersPage() {
 
     const openAddModal = () => {
         resetForm();
+        setFormErrors({});
         setIsAddModalOpen(true);
     };
 
@@ -231,6 +277,7 @@ export default function TeachersPage() {
             name: teacher.name,
             email: teacher.email,
             contact: teacher.contact || "",
+            password: "",
             avatar: teacher.avatar || "",
             designation: teacher.designation || "",
             course: teacher.course || "",
@@ -240,6 +287,7 @@ export default function TeachersPage() {
             totalStudents: teacher.totalStudents || 0,
             rating: teacher.rating || 0,
         });
+        setFormErrors({});
         setIsEditModalOpen(true);
     };
 
@@ -253,6 +301,7 @@ export default function TeachersPage() {
             name: "",
             email: "",
             contact: "",
+            password: "",
             avatar: "",
             designation: "",
             course: "",
@@ -263,6 +312,7 @@ export default function TeachersPage() {
             rating: 0,
         });
         setSelectedTeacher(null);
+        setFormErrors({});
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -641,46 +691,85 @@ export default function TeachersPage() {
                             <button onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); }} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={24} /></button>
                         </div>
                         <form onSubmit={isAddModalOpen ? handleAddTeacher : handleEditTeacher} className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                            {formErrors.submit && (
+                                <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                                    <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+                                    <div>
+                                        <p className="text-sm font-medium text-red-800">{formErrors.submit}</p>
+                                    </div>
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
-                                <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="Enter full name" />
+                                <input type="text" required value={formData.name} onChange={(e) => { setFormData({ ...formData, name: e.target.value }); if (formErrors.name) setFormErrors({ ...formErrors, name: "" }); }} className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 ${formErrors.name ? "border-red-300 bg-red-50" : "border-gray-300"}`} placeholder="Enter full name" />
+                                {formErrors.name && <p className="mt-1 text-sm text-red-600">{formErrors.name}</p>}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address <span className="text-red-500">*</span></label>
-                                    <input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="email@example.com" />
+                                    <input type="email" required value={formData.email} onChange={(e) => { setFormData({ ...formData, email: e.target.value }); if (formErrors.email) setFormErrors({ ...formErrors, email: "" }); }} className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 ${formErrors.email ? "border-red-300 bg-red-50" : "border-gray-300"}`} placeholder="email@example.com" />
+                                    {formErrors.email && <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Contact Number <span className="text-red-500">*</span></label>
-                                    <input type="text" required value={formData.contact} onChange={(e) => setFormData({ ...formData, contact: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="10-digit number"
+                                    <input type="text" required value={formData.contact} onChange={(e) => { setFormData({ ...formData, contact: e.target.value }); if (formErrors.contact) setFormErrors({ ...formErrors, contact: "" }); }} className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 ${formErrors.contact ? "border-red-300 bg-red-50" : "border-gray-300"}`} placeholder="10-digit number"
                                         maxLength={10}
                                         minLength={10}
                                         onInput={(e: React.FormEvent<HTMLInputElement>) => {
                                             const target = e.target as HTMLInputElement;
                                             target.value = target.value.replace(/[^0-9]/g, "");
                                         }} />
+                                    {formErrors.contact && <p className="mt-1 text-sm text-red-600">{formErrors.contact}</p>}
                                 </div>
                             </div>
+
+                            {isAddModalOpen && (
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+                                    <input type="password" required={isAddModalOpen} value={formData.password || ""} onChange={(e) => { setFormData({ ...formData, password: e.target.value }); if (formErrors.password) setFormErrors({ ...formErrors, password: "" }); }} className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 ${formErrors.password ? "border-red-300 bg-red-50" : "border-gray-300"}`} placeholder="Minimum 6 characters" />
+                                    {formErrors.password && <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>}
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Designation <span className="text-red-500">*</span></label>
-                                    <input type="text" required value={formData.designation} onChange={(e) => setFormData({ ...formData, designation: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="e.g. Senior Instructor" />
+                                    <input type="text" required value={formData.designation} onChange={(e) => { setFormData({ ...formData, designation: e.target.value }); if (formErrors.designation) setFormErrors({ ...formErrors, designation: "" }); }} className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 ${formErrors.designation ? "border-red-300 bg-red-50" : "border-gray-300"}`} placeholder="e.g. Senior Instructor" />
+                                    {formErrors.designation && <p className="mt-1 text-sm text-red-600">{formErrors.designation}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Primary Course <span className="text-red-500">*</span></label>
-                                    <input type="text" required value={formData.course} onChange={(e) => setFormData({ ...formData, course: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="e.g. MERN Stack" />
+                                    {isLoadingCourses ? (
+                                        <div className="mt-1 flex items-center gap-2 text-gray-500">
+                                            <Loader2 size={16} className="animate-spin" />
+                                            <span>Loading courses...</span>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <select required value={formData.course} onChange={(e) => { setFormData({ ...formData, course: e.target.value }); if (formErrors.course) setFormErrors({ ...formErrors, course: "" }); }} className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${formErrors.course ? "border-red-300 bg-red-50" : "border-gray-300"}`}>
+                                                <option value="">Select a course</option>
+                                                {courses.map((course) => (
+                                                    <option key={course._id} value={course.name}>
+                                                        {course.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {formErrors.course && <p className="mt-1 text-sm text-red-600">{formErrors.course}</p>}
+                                        </>
+                                    )}
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Experience (Years) <span className="text-red-500">*</span></label>
-                                    <input type="text" required value={formData.experience} onChange={(e) => setFormData({ ...formData, experience: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="e.g. 5+" />
+                                    <input type="text" required value={formData.experience} onChange={(e) => { setFormData({ ...formData, experience: e.target.value }); if (formErrors.experience) setFormErrors({ ...formErrors, experience: "" }); }} className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 ${formErrors.experience ? "border-red-300 bg-red-50" : "border-gray-300"}`} placeholder="e.g. 5+" />
+                                    {formErrors.experience && <p className="mt-1 text-sm text-red-600">{formErrors.experience}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Joining <span className="text-red-500">*</span></label>
-                                    <input type="date" required value={formData.dateOfJoining} onChange={(e) => setFormData({ ...formData, dateOfJoining: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <input type="date" required value={formData.dateOfJoining} onChange={(e) => { setFormData({ ...formData, dateOfJoining: e.target.value }); if (formErrors.dateOfJoining) setFormErrors({ ...formErrors, dateOfJoining: "" }); }} className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${formErrors.dateOfJoining ? "border-red-300 bg-red-50" : "border-gray-300"}`} />
+                                    {formErrors.dateOfJoining && <p className="mt-1 text-sm text-red-600">{formErrors.dateOfJoining}</p>}
                                 </div>
                             </div>
 

@@ -131,6 +131,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     { name: "My Batches", path: "/teacher/batches", icon: Users },
     { name: "Meetings", path: "/teacher/meetings", icon: Video },
     { name: "Syllabus Progress", path: "/teacher/syllabus-progress", icon: BarChart3 },
+    { name: "Settings", path: "/teacher/settings", icon: Settings },
   ];
 
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);

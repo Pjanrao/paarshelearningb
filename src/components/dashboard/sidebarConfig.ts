@@ -27,6 +27,7 @@ export const sidebarConfig = {
     { name: "My Batches", path: "/teacher/batches" },
     { name: "Take Lecture", path: "/teacher/take-lecture" },
     { name: "Syllabus Progress", path: "/teacher/syllabus-progress" },
+    { name: "Settings", path: "/teacher/settings" },
   ],
 
   student: [
