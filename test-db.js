@@ -1,28 +1,51 @@
-import mongoose from "mongoose";
-
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/paarsh-e-learning-blue"; // Or whatever is in .env
+const mongoose = require("mongoose");
+require("dotenv").config({ path: ".env.local" });
+require("dotenv").config();
 
 async function test() {
-  const env = (await import('fs')).readFileSync('.env', 'utf8');
-  const uriMatch = env.match(/MONGODB_URI="(.*)"/);
-  const uri = uriMatch ? uriMatch[1] : (env.match(/MONGODB_URI=(.*)/) ? env.match(/MONGODB_URI=(.*)/)[1] : null);
+  await mongoose.connect(process.env.MONGODB_URI);
+  console.log("Connected");
   
-  if (!uri) {
-    console.log("No MONGODB_URI found");
-    return;
+  const Batch = mongoose.model("Batch", new mongoose.Schema({}, { strict: false }));
+  const Course = mongoose.model("Course", new mongoose.Schema({}, { strict: false }));
+  const User = mongoose.model("User", new mongoose.Schema({}, { strict: false }));
+  const Topic = mongoose.model("Topic", new mongoose.Schema({}, { strict: false }));
+  const LectureTracking = mongoose.model("LectureTracking", new mongoose.Schema({}, { strict: false }));
+
+  try {
+    const batches = await Batch.find()
+      .populate("courseId", "name syllabus")
+      .populate("assignedTeacher", "name _id")
+      .populate({
+        path: "syllabusProgress.teacherId",
+        model: "User",
+        select: "name",
+        strictPopulate: false
+      })
+      .lean();
+    console.log("Batches count:", batches.length);
+    
+    // Check if totalTopicsAcross throws
+    const teacherProgressData = await Promise.all(
+      Array.from(new Set(batches.map(b => b.assignedTeacher?._id?.toString()).filter(Boolean))).map(async (teacherId) => {
+        const teacherBatches = batches.filter(b => b.assignedTeacher?._id?.toString() === teacherId);
+        const teacher = await User.findById(teacherId).select("name").lean();
+        
+        console.log("Teacher:", teacherId);
+        const totalHours = await LectureTracking.aggregate([
+          { $match: { teacherId: new (require("mongoose")).Types.ObjectId(teacherId) } },
+          { $group: { _id: null, total: { $sum: { $ifNull: ["$durationHours", 0] } } } }
+        ]);
+        console.log("Total hours:", totalHours);
+        
+        return { teacherId, name: teacher?.name };
+      })
+    );
+    console.log("Done");
+  } catch (e) {
+    console.error("Error:", e);
   }
   
-  await mongoose.connect(uri);
-  
-  const users = await mongoose.connection.collection('users').find({ role: 'teacher' }).sort({ createdAt: -1 }).limit(3).toArray();
-  const teachers = await mongoose.connection.collection('teachers').find().sort({ createdAt: -1 }).limit(3).toArray();
-  
-  console.log("USERS:");
-  console.log(users);
-  console.log("TEACHERS:");
-  console.log(teachers);
-  
-  process.exit(0);
+  mongoose.disconnect();
 }
-
 test();

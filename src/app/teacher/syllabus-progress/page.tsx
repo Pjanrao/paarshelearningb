@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { BookOpen, Users, CheckCircle2, Circle, Loader2, ChevronDown, ChevronRight } from "lucide-react";
+import { BookOpen, Users, CheckCircle2, Circle, Loader2, ChevronDown, ChevronRight, RotateCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function TeacherTakeLecture() {
@@ -10,10 +10,14 @@ export default function TeacherTakeLecture() {
   const [selectedBatch, setSelectedBatch] = useState("");
   const [loadingBatches, setLoadingBatches] = useState(true);
   const [loadingSyllabus, setLoadingSyllabus] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [savingTopicId, setSavingTopicId] = useState<string | null>(null);
   const [progressMap, setProgressMap] = useState<Record<string, any>>({});
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({});
   const [toast, setToast] = useState<{ msg: string; type: "success" | "error" } | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+
+  const BATCH_STORAGE_KEY = "teacherSyllabusSelectedBatch";
 
   const showToast = (msg: string, type: "success" | "error" = "success") => {
     setToast({ msg, type });
@@ -21,20 +25,72 @@ export default function TeacherTakeLecture() {
   };
 
   useEffect(() => {
+    const storedBatch = typeof window !== "undefined" ? window.localStorage.getItem(BATCH_STORAGE_KEY) : null;
+    if (storedBatch) setSelectedBatch(storedBatch);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if (selectedBatch) {
+        window.localStorage.setItem(BATCH_STORAGE_KEY, selectedBatch);
+      } else {
+        window.localStorage.removeItem(BATCH_STORAGE_KEY);
+      }
+    }
+  }, [selectedBatch]);
+
+  // Load batches
+  useEffect(() => {
     const loadBatches = async () => {
       setLoadingBatches(true);
       try {
-        const res = await fetch("/api/teacher/batches/");
+        const res = await fetch("/api/teacher/batches/", { cache: "no-store", credentials: "include" });
         const data = await res.json();
         setBatches(data.batches || []);
       } catch (e) {
         console.error(e);
+        showToast("Failed to load batches", "error");
       } finally {
         setLoadingBatches(false);
       }
     };
     loadBatches();
   }, []);
+
+  // Load syllabus for selected batch
+  const loadSyllabus = async (batchId: string, isRefresh = false) => {
+    if (!isRefresh) setLoadingSyllabus(true);
+    if (isRefresh) setRefreshing(true);
+    
+    try {
+      const res = await fetch(`/api/teacher/batches/${batchId}/syllabus/?t=${Date.now()}`, { cache: "no-store", credentials: "include" });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.error || "Failed to load syllabus", "error");
+        setBatchDetails(null);
+        return;
+      }
+
+      setBatchDetails(data);
+      const pm = (data.progressMap || {});
+      setProgressMap(pm);
+      
+      const expanded: Record<string, boolean> = {};
+      (data.modules || []).forEach((m: any) => { expanded[m._id] = true; });
+      setExpandedModules(expanded);
+      
+      setLastRefresh(new Date());
+      if (isRefresh) showToast("Syllabus refreshed", "success");
+    } catch (e: any) {
+      console.error(e);
+      showToast(e.message || "Something went wrong fetching syllabus", "error");
+      setBatchDetails(null);
+    } finally {
+      setLoadingSyllabus(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     if (!selectedBatch) {
@@ -43,40 +99,22 @@ export default function TeacherTakeLecture() {
       setExpandedModules({});
       return;
     }
-    const load = async () => {
-      setLoadingSyllabus(true);
-      try {
-        const res = await fetch(`/api/teacher/batches/${selectedBatch}/syllabus/`);
-        const data = await res.json();
+    loadSyllabus(selectedBatch);
+  }, [selectedBatch]);
 
-        if (!res.ok) {
-          showToast(data.error || "Failed to load syllabus", "error");
-          setBatchDetails(null);
-          return;
-        }
+  // Auto-refresh every 30 seconds when a batch is selected
+  useEffect(() => {
+    if (!selectedBatch) return;
+    
+    const interval = setInterval(() => {
+      loadSyllabus(selectedBatch, true);
+    }, 30000); // 30 seconds
 
-        setBatchDetails(data);
-        // Build progressMap from API response
-        const pm = (data.progressMap || {});
-        setProgressMap(pm);
-        // Expand all modules by default
-        const expanded: Record<string, boolean> = {};
-        (data.modules || []).forEach((m: any) => { expanded[m._id] = true; });
-        setExpandedModules(expanded);
-      } catch (e: any) {
-        console.error(e);
-        showToast(e.message || "Something went wrong fetching syllabus", "error");
-        setBatchDetails(null);
-      } finally {
-        setLoadingSyllabus(false);
-      }
-    };
-    load();
+    return () => clearInterval(interval);
   }, [selectedBatch]);
 
   const courseName = batchDetails?.batch?.courseId?.name || "";
 
-  // Group topics by module
   const modulesWithTopics = useMemo(() => {
     if (!batchDetails?.modules) return [];
     return batchDetails.modules.map((mod: any) => ({
@@ -114,59 +152,67 @@ export default function TeacherTakeLecture() {
     const isSub = !!subtopicId;
     setSavingTopicId(isSub ? subtopicId : topicId);
 
+    const previousTopicState = progressMap[topicId]
+      ? {
+          ...progressMap[topicId],
+          completedSubtopics: [...(progressMap[topicId]?.completedSubtopics || [])],
+        }
+      : undefined;
+
     let newValue = !currentlyCompleted;
     if (isSub) {
       newValue = !currentlySubCompleted;
     }
 
-    // Find the target topic to extract subtopic configuration
     let targetTopic: any = null;
     for (const mod of modulesWithTopics) {
       const found = mod.topics.find((t: any) => t._id === topicId);
-      if (found) { targetTopic = found; break; }
+      if (found) {
+        targetTopic = found;
+        break;
+      }
     }
     const allSubIds = targetTopic?.subtopics ? targetTopic.subtopics.map((s: any) => s._id) : [];
 
-    let payload: any = { topicId };
+    const payload: any = { batchId: selectedBatch, topicId };
+    
+    if (isSub) {
+      payload.subtopicId = subtopicId;
+      payload.subtopicCompleted = newValue;
+    } else {
+      payload.completed = newValue;
+    }
 
-    // Optimistic update
     setProgressMap((prev) => {
       const prevTopic = prev[topicId] || {};
-      let nextTopic = { ...prevTopic };
+      const nextTopic = { ...prevTopic };
 
       if (isSub) {
-        let subArr = nextTopic.completedSubtopics || [];
+        let subArr = [...(nextTopic.completedSubtopics || [])];
         if (newValue) {
-          if (!subArr.includes(subtopicId)) subArr = [...subArr, subtopicId];
+          if (!subArr.some((id: any) => id?.toString() === subtopicId?.toString())) {
+            subArr.push(subtopicId);
+          }
         } else {
-          subArr = subArr.filter((id: string) => id !== subtopicId);
+          subArr = subArr.filter((id: any) => id?.toString() !== subtopicId?.toString());
         }
         nextTopic.completedSubtopics = subArr;
 
-        // Auto-check Main Topic if all subtopics are completed
-        const allCompleted = allSubIds.length > 0 && allSubIds.every((id: string) => subArr.includes(id));
+        const allCompleted = allSubIds.length > 0 && allSubIds.every((id: any) => subArr.some((sid: any) => sid?.toString() === id?.toString()));
         nextTopic.completed = allCompleted;
         nextTopic.completedAt = allCompleted ? new Date().toISOString() : undefined;
-
-        payload.subtopicId = subtopicId;
-        payload.subtopicCompleted = newValue;
-        payload.completed = allCompleted; // sync main topic state to backend
       } else {
         nextTopic.completed = newValue;
         nextTopic.completedAt = newValue ? new Date().toISOString() : undefined;
-
-        // Auto-check/uncheck all subtopics when main topic is clicked
         nextTopic.completedSubtopics = newValue ? [...allSubIds] : [];
-
-        payload.completed = newValue;
-        payload.completedSubtopicsArr = nextTopic.completedSubtopics;
       }
       return { ...prev, [topicId]: nextTopic };
     });
 
     try {
-      const res = await fetch(`/api/teacher/batches/${selectedBatch}/syllabus/`, {
+      const res = await fetch(`/api/teacher/batches/${selectedBatch}/syllabus/?t=${Date.now()}`, {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -176,13 +222,24 @@ export default function TeacherTakeLecture() {
         throw new Error(err.error || "Failed to update");
       }
 
-      showToast(newValue ? (isSub ? "Subtopic completed!" : "Topic marked as completed!") : (isSub ? "Subtopic incomplete" : "Topic marked as incomplete"));
+      const responseData = await res.json();
+      if (responseData.progressMap) {
+        setProgressMap((prev) => ({ ...prev, ...responseData.progressMap }));
+      }
+
+      showToast(
+        newValue ? (isSub ? "Subtopic completed!" : "Topic marked as completed!") : (isSub ? "Subtopic incomplete" : "Topic marked as incomplete")
+      );
     } catch (e: any) {
-      // Simplified rollback approach for brevity (could be improved)
-      setProgressMap((prev) => ({
-        ...prev,
-        [topicId]: { ...(prev[topicId] || {}), completed: currentlyCompleted },
-      }));
+      setProgressMap((prev) => {
+        const next = { ...prev };
+        if (previousTopicState) {
+          next[topicId] = previousTopicState;
+        } else {
+          delete next[topicId];
+        }
+        return next;
+      });
       showToast(e.message || "Something went wrong", "error");
     } finally {
       setSavingTopicId(null);
@@ -193,14 +250,35 @@ export default function TeacherTakeLecture() {
     setExpandedModules((prev) => ({ ...prev, [moduleId]: !prev[moduleId] }));
   };
 
+  const handleManualRefresh = () => {
+    if (selectedBatch && !refreshing) {
+      loadSyllabus(selectedBatch, true);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#1e293b]">Log Lecture Progress</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Select a batch and tick off the topics you covered today.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#1e293b]">Log Lecture Progress</h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Select a batch and tick off the topics you covered today.
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-gray-400 mb-1">
+            Last updated: {lastRefresh.toLocaleTimeString()}
+          </p>
+          <button
+            onClick={handleManualRefresh}
+            disabled={refreshing || !selectedBatch}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#2C4276]/10 text-[#2C4276] hover:bg-[#2C4276]/20 disabled:opacity-50 transition text-xs font-bold"
+          >
+            <RotateCw size={12} className={refreshing ? "animate-spin" : ""} />
+            {refreshing ? "Refreshing..." : "Refresh"}
+          </button>
+        </div>
       </div>
 
       {/* Toast */}
@@ -433,3 +511,4 @@ export default function TeacherTakeLecture() {
     </div>
   );
 }
+

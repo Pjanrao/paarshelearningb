@@ -5,6 +5,7 @@ import Course from "@/models/Course";
 import Module from "@/models/Module";
 import Topic from "@/models/Topic";
 import LectureTracking from "@/models/LectureTracking";
+import SyllabusProgress from "@/models/SyllabusProgress";
 import { getUserFromAuth } from "@/lib/api-auth";
 
 export async function GET(req: Request, { params }: { params: Promise<{ batchId: string }> }) {
@@ -67,10 +68,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ batchId:
       .limit(20)
       .lean();
 
-    return NextResponse.json({ batch, modules, topics, progressMap, lectures }, { status: 200 });
+    return NextResponse.json(
+      { batch, modules, topics, progressMap, lectures },
+      { status: 200, headers: { "Cache-Control": "no-store" } }
+    );
   } catch (error: any) {
     console.error("Error fetching batch syllabus:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500, headers: { "Cache-Control": "no-store" } });
   }
 }
 
@@ -83,15 +87,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ batchId
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { batchId } = await params;
+    const paramsObj = await params;
+    const routeBatchId = paramsObj?.batchId;
     const payload = await req.json();
     const { topicId } = payload;
+    const batchId = routeBatchId || payload.batchId;
 
     if (!topicId) {
       return NextResponse.json({ error: "Topic ID is required" }, { status: 400 });
     }
 
+    console.log("SYLLABUS POST payload:", JSON.stringify(payload));
+    console.log("SYLLABUS POST target batchId:", batchId);
     const batch = await Batch.findById(batchId);
+    console.log("SYLLABUS POST batch found:", !!batch);
     if (!batch) {
       return NextResponse.json({ error: "Batch not found" }, { status: 404 });
     }
@@ -99,6 +108,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ batchId
     if (batch.assignedTeacher?.toString() !== dbUser._id.toString()) {
       return NextResponse.json({ error: "Not authorized for this batch" }, { status: 403 });
     }
+
+    const course = await Course.findById(batch.courseId).lean();
 
     if (!batch.syllabusProgress) {
       batch.syllabusProgress = [];
@@ -109,36 +120,70 @@ export async function POST(req: Request, { params }: { params: Promise<{ batchId
     if (topicIndex < 0) {
       batch.syllabusProgress.push({
         topicId,
+        teacherId: dbUser._id,
         completed: false,
-        completedSubtopics: []
+        completedSubtopics: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       topicIndex = batch.syllabusProgress.length - 1;
     }
 
-    if (payload.hasOwnProperty("completed")) {
-      batch.syllabusProgress[topicIndex].completed = payload.completed;
-      batch.syllabusProgress[topicIndex].completedAt = payload.completed ? new Date() : undefined;
-    }
+    const topicDoc = await Topic.findById(topicId).lean();
+    const embeddedTopic =
+      !topicDoc && course?.syllabus?.length
+        ? course.syllabus.find((item: any) => item._id?.toString() === topicId?.toString())
+        : null;
+    const allSubtopicIds = ((topicDoc?.subtopics || embeddedTopic?.subtopics || []) as any[])
+      .map((sub: any) => sub._id?.toString())
+      .filter(Boolean);
 
     if (payload.hasOwnProperty("subtopicId")) {
+      const subtopicId = payload.subtopicId?.toString();
       let arr = batch.syllabusProgress[topicIndex].completedSubtopics || [];
+      
       if (payload.subtopicCompleted) {
-        if (!arr.includes(payload.subtopicId)) arr.push(payload.subtopicId);
+        if (!arr.some((id: any) => id?.toString() === subtopicId)) {
+          arr.push(payload.subtopicId);
+        }
       } else {
-        arr = arr.filter((id: string) => id !== payload.subtopicId);
+        arr = arr.filter((id: any) => id?.toString() !== subtopicId);
       }
+      
       batch.syllabusProgress[topicIndex].completedSubtopics = arr;
+      
+      if (allSubtopicIds.length > 0) {
+        batch.syllabusProgress[topicIndex].completed = arr.length === allSubtopicIds.length;
+      } else {
+        batch.syllabusProgress[topicIndex].completed = false;
+      }
+    } else if (payload.hasOwnProperty("completed")) {
+      batch.syllabusProgress[topicIndex].completed = payload.completed;
+      batch.syllabusProgress[topicIndex].completedSubtopics = payload.completed ? allSubtopicIds : [];
     }
+    
+    batch.syllabusProgress[topicIndex].completedAt = batch.syllabusProgress[topicIndex].completed ? new Date() : undefined;
+    batch.syllabusProgress[topicIndex].updatedAt = new Date();
+    batch.syllabusProgress[topicIndex].teacherId = dbUser._id;
 
-    if (payload.hasOwnProperty("completedSubtopicsArr")) {
-      batch.syllabusProgress[topicIndex].completedSubtopics = payload.completedSubtopicsArr;
-    }
-
+    batch.lastLectureAt = new Date();
+    batch.markModified("syllabusProgress");
     await batch.save();
 
-    return NextResponse.json({ success: true, syllabusProgress: batch.syllabusProgress }, { status: 200 });
+    const progressMap = (batch.syllabusProgress || []).reduce((map: any, item: any) => {
+      map[item.topicId?.toString()] = item;
+      return map;
+    }, {});
+
+    return NextResponse.json(
+      { success: true, syllabusProgress: batch.syllabusProgress },
+      {
+        status: 200,
+        headers: { "Cache-Control": "no-store" },
+      }
+    );
   } catch (error: any) {
     console.error("Error updating syllabus progress:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500, headers: { "Cache-Control": "no-store" } });
   }
 }

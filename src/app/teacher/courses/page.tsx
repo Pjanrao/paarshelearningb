@@ -17,8 +17,8 @@ export default function TeacherCourses() {
       setError(null);
       try {
         const [profileRes, batchRes] = await Promise.all([
-          fetch("/api/teacher/profile"),
-          fetch("/api/teacher/batches"),
+          fetch("/api/teacher/profile", { credentials: "include" }),
+          fetch("/api/teacher/batches", { credentials: "include" }),
         ]);
 
         if (!profileRes.ok) {

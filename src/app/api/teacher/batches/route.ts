@@ -35,7 +35,19 @@ export async function GET(req: Request) {
 
         const topicCounts = await Topic.aggregate([
             { $match: { courseId: { $in: courseIds } } },
-            { $group: { _id: "$courseId", count: { $sum: 1 } } },
+            {
+                $project: {
+                    courseId: 1,
+                    units: {
+                        $cond: {
+                            if: { $gt: [{ $size: { $ifNull: ["$subtopics", []] } }, 0] },
+                            then: { $size: "$subtopics" },
+                            else: 1
+                        }
+                    }
+                }
+            },
+            { $group: { _id: "$courseId", count: { $sum: "$units" } } },
         ]);
 
         const lectureCounts = await LectureTracking.aggregate([
@@ -54,10 +66,16 @@ export async function GET(req: Request) {
         }, {});
 
         const enhancedBatches = batches.map((batch) => {
-            const totalTopics = topicCountMap[batch.courseId?._id?.toString() || ""] || 0;
-            const completedTopics = Array.isArray(batch.syllabusProgress)
-                ? batch.syllabusProgress.filter((p: any) => p.completed).length
-                : 0;
+            const courseSyllabusCount = (batch.courseId?.syllabus || []).reduce((sum: number, s: any) => sum + (s.subtopics?.length > 0 ? s.subtopics.length : 1), 0);
+            const totalTopics = topicCountMap[batch.courseId?._id?.toString() || ""] || courseSyllabusCount;
+            let completedTopics = 0;
+            (batch.syllabusProgress || []).forEach((p: any) => {
+                if (p.completedSubtopics && p.completedSubtopics.length > 0) {
+                    completedTopics += p.completedSubtopics.length;
+                } else if (p.completed) {
+                    completedTopics += 1;
+                }
+            });
             const progress = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
             return {
                 ...batch,
@@ -69,9 +87,12 @@ export async function GET(req: Request) {
             };
         });
 
-        return NextResponse.json({ batches: enhancedBatches }, { status: 200 });
+        return NextResponse.json(
+          { batches: enhancedBatches },
+          { status: 200, headers: { "Cache-Control": "no-store" } }
+        );
     } catch (error: any) {
         console.error("Error fetching teacher batches:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: error.message }, { status: 500, headers: { "Cache-Control": "no-store" } });
     }
 }

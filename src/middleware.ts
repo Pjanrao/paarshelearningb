@@ -2,6 +2,19 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
+    const rawPath = req.nextUrl.pathname;
+    const path = rawPath.length > 1 && rawPath.endsWith("/") ? rawPath.slice(0, -1) : rawPath;
+
+    // CRITICAL: Allow all auth routes without token check
+    // NextAuth and other auth endpoints must pass through
+    if (
+        path.startsWith("/api/auth/") ||
+        path.startsWith("/api/login") ||
+        path.startsWith("/api/register")
+    ) {
+        return NextResponse.next();
+    }
+
     // Legacy Token
     const legacyToken = req.cookies.get("token")?.value;
     const legacyRole = req.cookies.get("role")?.value;
@@ -15,9 +28,6 @@ export function middleware(req: NextRequest) {
 
     const teacherToken = req.cookies.get("teacherToken")?.value;
     const teacherRole = req.cookies.get("teacherRole")?.value;
-
-    const rawPath = req.nextUrl.pathname;
-    const path = rawPath.length > 1 && rawPath.endsWith("/") ? rawPath.slice(0, -1) : rawPath;
 
     // Resolve active credentials using fallback logic
     const activeAdminToken = adminToken || legacyToken;
@@ -58,17 +68,13 @@ export function middleware(req: NextRequest) {
         path.startsWith("/terms-and-conditions") ||
         path.startsWith("/privacy-policy") ||
         path.startsWith("/return-policy") ||
-        path.startsWith("/api/auth") ||
-        path.startsWith("/api/login") ||
-        path.startsWith("/api/register") ||
         path.startsWith("/entrance-exam") ||
         path.startsWith("/_next") ||
         path.startsWith("/images") ||
         path.startsWith("/uploads") ||
         path.startsWith("/promo") ||
         path.startsWith("/favicon.ico") ||
-        path.startsWith("/teacher/register") ||
-        path.startsWith("/api/teacher/register")
+        path.startsWith("/teacher/register")
     ) {
         return NextResponse.next();
     }

@@ -51,18 +51,13 @@ export const authOptions: NextAuthOptions = {
               };
             }
           }
-        } catch (error) {
-          console.error("DB auth error:", error);
+          
+          // No user found or password mismatch
+          throw new Error("Invalid email or password");
+        } catch (error: any) {
+          console.error("Auth error:", error?.message || error);
+          throw new Error(error?.message || "Authentication failed");
         }
-
-        // 🔥 Fallback (optional)
-        return {
-          id: "mock-user",
-          email: credentials.email,
-          name: credentials.email.split("@")[0],
-          role: "student",
-          image: ""
-        };
       }
     })
   ],
@@ -73,26 +68,37 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/",
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "fallback-secret-change-in-production",
   callbacks: {
-    async jwt({ token, user }: { token: any; user: any }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.image = user.image;
+    async jwt({ token, user, account }: { token: any; user?: any; account?: any }) {
+      try {
+        if (user) {
+          token.id = user.id;
+          token.email = user.email;
+          token.name = user.name;
+          token.role = user.role;
+          token.image = user.image || "";
+        }
+        return token;
+      } catch (error) {
+        console.error("JWT callback error:", error);
+        return token;
       }
-      return token;
     },
     async session({ session, token }: { session: any; token: any }) {
-      if (token) {
-        session.user = {
-          ...session.user,
-          id: token.id,
-          role: token.role,
-          image: token.image,
-        };
+      try {
+        if (session.user && token) {
+          session.user.id = token.id || token.sub;
+          session.user.email = token.email;
+          session.user.name = token.name;
+          session.user.role = token.role;
+          session.user.image = token.image;
+        }
+        return session;
+      } catch (error) {
+        console.error("Session callback error:", error);
+        return session;
       }
-      return session;
     },
   },
 };

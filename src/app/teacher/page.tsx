@@ -30,8 +30,8 @@ export default function TeacherDashboard() {
 
     try {
       const [profileRes, batchesRes] = await Promise.all([
-        fetch("/api/teacher/profile"),
-        fetch("/api/teacher/batches"),
+        fetch("/api/teacher/profile", { credentials: "include" }),
+        fetch("/api/teacher/batches", { credentials: "include" }),
       ]);
 
       if (!profileRes.ok) {

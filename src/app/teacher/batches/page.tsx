@@ -15,7 +15,7 @@ export default function TeacherBatches() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("/api/teacher/batches");
+        const res = await fetch("/api/teacher/batches", { credentials: "include" });
         if (!res.ok) {
           const errorData = await res.json().catch(() => null);
           throw new Error(errorData?.error || "Failed to load batches");

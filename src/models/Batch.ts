@@ -31,9 +31,19 @@ const BatchSchema = new mongoose.Schema(
                     type: mongoose.Schema.Types.ObjectId,
                     ref: "Topic",
                 },
+                teacherId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "User",
+                },
                 completed: { type: Boolean, default: false },
                 completedAt: Date,
-                completedSubtopics: [{ type: String }]
+completedSubtopics: [
+ {
+   type: mongoose.Schema.Types.ObjectId
+ }
+],
+                createdAt: { type: Date, default: Date.now },
+                updatedAt: { type: Date, default: Date.now }
             }
         ],
 

@@ -37,9 +37,35 @@ const syllabusProgressSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    entries: [
+      {
+        topicId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Topic",
+          required: true,
+        },
+        completed: {
+          type: Boolean,
+          default: false,
+        },
+        completedAt: Date,
+        completedSubtopics: [ 
+          {
+            type: mongoose.Schema.Types.ObjectId,
+          },
+        ],
+        updatedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
+
+// Ensure a single progress document per batch+teacher
+syllabusProgressSchema.index({ batchId: 1, teacherId: 1 }, { unique: true });
 
 const SyllabusProgress =
   mongoose.models.SyllabusProgress ||

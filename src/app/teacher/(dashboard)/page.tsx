@@ -13,7 +13,7 @@ export default function TeacherDashboard() {
 
     const fetchTeacherProfile = async () => {
         try {
-            const res = await fetch("/api/teacher/profile");
+            const res = await fetch("/api/teacher/profile", { credentials: "include" });
             if (!res.ok) throw new Error("Failed to load teacher profile");
             const data = await res.json();
             setTeacherProfile(data.teacher || null);
@@ -25,7 +25,7 @@ export default function TeacherDashboard() {
     const fetchBatches = async () => {
         try {
             setLoading(true);
-            const res = await fetch("/api/teacher/batches");
+            const res = await fetch("/api/teacher/batches", { credentials: "include" });
             if (!res.ok) throw new Error("Failed to load batches");
             const data = await res.json();
             setBatches(data.batches || []);
@@ -78,10 +78,11 @@ export default function TeacherDashboard() {
                 return batch;
             }));
 
-            const res = await fetch(`/api/teacher/batches/${batchId}/syllabus`, {
+            const res = await fetch(`/api/teacher/batches/${batchId}/syllabus/`, {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ topicId, completed: newStatus })
+                body: JSON.stringify({ batchId, topicId, completed: newStatus })
             });
 
             if (!res.ok) {
