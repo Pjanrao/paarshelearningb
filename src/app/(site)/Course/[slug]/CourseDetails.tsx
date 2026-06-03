@@ -350,24 +350,23 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
   const [activeAccordion, setActiveAccordion] = useState<number | null>(0);
   const router = useRouter();
-  const downloadPDF = async (url: string) => {
+  const downloadPDF = (url: string) => {
     try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-
-      const blobUrl = window.URL.createObjectURL(blob);
+      let finalUrl = url;
+      if (url.includes("cloudinary.com") && !url.includes("fl_attachment")) {
+        finalUrl = url.replace("/upload/", "/upload/fl_attachment/");
+      }
 
       const link = document.createElement("a");
-      link.href = blobUrl;
+      link.href = finalUrl;
+      link.target = "_blank";
       link.download = "course-syllabus.pdf";
 
       document.body.appendChild(link);
       link.click();
-
-      link.remove();
-      window.URL.revokeObjectURL(blobUrl);
-
+      document.body.removeChild(link);
     } catch (error) {
+      console.error("Download error:", error);
       toast.error("Failed to download syllabus");
     }
   };
