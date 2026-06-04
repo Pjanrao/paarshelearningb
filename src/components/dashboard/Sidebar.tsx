@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import {
+import { useState, useEffect } from "react"; import {
   LayoutDashboard,
   BookOpen,
   MessageSquare,
@@ -23,6 +22,8 @@ import {
   Gift,
   Clock,
   Award,
+  User,
+  LogOut,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 // import Image from "next/image";
@@ -35,6 +36,15 @@ interface SidebarProps {
 
 export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const [teacher, setTeacher] = useState<any>(null);
+
+  useEffect(() => {
+    const teacherData = localStorage.getItem("teacherUser");
+
+    if (teacherData) {
+      setTeacher(JSON.parse(teacherData));
+    }
+  }, []);
 
   const handleItemClick = () => {
     if (window.innerWidth < 768) {
@@ -142,7 +152,13 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
   };
 
   const menu = role?.toLowerCase() === "teacher" ? teacherMenu : adminMenu;
+  const handleLogout = () => {
+    localStorage.removeItem("teacherUser");
+    localStorage.removeItem("teacherToken");
+    localStorage.removeItem("teacherRole");
 
+    window.location.href = "/signin";
+  };
   return (
     <motion.div
       initial={false}
@@ -302,6 +318,49 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
         </ul>
       </div>
 
+      {role === "teacher" && (
+        <div className="border-t border-gray-200 bg-white p-3">
+          {collapsed ? (
+            <div className="flex justify-center">
+              <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
+                <User size={20} className="text-blue-600" />
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              {/* Left Side */}
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
+                  <User size={20} className="text-blue-600" />
+                </div>
+
+                <div>
+                  <h4 className="text-gray-800 font-semibold text-base leading-none">
+                    {teacher?.name || "Teacher"}
+                  </h4>
+
+                  <button
+                    onClick={handleLogout}
+                    className="text-gray-500 hover:text-red-600 text-sm mt-1 transition"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Side Logout Icon */}
+              <button
+                onClick={handleLogout}
+                className="p-2 rounded-md border border-gray-200 hover:bg-gray-50 transition"
+              >
+                <LogOut size={18} className="text-gray-600" />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      {/* Footer with Toggle Button */}
+
       {/* Footer with Toggle Button */}
       {/* <div className={`border-t border-gray-200 flex-shrink-0 transition-all duration-250 ${collapsed ? "px-2 py-3 flex justify-center" : "px-4 py-3"}`}>
         {collapsed ? (
@@ -328,6 +387,9 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
           </div>
         )}
       </div> */}
+
+
     </motion.div>
+
   );
 }
