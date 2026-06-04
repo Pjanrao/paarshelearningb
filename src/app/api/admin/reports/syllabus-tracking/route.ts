@@ -86,14 +86,14 @@ export async function GET(req: Request) {
         return sum + (entry.completed ? 1 : 0);
       }, 0);
       const progress = topicCount > 0 ? Math.round((completedTopics / topicCount) * 100) : 0;
-      
+
       let lastUpdateDate = batch.updatedAt;
       entries.forEach((e: any) => {
         if (e.updatedAt && new Date(e.updatedAt) > new Date(lastUpdateDate)) {
-           lastUpdateDate = e.updatedAt;
+          lastUpdateDate = e.updatedAt;
         }
       });
-      
+
       const lastLectureAt = lectureStats.find((stat) => stat._id.toString() === batch._id.toString())?.lastLectureAt || batch.lastLectureAt || lastUpdateDate;
       const overdueDays = lastLectureAt
         ? Math.floor((Date.now() - new Date(lastLectureAt).getTime()) / (1000 * 60 * 60 * 24))
@@ -185,6 +185,7 @@ export async function GET(req: Request) {
             batchName: batch.name,
             courseName: batch.course,
             progress: batch.progress,
+            topicDetails: batch.topicDetails,
           })),
         };
       })

@@ -15,6 +15,7 @@ export default function AdminSyllabusTracking() {
   
   const [activeTab, setActiveTab] = useState("batches");
   const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
+  const [expandedTeacher, setExpandedTeacher] = useState<string | null>(null);
 
   const [courses, setCourses] = useState<any[]>([]);
   const [teachers, setTeachers] = useState<any[]>([]);
@@ -105,6 +106,14 @@ export default function AdminSyllabusTracking() {
           setExpandedBatch(null);
       } else {
           setExpandedBatch(batchId);
+      }
+  };
+
+  const toggleTeacherDetails = (teacherId: string) => {
+      if (expandedTeacher === teacherId) {
+          setExpandedTeacher(null);
+      } else {
+          setExpandedTeacher(teacherId);
       }
   };
 
@@ -405,14 +414,16 @@ export default function AdminSyllabusTracking() {
                   <th className="py-4 px-6 text-center">Batches Handled</th>
                   <th className="py-4 px-6 text-center">Topics Done</th>
                   <th className="py-4 px-6 text-right">Completion Rate</th>
+                  <th className="py-4 px-6 text-right">Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {teacherProductivity.length === 0 ? (
-                     <tr><td colSpan={4} className="py-8 text-center text-gray-400 font-semibold">No instructors found.</td></tr>
+                     <tr><td colSpan={5} className="py-8 text-center text-gray-400 font-semibold">No instructors found.</td></tr>
                 ) : (
                     teacherProductivity.map((tp, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/50 transition">
+                    <React.Fragment key={tp.teacherId || idx}>
+                    <tr className="hover:bg-gray-50/50 transition">
                         <td className="py-4 px-6 font-bold text-[#1e293b] flex items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-blue-50 text-[#2C4276] flex items-center justify-center text-xs">
                                 {tp.name.charAt(0)}
@@ -422,7 +433,73 @@ export default function AdminSyllabusTracking() {
                         <td className="py-4 px-6 text-center font-bold text-gray-600">{tp.activeBatches}</td>
                         <td className="py-4 px-6 text-center font-bold text-gray-600">{tp.completedTopics} / {tp.totalTopics}</td>
                         <td className="py-4 px-6 text-right font-black text-[#2C4276]">{tp.completionRate}%</td>
+                        <td className="py-4 px-6 text-right">
+                          <button onClick={() => toggleTeacherDetails(tp.teacherId)} className="p-1.5 bg-gray-50 text-gray-400 hover:text-[#2C4276] hover:bg-blue-50 rounded-lg transition border border-gray-100">
+                              {expandedTeacher === tp.teacherId ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                          </button>
+                        </td>
                     </tr>
+                    <AnimatePresence>
+                    {expandedTeacher === tp.teacherId && (
+                        <motion.tr
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                        >
+                            <td colSpan={5} className="bg-[#f8faff] p-0 border-b border-blue-100">
+                                <div className="px-8 py-6 space-y-6">
+                                    {tp.batchDetails && tp.batchDetails.length > 0 ? (
+                                        tp.batchDetails.map((batch: any, bIdx: number) => (
+                                            <div key={bIdx} className="bg-white p-5 rounded-2xl border border-blue-50 shadow-sm">
+                                                <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4">
+                                                    <div>
+                                                        <h5 className="text-sm font-bold text-[#1e293b]">{batch.batchName}</h5>
+                                                        <p className="text-xs text-[#2C4276] font-semibold">{batch.courseName}</p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <span className="text-xs font-black text-[#2C4276] bg-blue-50 px-2 py-1 rounded-lg">
+                                                            {batch.progress}% Complete
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                
+                                                {batch.topicDetails && batch.topicDetails.filter((t: any) => t.completed || (t.completedSubtopics && t.completedSubtopics.length > 0)).length > 0 ? (
+                                                    <div className="space-y-3">
+                                                        {batch.topicDetails
+                                                            .filter((t: any) => t.completed || (t.completedSubtopics && t.completedSubtopics.length > 0))
+                                                            .map((topic: any, tIdx: number) => (
+                                                            <div key={tIdx} className="flex gap-2.5 items-start">
+                                                                <CheckCircle2 size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                                                                <div>
+                                                                    <p className="text-xs font-bold text-gray-700">{topic.topicTitle}</p>
+                                                                    {topic.subtopicTitles && topic.subtopicTitles.length > 0 && (
+                                                                        <div className="mt-1 space-y-1">
+                                                                            {topic.subtopicTitles.map((sub: string, sIdx: number) => (
+                                                                                <p key={sIdx} className="text-[10px] font-medium text-gray-500 flex items-center gap-1">
+                                                                                    <Circle size={4} className="text-green-400 fill-green-400" />
+                                                                                    {sub}
+                                                                                </p>
+                                                                            ))}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-xs text-gray-400 italic font-medium">No topics covered in this batch yet.</p>
+                                                )}
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-sm text-gray-400 text-center font-semibold">No assigned batches.</p>
+                                    )}
+                                </div>
+                            </td>
+                        </motion.tr>
+                    )}
+                    </AnimatePresence>
+                    </React.Fragment>
                     ))
                 )}
               </tbody>
