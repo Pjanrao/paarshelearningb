@@ -25,24 +25,14 @@ const Info = ({ label, value }: any) => (
 export default function CourseViewModal({ open, setOpen, course }: Props) {
   if (!course) return null;
 
-  const handleDownload = async (e: React.MouseEvent<HTMLAnchorElement>, url: string, filename: string) => {
+  const handleDownload = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, url: string, filename: string) => {
     e.preventDefault();
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error("Error downloading free PDF:", error);
-      // Fallback
-      window.open(url, "_blank");
+    // Use Cloudinary fl_attachment flag to force download; avoids CORS fetch issues in production
+    let finalUrl = url;
+    if (url.includes("cloudinary.com") && !url.includes("fl_attachment")) {
+      finalUrl = url.replace("/upload/", "/upload/fl_attachment/");
     }
+    window.open(finalUrl, "_blank");
   };
 
   return (

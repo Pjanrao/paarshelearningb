@@ -351,22 +351,14 @@ const CourseDetails = ({ slug }: { slug: string }) => {
   const [activeAccordion, setActiveAccordion] = useState<number | null>(0);
   const router = useRouter();
   const downloadPDF = (url: string) => {
-    try {
-      let finalUrl = url;
-      if (url.includes("cloudinary.com") && !url.includes("fl_attachment")) {
-        finalUrl = url.replace("/upload/", "/upload/fl_attachment/");
-      }
-
-      const link = document.createElement("a");
-      link.href = finalUrl;
-      link.target = "_blank";
-      link.download = "course-syllabus.pdf";
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Download error:", error);
+    // Use Cloudinary fl_attachment to force download; avoids CORS & browser-blocking issues in production
+    let finalUrl = url;
+    if (url && url.includes("cloudinary.com") && !url.includes("fl_attachment")) {
+      finalUrl = url.replace("/upload/", "/upload/fl_attachment/");
+    }
+    if (finalUrl) {
+      window.open(finalUrl, "_blank");
+    } else {
       toast.error("Failed to download syllabus");
     }
   };
