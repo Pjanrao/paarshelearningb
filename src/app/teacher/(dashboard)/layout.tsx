@@ -17,7 +17,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { logout as logoutAction, logoutAdmin, logoutStudent } from "@/redux/authSlice";
+import { logout as logoutAction, logoutTeacher } from "@/redux/authSlice";
 import Cookies from "js-cookie";
 import { signOut } from "next-auth/react";
 import ProfileDropdown from "@/components/dashboard/ProfileDropdown";
@@ -53,6 +53,7 @@ export default function TeacherLayout({
         try {
             await fetch("/api/auth/logout", { method: "POST" });
             await signOut({ redirect: false });
+
             Cookies.remove("token", { path: '/' });
             Cookies.remove("role", { path: '/' });
             Cookies.remove("teacherToken", { path: '/' });
@@ -61,16 +62,22 @@ export default function TeacherLayout({
             const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
             document.cookie = `token=; path=/; expires=${pastDate}`;
             document.cookie = `role=; path=/; expires=${pastDate}`;
+            document.cookie = `teacherToken=; path=/; expires=${pastDate}`;
+            document.cookie = `teacherRole=; path=/; expires=${pastDate}`;
 
             localStorage.removeItem("token");
             localStorage.removeItem("role");
             localStorage.removeItem("user");
+            localStorage.removeItem("teacherToken");
+            localStorage.removeItem("teacherRole");
+            localStorage.removeItem("teacherUser");
 
             dispatch(logoutAction());
-            window.location.href = "/";
+            dispatch(logoutTeacher());
+            window.location.href = "/signin";
         } catch (error) {
             console.error("Logout error:", error);
-            window.location.href = "/";
+            window.location.href = "/signin";
         }
     };
 
@@ -104,7 +111,7 @@ export default function TeacherLayout({
                         />
                     </div>
                     <div className="flex items-center gap-4 ml-auto">
-                        <ProfileDropdown />
+                        <ProfileDropdown role="teacher" />
                     </div>
                 </div>
             </header>

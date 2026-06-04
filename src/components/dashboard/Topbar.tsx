@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { logout, logoutAdmin, logoutStudent, logoutTeacher } from "@/redux/authSlice";
 import { Menu } from "lucide-react";
+import ProfileDropdown from "./ProfileDropdown";
 
 interface SearchResult {
   id: string;
@@ -73,52 +74,6 @@ export default function Topbar({
     }
   };
 
-  const handleLogout = () => {
-    const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
-
-    if (role === "admin") {
-      // Clear only admin tokens
-      document.cookie = `adminToken=; path=/; expires=${pastDate}`;
-      document.cookie = `adminRole=; path=/; expires=${pastDate}`;
-      // Also clear legacy tokens if they were set as admin
-      document.cookie = `token=; path=/; expires=${pastDate}`;
-      document.cookie = `role=; path=/; expires=${pastDate}`;
-      localStorage.removeItem("adminToken");
-      localStorage.removeItem("adminRole");
-      localStorage.removeItem("adminUser");
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      localStorage.removeItem("user");
-      dispatch(logoutAdmin());
-      dispatch(logout());
-      window.location.href = "/admin/signin";
-    } else if (role === "teacher") {
-      // Clear only teacher tokens
-      document.cookie = `teacherToken=; path=/; expires=${pastDate}`;
-      document.cookie = `teacherRole=; path=/; expires=${pastDate}`;
-      localStorage.removeItem("teacherToken");
-      localStorage.removeItem("teacherRole");
-      localStorage.removeItem("teacherUser");
-      dispatch(logoutTeacher());
-      window.location.href = "/signin";
-    } else {
-      // Clear only student tokens
-      document.cookie = `studentToken=; path=/; expires=${pastDate}`;
-      document.cookie = `studentRole=; path=/; expires=${pastDate}`;
-      // Also clear legacy tokens if they were set as student
-      document.cookie = `token=; path=/; expires=${pastDate}`;
-      document.cookie = `role=; path=/; expires=${pastDate}`;
-      localStorage.removeItem("studentToken");
-      localStorage.removeItem("studentRole");
-      localStorage.removeItem("studentUser");
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      localStorage.removeItem("user");
-      dispatch(logoutStudent());
-      dispatch(logout());
-      window.location.href = "/signin";
-    }
-  };
 
   return (
     <div className="h-16 
@@ -208,15 +163,8 @@ export default function Topbar({
         )}
       </div>
 
-      {/* Logout Button */}
-      <div className="flex items-center shrink-0">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 bg-[#2C4276] hover:bg-[#1e2e54] text-white rounded-full text-xs sm:text-sm font-bold shadow-sm hover:shadow-md transition-all active:scale-95 group"
-        >
-          <LogOut size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-          <span className="hidden xs:inline">Logout</span>
-        </button>
+      <div className="flex items-center gap-4 ml-auto shrink-0">
+        <ProfileDropdown role={role as "admin" | "teacher" | "student"} />
       </div>
     </div>
   );

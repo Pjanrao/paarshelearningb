@@ -5,15 +5,15 @@ import { User, LogOut, Settings, Key, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
-import { logout as logoutAction, logoutAdmin, logoutStudent } from "@/redux/authSlice";
+import { logout as logoutAction, logoutAdmin, logoutStudent, logoutTeacher } from "@/redux/authSlice";
 import Cookies from "js-cookie";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export default function ProfileDropdown() {
+export default function ProfileDropdown({ role = "student" }: { role?: "student" | "teacher" | "admin" }) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser || state.auth.adminUser);
+    const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser || state.auth.teacherUser || state.auth.adminUser);
     const dispatch = useDispatch();
     const router = useRouter();
 
@@ -39,6 +39,8 @@ export default function ProfileDropdown() {
             Cookies.remove("adminRole", { path: '/' });
             Cookies.remove("studentToken", { path: '/' });
             Cookies.remove("studentRole", { path: '/' });
+            Cookies.remove("teacherToken", { path: '/' });
+            Cookies.remove("teacherRole", { path: '/' });
 
             const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
             document.cookie = `token=; path=/; expires=${pastDate}`;
@@ -47,6 +49,8 @@ export default function ProfileDropdown() {
             document.cookie = `adminRole=; path=/; expires=${pastDate}`;
             document.cookie = `studentToken=; path=/; expires=${pastDate}`;
             document.cookie = `studentRole=; path=/; expires=${pastDate}`;
+            document.cookie = `teacherToken=; path=/; expires=${pastDate}`;
+            document.cookie = `teacherRole=; path=/; expires=${pastDate}`;
 
             localStorage.removeItem("token");
             localStorage.removeItem("role");
@@ -57,10 +61,14 @@ export default function ProfileDropdown() {
             localStorage.removeItem("studentToken");
             localStorage.removeItem("studentRole");
             localStorage.removeItem("studentUser");
+            localStorage.removeItem("teacherToken");
+            localStorage.removeItem("teacherRole");
+            localStorage.removeItem("teacherUser");
 
             dispatch(logoutAction());
             dispatch(logoutAdmin());
             dispatch(logoutStudent());
+            dispatch(logoutTeacher());
 
             window.location.href = "/";
         } catch (error) {
@@ -84,9 +92,11 @@ export default function ProfileDropdown() {
                 </div>
                 <div className="hidden sm:block text-left">
                     <p className="text-sm font-bold text-gray-900 leading-none mb-1">
-                        {user?.name || "Student"}
+                        {user?.name || (role === "teacher" ? "Teacher" : role === "admin" ? "Admin" : "Student")}
                     </p>
-                    <p className="text-[11px] text-gray-500 font-medium">Student Dashboard</p>
+                    <p className="text-[11px] text-gray-500 font-medium">
+                        {role === "teacher" ? "Teacher Dashboard" : role === "admin" ? "Admin Dashboard" : "Student Dashboard"}
+                    </p>
                 </div>
                 <ChevronDown
                     size={16}
@@ -97,13 +107,13 @@ export default function ProfileDropdown() {
             {isOpen && (
                 <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="px-4 py-3 border-b border-gray-50 mb-2">
-                        <p className="text-sm font-bold text-gray-900 truncate">{user?.name || "Student"}</p>
-                        <p className="text-xs text-gray-500 truncate">{user?.email || "student@example.com"}</p>
+                        <p className="text-sm font-bold text-gray-900 truncate">{user?.name || (role === "teacher" ? "Teacher" : role === "admin" ? "Admin" : "Student")}</p>
+                        <p className="text-xs text-gray-500 truncate">{user?.email || `${role}@example.com`}</p>
                     </div>
 
                     <div className="px-2">
                         <Link
-                            href="/student/profile"
+                            href={role === "teacher" ? "/teacher/settings" : `/${role}/profile`}
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#2C4276] rounded-xl transition-all group"
                         >
@@ -114,7 +124,7 @@ export default function ProfileDropdown() {
                         </Link>
 
                         <Link
-                            href="/student/profile?tab=security"
+                            href={role === "teacher" ? "/teacher/settings?tab=security" : `/${role}/profile?tab=security`}
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#2C4276] rounded-xl transition-all group"
                         >

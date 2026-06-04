@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
     User,
     Lock,
@@ -24,6 +25,8 @@ import Link from "next/link";
 
 export default function TeacherSettingsPage() {
     const { toast } = useToast();
+    const searchParams = useSearchParams();
+    const activeTab = searchParams.get("tab") === "security" ? "security" : "profile";
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
 
@@ -226,7 +229,7 @@ export default function TeacherSettingsPage() {
                     </div>
                 </div>
 
-                <Tabs defaultValue="profile" className="space-y-6">
+                <Tabs defaultValue={activeTab} key={activeTab} className="space-y-6">
                     <TabsList className="bg-white dark:bg-slate-900 p-1.5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 w-full lg:w-fit h-auto flex flex-col sm:flex-row gap-1 shadow-md">
                         <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-[#2C4276] data-[state=active]:text-white data-[state=inactive]:text-gray-500 py-3 px-6 font-bold transition-all flex-1 text-sm sm:text-base">
                             <User className="h-4 w-4 mr-2" />
