@@ -2,11 +2,21 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import SiteImage from "@/models/SiteImage";
 
+const normalizeUrl = (url: string) => {
+    const cleaned = url.toString().trim().replace(/\\/g, "/");
+    if (/^(https?:|data:|\/)/i.test(cleaned)) return cleaned;
+    return `/${cleaned.replace(/^\/+/, "")}`;
+};
+
 export async function GET(request: Request) {
     try {
         await connectDB();
-        const images = await SiteImage.find({}).sort({ category: 1, label: 1 });
-        return NextResponse.json(images);
+        const images = await SiteImage.find({}).sort({ category: 1, label: 1 }).lean();
+        const normalized = images.map((image: any) => ({
+            ...image,
+            url: image.url ? normalizeUrl(image.url) : image.url,
+        }));
+        return NextResponse.json(normalized);
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
@@ -25,18 +35,28 @@ export async function POST(request: Request) {
             );
         }
 
+        const normalizedUrl = normalizeUrl(url);
         const existing = await SiteImage.findOne({ key });
         if (existing) {
-            existing.url = url;
+            existing.url = normalizedUrl;
             existing.label = label;
             existing.category = category || existing.category;
             await existing.save();
-            return NextResponse.json(existing);
+            const saved = existing.toObject ? existing.toObject() : existing;
+            return NextResponse.json({
+                ...saved,
+                url: normalizedUrl,
+            });
         }
 
-        const newImage = await SiteImage.create({ key, url, label, category });
-        return NextResponse.json(newImage, { status: 201 });
+        const newImage = await SiteImage.create({ key, url: normalizedUrl, label, category });
+        const obj = newImage.toObject ? newImage.toObject() : newImage;
+        return NextResponse.json({
+            ...obj,
+            url: normalizedUrl,
+        }, { status: 201 });
     } catch (error: any) {
+        console.error("POST /api/admin/site-images error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
