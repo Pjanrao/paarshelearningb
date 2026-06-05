@@ -17,14 +17,15 @@ export async function POST(req: Request) {
         // Save based on environment
         const buffer = Buffer.from(await file.arrayBuffer());
         const filename = `${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
-        const folder = formData.get("folder") as string || "courses/receipts";
+        const folderRaw = (formData.get("folder") as string) || "courses/receipts";
+        const folder = folderRaw.replace(/^[\/]+/, "");
         const relativePath = `/uploads/${folder}/${filename}`;
         
         const basePath = process.env.NODE_ENV === "development"
             ? path.join(process.cwd(), "public")
             : "/var/www";
         
-        const fullPath = path.join(basePath, relativePath);
+        const fullPath = path.join(basePath, "uploads", ...folder.split(/[\\/]+/), filename);
         
         // Ensure directory exists
         const dir = path.dirname(fullPath);

@@ -43,6 +43,18 @@ const PREDEFINED_KEYS = [
     { key: "FAVICON", label: "Website Favicon", category: "Brand" },
 ];
 
+const DEFAULT_PREVIEW_IMAGES: Record<string, string> = {
+    SITE_LOGO: "/images/logo/logo-wide.webp",
+    SITE_LOGO_DARK: "/images/logo/logo-wide.webp",
+    HOME_HERO_BG: "/images/hero/digital-marketing-course.png",
+    WHY_CHOOSE_US_IMAGE: "/images/work-progress/why_choose.png",
+    ABOUT_US_BANNER: "/images/contact-page/Working.png",
+    CONTACT_US_IMAGE: "/images/contact-page/vision.png",
+    AUTH_SIDE_IMAGE: "/images/logo/logo-wide.webp",
+    NOT_FOUND_IMAGE: "/images/svgs/404.svg",
+    FAVICON: "/favicon.ico",
+};
+
 export default function ImageManagementPage() {
     const [images, setImages] = useState<SiteImage[]>([]);
     const [loading, setLoading] = useState(true);
@@ -57,6 +69,7 @@ export default function ImageManagementPage() {
             setLoading(true);
             const response = await fetch("/api/admin/site-images");
             const data = await response.json();
+            console.log("Fetched site images:", data);
             if (response.ok) {
                 setImages(data);
             }
@@ -67,6 +80,7 @@ export default function ImageManagementPage() {
             setLoading(false);
         }
     };
+
 
     useEffect(() => {
         fetchImages();
@@ -93,6 +107,7 @@ export default function ImageManagementPage() {
     const handleUpload = async (key: string, label: string, category: string, file: File) => {
         setUpdatingKey(key);
         try {
+            console.log(`Uploading image for key: ${key}`, file);
             // 1. Upload file
             const formData = new FormData();
             formData.append("file", file);
@@ -103,20 +118,27 @@ export default function ImageManagementPage() {
                 body: formData,
             });
             const uploadData = await uploadRes.json();
+            console.log("Upload response:", uploadData, "Status:", uploadRes.status);
 
             if (!uploadRes.ok) throw new Error(uploadData.error || "Upload failed");
 
             // 2. Save metadata
+            const payload = {
+                key,
+                label,
+                category,
+                url: uploadData.url
+            };
+            console.log("Saving metadata:", payload);
+            
             const saveRes = await fetch("/api/admin/site-images", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    key,
-                    label,
-                    category,
-                    url: uploadData.url
-                }),
+                body: JSON.stringify(payload),
             });
+            
+            const saveData = await saveRes.json();
+            console.log("Save response:", saveData, "Status:", saveRes.status);
 
             if (saveRes.ok) {
                 toast.success(`${label} updated successfully`);
@@ -125,6 +147,7 @@ export default function ImageManagementPage() {
                 throw new Error("Failed to save image metadata");
             }
         } catch (error: any) {
+            console.error("Upload error:", error);
             toast.error(error.message);
         } finally {
             setUpdatingKey(null);
@@ -185,9 +208,23 @@ export default function ImageManagementPage() {
         }
     };
 
-    const getImageForKey = (key: string) => {
-        return images.find(img => img.key === key);
+    const normalizeUrl = (url: string) => {
+        if (!url) return "";
+        const cleaned = url.trim().replace(/\\/g, "/");
+        if (/^(https?:|data:|\/)/i.test(cleaned)) {
+            return cleaned;
+        }
+        return `/${cleaned}`;
     };
+
+    const getImageForKey = (key: string) => {
+        const found = images.find(img => img.key === key);
+        if (found) {
+            console.log(`Found image for ${key}:`, found);
+        }
+        return found;
+    };
+
 
     const filteredKeys = PREDEFINED_KEYS.filter(k =>
         k.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -233,7 +270,10 @@ export default function ImageManagementPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredKeys.map((item) => {
                         const savedImage = getImageForKey(item.key);
+                        const defaultPreview = DEFAULT_PREVIEW_IMAGES[item.key];
+                        const previewUrl = savedImage?.url ? normalizeUrl(savedImage.url) : defaultPreview;
                         const isUpdating = updatingKey === item.key;
+                        const hasPreview = Boolean(previewUrl && !imageErrors[item.key]);
 
                         return (
                             <motion.div
@@ -251,9 +291,9 @@ export default function ImageManagementPage() {
                                 </div>
 
                                 <div className="relative aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
-                                    {savedImage && !imageErrors[item.key] ? (
+                                    {hasPreview ? (
                                         <img
-                                            src={savedImage.url}
+                                            src={previewUrl!}
                                             alt={item.label}
                                             onError={() => setImageErrors(prev => ({ ...prev, [item.key]: true }))}
                                             className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
@@ -338,60 +378,7 @@ export default function ImageManagementPage() {
                 </div>
             )}
 
-            {/* Blog images section */}
-            <div className="mt-10">
-                <h2 className="text-2xl font-bold mb-4">Blog Images</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {blogPosts.map((post) => {
-                        const key = `BLOG_${post.slug}`;
-                        const savedImage = getImageForKey(key);
-                        const isUpdating = updatingKey === key;
-
-                        return (
-                            <div key={post.slug} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-                                <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
-                                    <div>
-                                        <h3 className="font-bold text-gray-800 text-sm">{post.title}</h3>
-                                        <p className="text-xs text-gray-500">{post.slug}</p>
-                                    </div>
-                                    <div className={`w-2 h-2 rounded-full ${savedImage ? 'bg-green-500' : 'bg-amber-400'} shadow-sm`} />
-                                </div>
-
-                                <div className="relative aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
-                                    {(savedImage || post.coverImage) ? (
-                                        <img src={(savedImage && savedImage.url) ? savedImage.url : (post.coverImage || '')} alt={post.title} className="w-full h-full object-contain p-2" />
-                                    ) : (
-                                        <div className="flex flex-col items-center gap-2 text-gray-400">
-                                            <ImageIcon size={40} strokeWidth={1.5} />
-                                            <span className="text-xs font-medium">No Image Configured</span>
-                                        </div>
-                                    )}
-
-                                    {isUpdating && (
-                                        <div className="absolute inset-0 bg-white/80 backdrop-blur-[2px] flex flex-col items-center justify-center z-10">
-                                            <Loader2 className="animate-spin text-[#2C4276] mb-2" size={32} />
-                                            <span className="text-xs font-bold text-[#2C4276] animate-pulse uppercase tracking-wider">Uploading...</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="p-4 bg-white mt-auto">
-                                    <div className="flex items-center gap-2">
-                                        <label className={`flex-1 cursor-pointer flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-[11px] font-bold bg-[#2C4276] text-white`}>
-                                            <Upload size={14} />
-                                            Upload
-                                            <input type="file" className="hidden" accept="image/*" disabled={isUpdating} onChange={(e) => {
-                                                const file = e.target.files?.[0];
-                                                if (file) handleBlogUpload(post.slug, post.title, file);
-                                            }} />
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        )
-                    })}
-                </div>
-            </div>
+            {/* Blog images section removed - using static site defaults and DB-driven site images only */}
 
             <div className="mt-10 bg-blue-50/50 rounded-2xl p-5 border border-blue-100 flex gap-4 items-start">
                 <div className="mt-1 bg-blue-100 p-2 rounded-lg text-blue-600">

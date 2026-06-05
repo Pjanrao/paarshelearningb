@@ -18,7 +18,7 @@ export interface Course {
   description?: string;
   shortDescription?: string;
   category?: any;
-  date?: string;
+  date?: string;  
   fee?: number;
   rating?: number;
   duration?: any;
