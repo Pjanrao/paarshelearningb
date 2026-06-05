@@ -15,8 +15,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useState, useEffect } from "react";
-import { toast } from "react-hot-toast";
-import { Pencil, CheckCircle, XCircle, Clock } from "lucide-react";
+import { toast } from "sonner";
+import { Pencil, CheckCircle, XCircle, Clock, Loader2 } from "lucide-react";
 
 interface Props {
     open: boolean;
@@ -78,8 +78,8 @@ export default function WithdrawalEditModal({ open, setOpen, withdrawal }: Props
                                     key={item.id}
                                     onClick={() => setStatus(item.id)}
                                     className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${status === item.id
-                                            ? `${item.border} ${item.bg}`
-                                            : "border-gray-100 hover:border-gray-200 bg-white"
+                                        ? `${item.border} ${item.bg}`
+                                        : "border-gray-100 hover:border-gray-200 bg-white"
                                         }`}
                                 >
                                     <item.icon className={status === item.id ? item.color : "text-gray-400"} size={20} />
@@ -114,9 +114,14 @@ export default function WithdrawalEditModal({ open, setOpen, withdrawal }: Props
                     <button
                         onClick={handleSubmit}
                         disabled={isLoading}
-                        className="flex-1 py-3 text-sm font-bold text-white bg-[#2C4276] rounded-xl hover:bg-opacity-90 transition shadow-lg shadow-[#2C4276]/10 disabled:opacity-50"
+                        className="flex-1 py-3 text-sm font-bold text-white bg-[#2C4276] rounded-xl hover:bg-opacity-90 transition shadow-lg shadow-[#2C4276]/10 disabled:opacity-50 flex items-center justify-center gap-2"
                     >
-                        {isLoading ? "Saving..." : "Save Changes"}
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="animate-spin" size={18} />
+                                <span>Saving...</span>
+                            </>
+                        ) : "Save Changes"}
                     </button>
                 </div>
             </DialogContent>

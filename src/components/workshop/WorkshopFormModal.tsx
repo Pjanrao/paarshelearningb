@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import { toast } from "sonner";
 
 interface Workshop {
     _id?: string;
@@ -61,6 +62,27 @@ export default function WorkshopFormModal({
 
 
     const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!form.title.trim()) newErrors.title = "Workshop title is required";
+        if (!form.description.trim()) newErrors.description = "Description is required";
+        if (!form.instructorName.trim()) newErrors.instructorName = "Instructor name is required";
+        if (!form.date) newErrors.date = "Date is required";
+        if (!form.time) newErrors.time = "Time is required";
+        if (!form.duration.trim()) newErrors.duration = "Duration is required";
+
+        if (form.mode === "online" && !form.meetingLink.trim()) {
+            newErrors.meetingLink = "Meeting link is required for online workshop";
+        }
+        if (form.mode === "offline" && !form.location.trim()) {
+            newErrors.location = "Location is required for offline workshop";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     useEffect(() => {
         if (editing) {
@@ -99,27 +121,12 @@ export default function WorkshopFormModal({
 
 
     const handleSubmit = async () => {
+        if (!validate()) {
+            toast.error("Please fix validation errors ❌");
+            return;
+        }
         setLoading(true);
         try {
-
-            // ✅ STEP 1: VALIDATION (FIRST)
-            if (!form.title || !form.description) {
-                alert("Title and Description are required");
-                setLoading(false);
-                return;
-            }
-
-            if (form.mode === "online" && !form.meetingLink) {
-                alert("Meeting link is required for online workshop");
-                setLoading(false);
-                return;
-            }
-
-            if (form.mode === "offline" && !form.location) {
-                alert("Location is required for offline workshop");
-                setLoading(false);
-                return;
-            }
             const payload = {
                 ...form,
                 highlights: form.highlights.filter((h) => h.trim() !== ""),
@@ -139,6 +146,7 @@ export default function WorkshopFormModal({
             });
 
             if (res.ok) {
+                toast.success(editing ? "Workshop updated successfully ✅" : "Workshop published successfully ✅");
                 onClose();
                 setForm({
                     title: "",
@@ -156,11 +164,11 @@ export default function WorkshopFormModal({
                 });
             } else {
                 const data = await res.json();
-                alert(data.message || "Failed to save workshop");
+                toast.error(data.message || "Failed to save workshop ❌");
             }
         } catch (error) {
             console.error("Error saving workshop:", error);
-            alert("An error occurred while saving the workshop");
+            toast.error("An error occurred while saving the workshop ❌");
         } finally {
             setLoading(false);
         }
@@ -189,10 +197,15 @@ export default function WorkshopFormModal({
                             </label>
                             <Input
                                 placeholder="Enter workshop title"
-                                className="h-11 border-gray-200 focus:border-blue-600 rounded-xl"
+                                className={`h-11 border-gray-200 focus:border-blue-600 rounded-xl ${errors.title ? "border-red-500 bg-red-50" : ""
+                                    }`}
                                 value={form.title}
-                                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                                onChange={(e) => {
+                                    setForm({ ...form, title: e.target.value });
+                                    if (errors.title) setErrors({ ...errors, title: "" });
+                                }}
                             />
+                            {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
                         </div>
 
                         {/* Subtitle */}
@@ -216,10 +229,15 @@ export default function WorkshopFormModal({
                             <Textarea
                                 rows={4}
                                 placeholder="Describe the workshop..."
-                                className="border-gray-200 focus:border-blue-600 rounded-xl resize-none"
+                                className={`border-gray-200 focus:border-blue-600 rounded-xl resize-none ${errors.description ? "border-red-500 bg-red-50" : ""
+                                    }`}
                                 value={form.description}
-                                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                                onChange={(e) => {
+                                    setForm({ ...form, description: e.target.value });
+                                    if (errors.description) setErrors({ ...errors, description: "" });
+                                }}
                             />
+                            {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description}</p>}
                         </div>
 
                         {/* Highlights/Benefits */}
@@ -258,10 +276,15 @@ export default function WorkshopFormModal({
                                 </label>
                                 <Input
                                     type="date"
-                                    className="h-11 border-gray-200 focus:border-blue-600 rounded-xl"
+                                    className={`h-11 border-gray-200 focus:border-blue-600 rounded-xl ${errors.date ? "border-red-500 bg-red-50" : ""
+                                        }`}
                                     value={form.date}
-                                    onChange={(e) => setForm({ ...form, date: e.target.value })}
+                                    onChange={(e) => {
+                                        setForm({ ...form, date: e.target.value });
+                                        if (errors.date) setErrors({ ...errors, date: "" });
+                                    }}
                                 />
+                                {errors.date && <p className="text-xs text-red-500 mt-1">{errors.date}</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">
@@ -269,10 +292,15 @@ export default function WorkshopFormModal({
                                 </label>
                                 <Input
                                     type="time"
-                                    className="h-11 border-gray-200 focus:border-blue-600 rounded-xl"
+                                    className={`h-11 border-gray-200 focus:border-blue-600 rounded-xl ${errors.time ? "border-red-500 bg-red-50" : ""
+                                        }`}
                                     value={form.time}
-                                    onChange={(e) => setForm({ ...form, time: e.target.value })}
+                                    onChange={(e) => {
+                                        setForm({ ...form, time: e.target.value });
+                                        if (errors.time) setErrors({ ...errors, time: "" });
+                                    }}
                                 />
+                                {errors.time && <p className="text-xs text-red-500 mt-1">{errors.time}</p>}
                             </div>
                         </div>
 
@@ -283,10 +311,15 @@ export default function WorkshopFormModal({
                                 </label>
                                 <Input
                                     placeholder="e.g. 2 Hours"
-                                    className="h-11 border-gray-200 focus:border-blue-600 rounded-xl"
+                                    className={`h-11 border-gray-200 focus:border-blue-600 rounded-xl ${errors.duration ? "border-red-500 bg-red-50" : ""
+                                        }`}
                                     value={form.duration}
-                                    onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                                    onChange={(e) => {
+                                        setForm({ ...form, duration: e.target.value });
+                                        if (errors.duration) setErrors({ ...errors, duration: "" });
+                                    }}
                                 />
+                                {errors.duration && <p className="text-xs text-red-500 mt-1">{errors.duration}</p>}
                             </div>
                         </div>
 
@@ -296,10 +329,15 @@ export default function WorkshopFormModal({
                             </label>
                             <Input
                                 placeholder="Expert Name"
-                                className="h-11 border-gray-200 focus:border-blue-600 rounded-xl"
+                                className={`h-11 border-gray-200 focus:border-blue-600 rounded-xl ${errors.instructorName ? "border-red-500 bg-red-50" : ""
+                                    }`}
                                 value={form.instructorName}
-                                onChange={(e) => setForm({ ...form, instructorName: e.target.value })}
+                                onChange={(e) => {
+                                    setForm({ ...form, instructorName: e.target.value });
+                                    if (errors.instructorName) setErrors({ ...errors, instructorName: "" });
+                                }}
                             />
+                            {errors.instructorName && <p className="text-xs text-red-500 mt-1">{errors.instructorName}</p>}
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -348,10 +386,15 @@ export default function WorkshopFormModal({
                                     </label>
                                     <Input
                                         placeholder="Enter full address"
-                                        className="h-11 border-gray-200 bg-white rounded-xl"
+                                        className={`h-11 border-gray-200 bg-white rounded-xl ${errors.location ? "border-red-500 bg-red-50" : ""
+                                            }`}
                                         value={form.location}
-                                        onChange={(e) => setForm({ ...form, location: e.target.value })}
+                                        onChange={(e) => {
+                                            setForm({ ...form, location: e.target.value });
+                                            if (errors.location) setErrors({ ...errors, location: "" });
+                                        }}
                                     />
+                                    {errors.location && <p className="text-xs text-red-500 mt-1">{errors.location}</p>}
                                 </div>
                             ) : (
                                 <div>
@@ -360,10 +403,15 @@ export default function WorkshopFormModal({
                                     </label>
                                     <Input
                                         placeholder="Zoom, Google Meet, etc."
-                                        className="h-11 border-gray-200 bg-white rounded-xl text-blue-600"
+                                        className={`h-11 border-gray-200 bg-white rounded-xl text-blue-600 ${errors.meetingLink ? "border-red-500 bg-red-50" : ""
+                                            }`}
                                         value={form.meetingLink}
-                                        onChange={(e) => setForm({ ...form, meetingLink: e.target.value })}
+                                        onChange={(e) => {
+                                            setForm({ ...form, meetingLink: e.target.value });
+                                            if (errors.meetingLink) setErrors({ ...errors, meetingLink: "" });
+                                        }}
                                     />
+                                    {errors.meetingLink && <p className="text-xs text-red-500 mt-1">{errors.meetingLink}</p>}
                                 </div>
                             )}
                         </div>

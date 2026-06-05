@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-    Upload, 
-    Image as ImageIcon, 
-    Save, 
-    Loader2, 
-    CheckCircle, 
-    Info, 
+import {
+    Upload,
+    Image as ImageIcon,
+    Save,
+    Loader2,
+    CheckCircle,
+    Info,
     Search,
     RefreshCcw,
     Layout,
@@ -15,6 +15,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 interface SiteImage {
     _id?: string;
@@ -42,6 +49,8 @@ export default function ImageManagementPage() {
     const [updatingKey, setUpdatingKey] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
+    const [deleteId, setDeleteId] = useState<{ key: string; label: string } | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const fetchImages = async () => {
         try {
@@ -63,7 +72,7 @@ export default function ImageManagementPage() {
         fetchImages();
     }, []);
 
-    const [blogPosts, setBlogPosts] = useState<Array<{slug:string,title:string,coverImage?:string}>>([]);
+    const [blogPosts, setBlogPosts] = useState<Array<{ slug: string, title: string, coverImage?: string }>>([]);
 
     const fetchBlogPosts = async () => {
         try {
@@ -122,18 +131,18 @@ export default function ImageManagementPage() {
         }
     };
 
-    const handleDelete = async (key: string, label: string) => {
-        if (!confirm(`Are you sure you want to remove the image for "${label}"?`)) return;
-
-        setUpdatingKey(key);
+    const handleDelete = async () => {
+        if (!deleteId) return;
+        setDeleteLoading(true);
         try {
-            const response = await fetch(`/api/admin/site-images?key=${key}`, {
+            const response = await fetch(`/api/admin/site-images?key=${deleteId.key}`, {
                 method: "DELETE",
             });
 
             if (response.ok) {
-                toast.success(`${label} image removed successfully`);
+                toast.success(`${deleteId.label} image removed successfully`);
                 fetchImages();
+                setDeleteId(null);
             } else {
                 const data = await response.json();
                 throw new Error(data.error || "Failed to remove image");
@@ -141,7 +150,7 @@ export default function ImageManagementPage() {
         } catch (error: any) {
             toast.error(error.message);
         } finally {
-            setUpdatingKey(null);
+            setDeleteLoading(false);
         }
     };
 
@@ -180,8 +189,8 @@ export default function ImageManagementPage() {
         return images.find(img => img.key === key);
     };
 
-    const filteredKeys = PREDEFINED_KEYS.filter(k => 
-        k.label.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const filteredKeys = PREDEFINED_KEYS.filter(k =>
+        k.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
         k.key.toLowerCase().includes(searchQuery.toLowerCase()) ||
         k.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -193,7 +202,7 @@ export default function ImageManagementPage() {
                     <h1 className="text-3xl font-bold text-[#2C4276]">Image Management</h1>
                     <p className="text-gray-500 mt-1">Manage all website banners and illustrations</p>
                 </div>
-                <button 
+                <button
                     onClick={fetchImages}
                     className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
                     title="Refresh List"
@@ -206,8 +215,8 @@ export default function ImageManagementPage() {
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
                     <Search size={18} />
                 </div>
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     placeholder="Search by label, key or category..."
                     className="w-full pl-10 pr-4 py-3 bg-white border border-gray-100 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                     value={searchQuery}
@@ -227,7 +236,7 @@ export default function ImageManagementPage() {
                         const isUpdating = updatingKey === item.key;
 
                         return (
-                            <motion.div 
+                            <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 key={item.key}
@@ -243,8 +252,8 @@ export default function ImageManagementPage() {
 
                                 <div className="relative aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
                                     {savedImage && !imageErrors[item.key] ? (
-                                        <img 
-                                            src={savedImage.url} 
+                                        <img
+                                            src={savedImage.url}
                                             alt={item.label}
                                             onError={() => setImageErrors(prev => ({ ...prev, [item.key]: true }))}
                                             className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
@@ -289,9 +298,9 @@ export default function ImageManagementPage() {
                                             `}>
                                                 <Upload size={14} />
                                                 {savedImage ? 'Update' : 'Upload'}
-                                                <input 
-                                                    type="file" 
-                                                    className="hidden" 
+                                                <input
+                                                    type="file"
+                                                    className="hidden"
                                                     accept="image/*"
                                                     disabled={isUpdating}
                                                     onChange={(e) => {
@@ -303,7 +312,7 @@ export default function ImageManagementPage() {
 
                                             {savedImage && (
                                                 <button
-                                                    onClick={() => handleDelete(item.key, item.label)}
+                                                    onClick={() => setDeleteId({ key: item.key, label: item.label })}
                                                     disabled={isUpdating}
                                                     className={`
                                                         p-2.5 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 transition-all
@@ -349,7 +358,7 @@ export default function ImageManagementPage() {
                                 </div>
 
                                 <div className="relative aspect-video bg-gray-100 flex items-center justify-center overflow-hidden">
-                                    { (savedImage || post.coverImage) ? (
+                                    {(savedImage || post.coverImage) ? (
                                         <img src={(savedImage && savedImage.url) ? savedImage.url : (post.coverImage || '')} alt={post.title} className="w-full h-full object-contain p-2" />
                                     ) : (
                                         <div className="flex flex-col items-center gap-2 text-gray-400">
@@ -391,12 +400,48 @@ export default function ImageManagementPage() {
                 <div>
                     <h4 className="text-blue-900 font-bold mb-1">Developer Information</h4>
                     <p className="text-sm text-blue-800/70 leading-relaxed">
-                        These images are identified by their unique <strong>Key Reference</strong>. 
+                        These images are identified by their unique <strong>Key Reference</strong>.
                         When you update an image here, it will automatically change everywhere it is used on the website.
                         Ensure the images have the correct aspect ratio for their intended location.
                     </p>
                 </div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+                <AlertDialogContent className="max-w-md bg-white rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl text-center">
+                    <div className="p-8 space-y-6">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-red-50/50 text-red-600">
+                            <Trash2 size={40} />
+                        </div>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
+                                Remove Image?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm font-medium text-gray-400">
+                                This will remove the custom image for <span className="text-red-500 font-bold">{deleteId?.label}</span>. The website will revert to its default state for this asset.
+                            </AlertDialogDescription>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleteLoading}
+                                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200 disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                {deleteLoading ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={18} />}
+                                Confirm Removal
+                            </button>
+                            <button
+                                onClick={() => setDeleteId(null)}
+                                className="w-full py-4 text-gray-400 font-bold hover:text-gray-600 bg-transparent hover:bg-gray-50 rounded-2xl transition-all"
+                            >
+                                Keep Asset
+                            </button>
+                        </div>
+                    </div>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

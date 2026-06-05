@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Eye, Pencil, Trash2, Plus, Search, Loader2, X, Star, CheckCircle, XCircle, BookOpen, Layers, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 
 import {
     AlertDialog,
@@ -154,8 +155,9 @@ export default function TeachersPage() {
 
     const handleAddTeacher = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
+            toast.error("Please fix validation errors ❌");
             return;
         }
 
@@ -171,15 +173,18 @@ export default function TeachersPage() {
             const data = await response.json();
 
             if (response.ok) {
+                toast.success("Teacher registered successfully ✅");
                 setIsAddModalOpen(false);
                 resetForm();
                 fetchTeachers();
             } else {
                 setFormErrors({ submit: data.message || "Failed to create teacher" });
+                toast.error(data.message || "Registration failed ❌");
             }
         } catch (error) {
             console.error("Error creating teacher:", error);
             setFormErrors({ submit: "Failed to create teacher" });
+            toast.error("An error occurred ❌");
         } finally {
             setFormLoading(false);
         }
@@ -190,6 +195,7 @@ export default function TeachersPage() {
         if (!selectedTeacher) return;
 
         if (!validateForm()) {
+            toast.error("Please fix validation errors ❌");
             return;
         }
 
@@ -211,15 +217,18 @@ export default function TeachersPage() {
             const data = await response.json();
 
             if (response.ok) {
+                toast.success("Teacher updated successfully ✅");
                 setIsEditModalOpen(false);
                 resetForm();
                 fetchTeachers();
             } else {
                 setFormErrors({ submit: data.message || "Failed to update teacher" });
+                toast.error(data.message || "Update failed ❌");
             }
         } catch (error) {
             console.error("Error updating teacher:", error);
             setFormErrors({ submit: "Failed to update teacher" });
+            toast.error("An error occurred ❌");
         } finally {
             setFormLoading(false);
         }
@@ -234,14 +243,15 @@ export default function TeachersPage() {
             });
 
             if (response.ok) {
+                toast.success("Teacher deleted successfully ✅");
                 fetchTeachers();
                 setDeleteId(null);
             } else {
-                alert("Failed to delete teacher");
+                toast.error("Failed to delete teacher ❌");
             }
         } catch (error) {
             console.error("Error deleting teacher:", error);
-            alert("Failed to delete teacher");
+            toast.error("An error occurred ❌");
         } finally {
             setDeleteLoading(false);
         }
@@ -255,13 +265,14 @@ export default function TeachersPage() {
                 body: JSON.stringify({ approvalStatus: status }),
             });
             if (response.ok) {
+                toast.success(`Teacher status updated to ${status} ✅`);
                 fetchTeachers();
             } else {
-                alert("Failed to update status");
+                toast.error("Failed to update status ❌");
             }
         } catch (error) {
             console.error("Error updating status:", error);
-            alert("Failed to update status");
+            toast.error("An error occurred ❌");
         }
     };
 
@@ -390,24 +401,25 @@ export default function TeachersPage() {
                 body: JSON.stringify({ assignedCourses: selectedAssignedCourses }),
             });
             if (!response.ok) throw new Error("Failed to save assigned courses");
+            toast.success("Courses assigned successfully ✅");
             setIsAssignCourseModalOpen(false);
             setSelectedTeacherForAssign(null);
             fetchTeachers();
         } catch (error) {
             console.error("Error assigning courses:", error);
-            alert("Failed to assign courses. Try again.");
+            toast.error("Failed to assign courses ❌");
         }
     };
 
     const handleAssignBatchSave = async () => {
         if (!selectedTeacherForAssign || !selectedBatchId) {
-            alert("Please select a batch to assign.");
+            toast.error("Please select a batch to assign ⚠️");
             return;
         }
 
         const teacherUserId = selectedTeacherForAssign.userId ? String(selectedTeacherForAssign.userId) : "";
         if (!teacherUserId) {
-            alert("Teacher does not have a linked user account to assign to this batch.");
+            toast.error("Teacher account is not ready ⚠️");
             return;
         }
 
@@ -418,13 +430,14 @@ export default function TeachersPage() {
                 body: JSON.stringify({ assignedTeacher: teacherUserId }),
             });
             if (!response.ok) throw new Error("Failed to assign batch");
+            toast.success("Batch assigned successfully ✅");
             setIsAssignBatchModalOpen(false);
             setSelectedTeacherForAssign(null);
             setSelectedBatchId("");
             fetchTeachers();
         } catch (error) {
             console.error("Error assigning batch:", error);
-            alert("Failed to assign batch. Try again.");
+            toast.error("Failed to assign batch ❌");
         }
     };
 
@@ -1043,31 +1056,37 @@ export default function TeachersPage() {
             )}
 
             <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-                <AlertDialogContent className="max-w-md bg-white dark:bg-gray-900">
-                    <AlertDialogHeader className="flex flex-col items-center text-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
-                            <Trash2 className="text-red-600" size={22} />
+                <AlertDialogContent className="max-w-md bg-white rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
+                    <div className="p-8 text-center bg-white space-y-6">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-red-50/50">
+                            <Trash2 className="text-red-600" size={32} />
                         </div>
-                        <AlertDialogTitle className="text-lg font-semibold text-gray-900">
-                            Delete Teacher
-                        </AlertDialogTitle>
-                        <AlertDialogDescription className="text-sm text-gray-500 leading-relaxed">
-                            Are you sure you want to delete <span className="font-bold text-gray-800">{deleteId?.name}</span>? This action cannot be undone and will permanently delete the teacher from the system.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="flex justify-center gap-3 mt-4">
-                        <Button variant="outline" onClick={() => setDeleteId(null)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleDeleteTeacher}
-                            disabled={deleteLoading}
-                            className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-60"
-                        >
-                            {deleteLoading && <Loader2 className="animate-spin mr-2" size={16} />}
-                            Delete
-                        </Button>
-                    </AlertDialogFooter>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
+                                Delete Teacher?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm font-medium text-gray-400">
+                                Are you sure you want to delete <span className="text-red-500 font-bold">{deleteId?.name}</span>? This action cannot be undone and will permanently delete the teacher from the system.
+                            </AlertDialogDescription>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleDeleteTeacher}
+                                disabled={deleteLoading}
+                                className="w-full py-4 bg-red-600 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200 disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                {deleteLoading ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={18} />}
+                                Confirm Delete
+                            </button>
+                            <button
+                                onClick={() => setDeleteId(null)}
+                                className="w-full py-4 text-gray-400 font-bold hover:text-gray-600 bg-transparent hover:bg-gray-50 rounded-2xl transition-all"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
                 </AlertDialogContent>
             </AlertDialog>
         </div>

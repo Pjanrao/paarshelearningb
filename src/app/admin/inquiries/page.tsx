@@ -126,9 +126,24 @@ export default function InquiriesManagementPage() {
         }
     };
 
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!selectedInquiry?.source?.trim()) newErrors.source = "Lead source is required";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleUpdateInquiry = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedInquiry) return;
+
+        if (!validate()) {
+            toast.error("Please fix validation errors ❌");
+            return;
+        }
 
         setUpdateLoading(true);
         try {
@@ -139,14 +154,16 @@ export default function InquiriesManagementPage() {
             });
 
             if (response.ok) {
+                toast.success("Inquiry updated successfully ✅");
                 setIsEditModalOpen(false);
                 fetchInquiries();
             } else {
-                alert("Failed to update inquiry");
+                const errorData = await response.json();
+                toast.error("Error: " + (errorData.error || "Failed to update inquiry ❌"));
             }
         } catch (error) {
             console.error("Error updating inquiry:", error);
-            alert("Failed to update inquiry");
+            toast.error("Failed to update inquiry ❌");
         } finally {
             setUpdateLoading(false);
         }
@@ -551,14 +568,19 @@ export default function InquiriesManagementPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Lead Source</label>
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Lead Source <span className="text-red-500">*</span></label>
                                 <input
                                     type="text"
                                     value={selectedInquiry.source || ""}
-                                    onChange={(e) => setSelectedInquiry({ ...selectedInquiry, source: e.target.value })}
-                                    className="w-full bg-gray-50 border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium"
+                                    onChange={(e) => {
+                                        setSelectedInquiry({ ...selectedInquiry, source: e.target.value });
+                                        if (errors.source) setErrors({ ...errors, source: "" });
+                                    }}
+                                    className={`w-full bg-gray-50 border rounded-xl p-3 outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-medium ${errors.source ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
                                     placeholder="e.g. Website, Social Media, Referral"
                                 />
+                                {errors.source && <p className="text-xs text-red-500 mt-1">{errors.source}</p>}
                             </div>
 
                             <div className="flex gap-3 pt-4">

@@ -11,6 +11,12 @@ import {
     useDeleteEntranceTestMutation,
 } from "@/redux/api/entranceTestApi";
 import { Info } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import EntranceExamGuide from "@/components/practice-test/admin/EntranceExamGuide";
 
 interface Test {
@@ -91,7 +97,7 @@ const EntranceExamManagement = () => {
         return tests.map((test: Test) => ({
             ...test,
             collegeName: collegeMap[test.college] || "Unknown",
-        }));
+        })).reverse();
     }, [testsData, colleges]);
 
     const filteredTests = allTests.filter(
@@ -152,7 +158,39 @@ const EntranceExamManagement = () => {
         setIsDialogOpen(true);
     };
 
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!testForm.collegeId) newErrors.collegeId = "College is required";
+        if (!testForm.batchName) newErrors.batchName = "Batch Name is required";
+        if (!testForm.testDuration) newErrors.testDuration = "Duration is required";
+        if (!testForm.questionsPerTest) newErrors.questionsPerTest = "Questions count is required";
+        if (!testForm.passingScore) newErrors.passingScore = "Passing score is required";
+
+        if (testForm.hasExpiry) {
+            if (!testForm.startDate || !testForm.startTime) newErrors.startDateTime = "Missing start window";
+            if (!testForm.endDate || !testForm.endTime) newErrors.endDateTime = "Missing end window";
+
+            if (testForm.startDate && testForm.startTime && testForm.endDate && testForm.endTime) {
+                const start = new Date(`${testForm.startDate}T${testForm.startTime}`);
+                const end = new Date(`${testForm.endDate}T${testForm.endTime}`);
+                if (end <= start) {
+                    newErrors.endDateTime = "End time must be after start time";
+                }
+            }
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async () => {
+        if (!validate()) {
+            toast.error("Please fix validation errors ❌");
+            return;
+        }
+
         const {
             collegeId,
             batchName,
@@ -167,24 +205,12 @@ const EntranceExamManagement = () => {
             endTime
         } = testForm;
 
-        if (!collegeId || !batchName || !testDuration || !questionsPerTest || !passingScore) {
-            return toast.error("Required fields missing");
-        }
-
         let startDateTime = "";
         let endDateTime = "";
 
         if (hasExpiry) {
-            if (!startDate || !startTime || !endDate || !endTime) {
-                return toast.error("Please complete schedule window");
-            }
-
             startDateTime = new Date(`${startDate}T${startTime}`).toISOString();
             endDateTime = new Date(`${endDate}T${endTime}`).toISOString();
-
-            if (new Date(endDateTime) <= new Date(startDateTime)) {
-                return toast.error("End time must be after start time");
-            }
         }
 
         const payload = {
@@ -204,17 +230,17 @@ const EntranceExamManagement = () => {
         try {
             if (editingTest) {
                 await updateTest({ testId: editingTest.testId, ...payload }).unwrap();
-                toast.success("Exam updated successfully");
+                toast.success("Exam updated successfully ✅");
             } else {
                 await createTest(payload).unwrap();
-                toast.success("Exam created successfully");
+                toast.success("Exam created successfully ✅");
             }
 
             setIsDialogOpen(false);
             triggerGetTests("all");
 
         } catch (err: any) {
-            toast.error(err?.data?.message || "Operation failed");
+            toast.error(err?.data?.message || "Operation failed ❌");
         }
     };
 
@@ -428,33 +454,79 @@ const EntranceExamManagement = () => {
                                 <div className="space-y-1">
                                     <label className="block text-sm font-semibold text-gray-700">College <span className="text-red-500">*</span></label>
                                     <select
-                                        className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium"
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium transition-all ${errors.collegeId ? "border-red-500 bg-red-50" : "border-gray-200"
+                                            }`}
                                         value={testForm.collegeId}
-                                        onChange={e => setTestForm({ ...testForm, collegeId: e.target.value })}
+                                        onChange={e => {
+                                            setTestForm({ ...testForm, collegeId: e.target.value });
+                                            if (errors.collegeId) setErrors({ ...errors, collegeId: "" });
+                                        }}
                                         disabled={!!editingTest}
                                     >
                                         <option value="">Select college</option>
                                         {colleges.map((c: College) => (<option key={c._id} value={c._id}>{c.name}</option>))}
                                     </select>
+                                    {errors.collegeId && <p className="text-xs text-red-500">{errors.collegeId}</p>}
                                 </div>
                                 <div className="space-y-1">
                                     <label className="block text-sm font-semibold text-gray-700">Batch Name <span className="text-red-500">*</span></label>
-                                    <input type="text" placeholder="e.g. Summer-2024-B1" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={testForm.batchName} onChange={e => setTestForm({ ...testForm, batchName: e.target.value })} />
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Summer-2024-B1"
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.batchName ? "border-red-500 bg-red-50" : "border-gray-200"
+                                            }`}
+                                        value={testForm.batchName}
+                                        onChange={e => {
+                                            setTestForm({ ...testForm, batchName: e.target.value });
+                                            if (errors.batchName) setErrors({ ...errors, batchName: "" });
+                                        }}
+                                    />
+                                    {errors.batchName && <p className="text-xs text-red-500">{errors.batchName}</p>}
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div className="space-y-1">
                                     <label className="block text-sm font-semibold text-gray-700">Duration (mins) <span className="text-red-500">*</span></label>
-                                    <input type="number" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={testForm.testDuration} onChange={e => setTestForm({ ...testForm, testDuration: e.target.value })} />
+                                    <input
+                                        type="number"
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.testDuration ? "border-red-500 bg-red-50" : "border-gray-200"
+                                            }`}
+                                        value={testForm.testDuration}
+                                        onChange={e => {
+                                            setTestForm({ ...testForm, testDuration: e.target.value });
+                                            if (errors.testDuration) setErrors({ ...errors, testDuration: "" });
+                                        }}
+                                    />
+                                    {errors.testDuration && <p className="text-xs text-red-500">{errors.testDuration}</p>}
                                 </div>
                                 <div className="space-y-1">
                                     <label className="block text-sm font-semibold text-gray-700">Questions <span className="text-red-500">*</span></label>
-                                    <input type="number" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={testForm.questionsPerTest} onChange={e => setTestForm({ ...testForm, questionsPerTest: e.target.value })} />
+                                    <input
+                                        type="number"
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.questionsPerTest ? "border-red-500 bg-red-50" : "border-gray-200"
+                                            }`}
+                                        value={testForm.questionsPerTest}
+                                        onChange={e => {
+                                            setTestForm({ ...testForm, questionsPerTest: e.target.value });
+                                            if (errors.questionsPerTest) setErrors({ ...errors, questionsPerTest: "" });
+                                        }}
+                                    />
+                                    {errors.questionsPerTest && <p className="text-xs text-red-500">{errors.questionsPerTest}</p>}
                                 </div>
                                 <div className="space-y-1">
                                     <label className="block text-sm font-semibold text-gray-700">Pass Score <span className="text-red-500">*</span></label>
-                                    <input type="number" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" value={testForm.passingScore} onChange={e => setTestForm({ ...testForm, passingScore: e.target.value })} />
+                                    <input
+                                        type="number"
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.passingScore ? "border-red-500 bg-red-50" : "border-gray-200"
+                                            }`}
+                                        value={testForm.passingScore}
+                                        onChange={e => {
+                                            setTestForm({ ...testForm, passingScore: e.target.value });
+                                            if (errors.passingScore) setErrors({ ...errors, passingScore: "" });
+                                        }}
+                                    />
+                                    {errors.passingScore && <p className="text-xs text-red-500">{errors.passingScore}</p>}
                                 </div>
                             </div>
 
@@ -472,19 +544,57 @@ const EntranceExamManagement = () => {
 
                             {testForm.hasExpiry && (
                                 <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-600 mb-2 uppercase tracking-tight">Exam Start Window</label>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-bold text-gray-600 uppercase tracking-tight">Exam Start Window*</label>
                                         <div className="flex gap-2">
-                                            <input type="date" className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={testForm.startDate} onChange={e => setTestForm({ ...testForm, startDate: e.target.value })} />
-                                            <input type="time" className="w-32 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={testForm.startTime} onChange={e => setTestForm({ ...testForm, startTime: e.target.value })} />
+                                            <input
+                                                type="date"
+                                                className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.startDateTime ? "border-red-500 bg-red-50" : "border-gray-200"
+                                                    }`}
+                                                value={testForm.startDate}
+                                                onChange={e => {
+                                                    setTestForm({ ...testForm, startDate: e.target.value });
+                                                    if (errors.startDateTime) setErrors({ ...errors, startDateTime: "" });
+                                                }}
+                                            />
+                                            <input
+                                                type="time"
+                                                className={`w-32 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.startDateTime ? "border-red-500 bg-red-50" : "border-gray-200"
+                                                    }`}
+                                                value={testForm.startTime}
+                                                onChange={e => {
+                                                    setTestForm({ ...testForm, startTime: e.target.value });
+                                                    if (errors.startDateTime) setErrors({ ...errors, startDateTime: "" });
+                                                }}
+                                            />
                                         </div>
+                                        {errors.startDateTime && <p className="text-xs text-red-500">{errors.startDateTime}</p>}
                                     </div>
-                                    <div className="pt-2">
-                                        <label className="block text-sm font-bold text-gray-600 mb-2 uppercase tracking-tight">Exam End Window</label>
+                                    <div className="space-y-2 pt-2">
+                                        <label className="block text-sm font-bold text-gray-600 uppercase tracking-tight">Exam End Window*</label>
                                         <div className="flex gap-2">
-                                            <input type="date" className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={testForm.endDate} onChange={e => setTestForm({ ...testForm, endDate: e.target.value })} />
-                                            <input type="time" className="w-32 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={testForm.endTime} onChange={e => setTestForm({ ...testForm, endTime: e.target.value })} />
+                                            <input
+                                                type="date"
+                                                className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.endDateTime ? "border-red-500 bg-red-50" : "border-gray-200"
+                                                    }`}
+                                                value={testForm.endDate}
+                                                onChange={e => {
+                                                    setTestForm({ ...testForm, endDate: e.target.value });
+                                                    if (errors.endDateTime) setErrors({ ...errors, endDateTime: "" });
+                                                }}
+                                            />
+                                            <input
+                                                type="time"
+                                                className={`w-32 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.endDateTime ? "border-red-500 bg-red-50" : "border-gray-200"
+                                                    }`}
+                                                value={testForm.endTime}
+                                                onChange={e => {
+                                                    setTestForm({ ...testForm, endTime: e.target.value });
+                                                    if (errors.endDateTime) setErrors({ ...errors, endDateTime: "" });
+                                                }}
+                                            />
                                         </div>
+                                        {errors.endDateTime && <p className="text-xs text-red-500">{errors.endDateTime}</p>}
                                     </div>
                                 </div>
                             )}
@@ -504,30 +614,40 @@ const EntranceExamManagement = () => {
                 </div>
             )}
 
-            {deleteTestDialogOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 text-center">
-                        <div className="p-8">
-                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <AlertCircle className="text-red-600" size={32} />
-                            </div>
-                            <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Exam?</h2>
-                            <p className="text-gray-500 text-sm">Are you sure you want to delete exam <strong>{testToDelete?.testId}</strong>? This action cannot be undone.</p>
+            <AlertDialog open={deleteTestDialogOpen} onOpenChange={setDeleteTestDialogOpen}>
+                <AlertDialogContent className="max-w-md bg-white rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl text-center">
+                    <div className="p-8 space-y-6">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-red-50/50 text-red-600">
+                            <Trash2 size={40} />
                         </div>
-                        <div className="flex gap-3 p-6 pt-0 justify-center">
-                            <button onClick={() => setDeleteTestDialogOpen(false)} className="px-6 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
+                                Delete Exam?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm font-medium text-gray-400">
+                                Are you sure you want to delete exam <span className="text-red-500 font-bold">{testToDelete?.testId}</span>? This action cannot be reversed.
+                            </AlertDialogDescription>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
                             <button
                                 onClick={handleDelete}
                                 disabled={isDeletingTest}
-                                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2 shadow-md transition-all font-semibold"
+                                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200 disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
                             >
-                                {isDeletingTest && <Loader2 className="animate-spin" size={16} />}
-                                Delete
+                                {isDeletingTest ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={18} />}
+                                Confirm Delete
+                            </button>
+                            <button
+                                onClick={() => setDeleteTestDialogOpen(false)}
+                                className="w-full py-4 text-gray-400 font-bold hover:text-gray-600 bg-transparent hover:bg-gray-50 rounded-2xl transition-all"
+                            >
+                                Cancel
                             </button>
                         </div>
                     </div>
-                </div>
-            )}
+                </AlertDialogContent>
+            </AlertDialog>
 
             <EntranceExamGuide open={guideOpen} onOpenChange={setGuideOpen} />
         </div>

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ChevronLeft, Save, Upload, X, Image as ImageIcon, MapPin } from "lucide-react";
 import Image from "next/image";
 import { getAssetUrl } from "@/utils/image";
+import { toast } from "sonner";
 
 export default function EditJob() {
     const { id } = useParams();
@@ -33,7 +34,17 @@ export default function EditJob() {
 
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const [locationInput, setLocationInput] = useState("");
+
+    const validateForm = () => {
+        const newErrors: Record<string, string> = {};
+        if (!form.title.trim()) newErrors.title = "Job title is required";
+        if (!form.description.trim()) newErrors.description = "Job description is required";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -78,6 +89,12 @@ export default function EditJob() {
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validateForm()) {
+            toast.error("Please fix validation errors ❌");
+            return;
+        }
+
         try {
             let uploadedImageUrl = form.jobImage;
 
@@ -94,6 +111,7 @@ export default function EditJob() {
                 if (!res.ok) throw new Error("Image upload failed");
                 const data = await res.json();
                 uploadedImageUrl = data.url;
+                toast.success("Image uploaded successfully ✅");
             }
 
             await updateJob({
@@ -108,9 +126,10 @@ export default function EditJob() {
                     : [],
             }).unwrap();
 
+            toast.success("Job updated successfully ✅");
             router.push("/admin/jobs");
         } catch (error) {
-            alert("Failed to update job.");
+            toast.error("Failed to update job ❌");
             console.error(error);
         }
     };
@@ -139,10 +158,15 @@ export default function EditJob() {
                             <input
                                 required
                                 type="text"
-                                className="w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-[#2C4276]/20 outline-none transition-all"
+                                className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-[#2C4276]/20 outline-none transition-all ${errors.title ? "border-red-500 bg-red-50" : "border-gray-200"
+                                    }`}
                                 value={form.title}
-                                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                                onChange={(e) => {
+                                    setForm({ ...form, title: e.target.value });
+                                    if (errors.title) setErrors({ ...errors, title: "" });
+                                }}
                             />
+                            {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
                         </div>
 
                         <div>
@@ -251,10 +275,15 @@ export default function EditJob() {
                             <textarea
                                 required
                                 rows={5}
-                                className="w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-[#2C4276]/20 outline-none transition-all resize-y"
+                                className={`w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-[#2C4276]/20 outline-none transition-all resize-y ${errors.description ? "border-red-500 bg-red-50" : "border-gray-200"
+                                    }`}
                                 value={form.description}
-                                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                                onChange={(e) => {
+                                    setForm({ ...form, description: e.target.value });
+                                    if (errors.description) setErrors({ ...errors, description: "" });
+                                }}
                             ></textarea>
+                            {errors.description && <p className="text-xs text-red-500 mt-1">{errors.description}</p>}
                         </div>
 
                         <div className="md:col-span-2">

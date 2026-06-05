@@ -3,7 +3,15 @@
 import { useState } from "react";
 import BatchFormModal from "@/components/dashboard/batches/BatchFormModal";
 import BatchViewModal from "@/components/dashboard/batches/BatchViewModal";
-import { Eye, Pencil, Trash2, Plus } from "lucide-react";
+import { Eye, Pencil, Trash2, Plus, Loader2, Search } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
     useGetBatchesQuery,
     useDeleteBatchMutation
@@ -23,6 +31,9 @@ export default function Page() {
     const [toDate, setToDate] = useState("");
 
     const [itemsPerPage, setItemsPerPage] = useState<number | "all">(10);
+
+    const [deleteId, setDeleteId] = useState<{ id: string; name: string } | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     // ✅ REDUX DATA
     const { data = [], refetch } = useGetBatchesQuery();
@@ -50,10 +61,19 @@ export default function Page() {
     const totalPages = itemsPerPage === "all" ? 1 : Math.ceil(filtered.length / effectiveLimit);
 
     // ✅ DELETE (FIXED)
-    const deleteBatch = async (id: string) => {
-        if (!confirm("Delete this batch?")) return;
-        await deleteBatchApi(id);
-        refetch(); // refresh
+    const handleDelete = async () => {
+        if (!deleteId) return;
+        setDeleteLoading(true);
+        try {
+            await deleteBatchApi(deleteId.id).unwrap();
+            toast.success("Batch deleted successfully");
+            setDeleteId(null);
+            refetch(); // refresh
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to delete batch");
+        } finally {
+            setDeleteLoading(false);
+        }
     };
 
     // ✅ STATUS
@@ -250,7 +270,7 @@ export default function Page() {
                                         </button>
 
                                         <button
-                                            onClick={() => deleteBatch(b._id)}
+                                            onClick={() => setDeleteId({ id: b._id, name: b.name })}
                                             className="bg-red-100 text-red-600 p-2 rounded-full"
                                         >
                                             <Trash2 size={16} />
@@ -330,6 +350,41 @@ export default function Page() {
                 />
             )}
 
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+                <AlertDialogContent className="max-w-md bg-white rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
+                    <div className="p-8 text-center bg-white space-y-6">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-red-50/50">
+                            <Trash2 className="text-red-600" size={32} />
+                        </div>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
+                                Delete Batch?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm font-medium text-gray-400">
+                                Are you sure you want to delete <span className="text-red-500 font-black">{deleteId?.name}</span>? This will remove all associated student records from this batch.
+                            </AlertDialogDescription>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleteLoading}
+                                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200 disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {deleteLoading ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={18} />}
+                                Confirm Delete
+                            </button>
+                            <button
+                                onClick={() => setDeleteId(null)}
+                                className="w-full py-4 text-gray-400 font-bold hover:text-gray-600 bg-transparent hover:bg-gray-50 rounded-2xl transition-all"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

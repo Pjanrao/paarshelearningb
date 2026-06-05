@@ -15,8 +15,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useState, useEffect } from "react";
-import { toast } from "react-hot-toast";
-import { Wallet, Banknote, CreditCard, ChevronRight } from "lucide-react";
+import { toast } from "sonner";
+import { Wallet, Banknote, CreditCard, ChevronRight, Loader2 } from "lucide-react";
 
 interface Props {
     open: boolean;
@@ -27,17 +27,25 @@ interface Props {
 export default function WithdrawalPaymentModal({ open, setOpen, withdrawal }: Props) {
     const [paymentMethod, setPaymentMethod] = useState<string>("Cash");
     const [transactionId, setTransactionId] = useState<string>("");
+    const [errors, setErrors] = useState<any>({});
     const [updateStatus, { isLoading }] = useUpdateWithdrawalStatusAdminMutation();
 
     useEffect(() => {
         if (withdrawal) {
             setPaymentMethod(withdrawal.paymentMethod || "Cash");
             setTransactionId(withdrawal.transactionId || "");
+            setErrors({});
         }
     }, [withdrawal, open]);
 
     const handleConfirm = async () => {
         if (!withdrawal?._id) return;
+
+        if (paymentMethod === "UPI" && !transactionId.trim()) {
+            setErrors({ transactionId: "Transaction Reference is required for UPI" });
+            toast.error("Please provide a transaction reference");
+            return;
+        }
 
         try {
             await updateStatus({
@@ -50,7 +58,7 @@ export default function WithdrawalPaymentModal({ open, setOpen, withdrawal }: Pr
 
             toast.success(withdrawal.status === "approved" ? "Payment details updated" : "Withdrawal approved");
             setOpen(false);
-            setTransactionId(""); 
+            setTransactionId("");
         } catch (error: any) {
             console.error("Payment Update Error:", error);
             toast.error(error?.data?.message || "Failed to process payment");
@@ -87,7 +95,10 @@ export default function WithdrawalPaymentModal({ open, setOpen, withdrawal }: Pr
                 <div className="p-6 space-y-6">
                     <div className="space-y-4">
                         <label className="text-sm font-bold text-gray-700">Mode of Payment</label>
-                        <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                        <Select value={paymentMethod} onValueChange={(val) => {
+                            setPaymentMethod(val);
+                            setErrors({});
+                        }}>
                             <SelectTrigger className="w-full h-14 rounded-xl border-2 focus:ring-[#2C4276]/20 bg-gray-50/50">
                                 <SelectValue placeholder="Select payment method" />
                             </SelectTrigger>
@@ -100,15 +111,21 @@ export default function WithdrawalPaymentModal({ open, setOpen, withdrawal }: Pr
 
                     {paymentMethod === "UPI" && (
                         <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest">Transaction Reference / ID</label>
+                            <label className="text-xs font-black text-gray-400 uppercase tracking-widest">
+                                Transaction Reference / ID <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
                                 value={transactionId}
-                                onChange={(e) => setTransactionId(e.target.value)}
+                                onChange={(e) => {
+                                    setTransactionId(e.target.value);
+                                    if (errors.transactionId) setErrors({});
+                                }}
                                 placeholder="Enter Transaction ID or Reference..."
-                                className="w-full border-b-2 border-gray-100 py-3 text-lg font-medium focus:border-[#2C4276] outline-none transition-all placeholder:text-gray-200"
+                                className={`w-full border-b-2 py-3 text-lg font-medium outline-none transition-all placeholder:text-gray-200 ${errors.transactionId ? 'border-red-500 bg-red-50' : 'border-gray-100 focus:border-[#2C4276]'}`}
                                 autoFocus
                             />
+                            {errors.transactionId && <p className="text-[10px] text-red-500 font-bold">{errors.transactionId}</p>}
                         </div>
                     )}
 
@@ -122,12 +139,17 @@ export default function WithdrawalPaymentModal({ open, setOpen, withdrawal }: Pr
                         <button
                             onClick={handleConfirm}
                             disabled={isLoading}
-                            className={`flex-[2] py-4 rounded-xl text-white font-black text-sm shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 ${paymentMethod.startsWith("Cash") ? "bg-green-600 hover:bg-green-700 shadow-green-200" : "bg-blue-600 hover:bg-blue-700 shadow-blue-200"
+                            className={`flex-[2] py-4 rounded-xl text-white font-black text-sm shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2 ${paymentMethod.startsWith("Cash") ? "bg-green-600 hover:bg-green-700 shadow-green-200" : "bg-[#2C4276] hover:opacity-90 shadow-blue-200"
                                 } disabled:opacity-50`}
                         >
-                            {isLoading ? "Processing..." : (
+                            {isLoading ? (
                                 <>
-                                    {withdrawal.status === "approved" ? "Update Details" : "Confirm & Approve"}
+                                    <Loader2 className="animate-spin" size={18} />
+                                    <span>Processing...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>{withdrawal.status === "approved" ? "Update Details" : "Confirm & Approve"}</span>
                                     <ChevronRight size={18} />
                                 </>
                             )}

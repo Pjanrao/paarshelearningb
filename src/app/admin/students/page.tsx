@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { Eye, Pencil, Trash2, Plus, Search, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
 import DeleteCourseDialog from "@/components/dashboard/courses/DeleteCourseDialog";
 
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
@@ -91,8 +92,30 @@ export default function StudentsPage() {
         return () => clearTimeout(debounceTimer);
     }, [searchQuery, currentPage, studentsPerPage]);
 
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!formData.name.trim()) newErrors.name = "Full name is required";
+        if (!formData.email.trim()) {
+            newErrors.email = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = "Invalid email format";
+        }
+        if (formData.contact && !/^\d+$/.test(formData.contact)) {
+            newErrors.contact = "Contact must be numeric";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleAddStudent = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!validate()) {
+            toast.error("Please fix validation errors ❌");
+            return;
+        }
         setFormLoading(true);
 
         try {
@@ -103,15 +126,16 @@ export default function StudentsPage() {
             });
 
             if (response.ok) {
+                toast.success("Student created successfully ✅");
                 setIsAddModalOpen(false);
                 resetForm();
                 fetchStudents();
             } else {
-                alert("Failed to create student");
+                toast.error("Failed to create student ❌");
             }
         } catch (error) {
             console.error("Error creating student:", error);
-            alert("Failed to create student");
+            toast.error("An error occurred ❌");
         } finally {
             setFormLoading(false);
         }
@@ -120,6 +144,10 @@ export default function StudentsPage() {
     const handleEditStudent = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedStudent) return;
+        if (!validate()) {
+            toast.error("Please fix validation errors ❌");
+            return;
+        }
 
         setFormLoading(true);
 
@@ -131,15 +159,16 @@ export default function StudentsPage() {
             });
 
             if (response.ok) {
+                toast.success("Student updated successfully ✅");
                 setIsEditModalOpen(false);
                 resetForm();
                 fetchStudents();
             } else {
-                alert("Failed to update student");
+                toast.error("Failed to update student ❌");
             }
         } catch (error) {
             console.error("Error updating student:", error);
-            alert("Failed to update student");
+            toast.error("An error occurred ❌");
         } finally {
             setFormLoading(false);
         }
@@ -154,14 +183,15 @@ export default function StudentsPage() {
             });
 
             if (response.ok) {
+                toast.success("Student deleted successfully ✅");
                 fetchStudents();
                 setDeleteId(null);
             } else {
-                alert("Failed to delete student");
+                toast.error("Failed to delete student ❌");
             }
         } catch (error) {
             console.error("Error deleting student:", error);
-            alert("Failed to delete student");
+            toast.error("An error occurred ❌");
         } finally {
             setDeleteLoading(false);
         }
@@ -407,19 +437,54 @@ export default function StudentsPage() {
                         </div>
                         <form onSubmit={isAddModalOpen ? handleAddStudent : handleEditStudent} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name *</label>
-                                <input type="text" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Enter full name" />
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.name}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, name: e.target.value });
+                                        if (errors.name) setErrors({ ...errors, name: "" });
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.name ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
+                                    placeholder="Enter full name"
+                                />
+                                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address *</label>
-                                <input type="email" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="email@example.com" />
+                                <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address <span className="text-red-500">*</span></label>
+                                <input
+                                    type="email"
+                                    required
+                                    value={formData.email}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, email: e.target.value });
+                                        if (errors.email) setErrors({ ...errors, email: "" });
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.email ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
+                                    placeholder="email@example.com"
+                                />
+                                {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Contact Number</label>
-                                <input type="text" value={formData.contact} onChange={(e) => setFormData({ ...formData, contact: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="+1 234 567 890" />
+                                <input
+                                    type="text"
+                                    value={formData.contact}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, contact: e.target.value });
+                                        if (errors.contact) setErrors({ ...errors, contact: "" });
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.contact ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
+                                    placeholder="+91 9876543210"
+                                />
+                                {errors.contact && <p className="text-xs text-red-500 mt-1">{errors.contact}</p>}
                             </div>
                             <div className="flex justify-end gap-3 pt-4">
-                                <button type="button" onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); }} className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+                                <button type="button" onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); setErrors({}); }} className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
                                 <button type="submit" disabled={formLoading} className="px-6 py-2 bg-[#2C4276] text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 flex items-center gap-2 shadow-md transition-all font-semibold">
                                     {formLoading && <Loader2 className="animate-spin" size={16} />}
                                     {isAddModalOpen ? "Create Student" : "Save Changes"}
@@ -497,31 +562,37 @@ export default function StudentsPage() {
             )}
 
             <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-                <AlertDialogContent className="max-w-md bg-white dark:bg-gray-900">
-                    <AlertDialogHeader className="flex flex-col items-center text-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
-                            <Trash2 className="text-red-600" size={22} />
+                <AlertDialogContent className="max-w-md bg-white rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
+                    <div className="p-8 text-center bg-white space-y-6">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-red-50/50">
+                            <Trash2 className="text-red-600" size={32} />
                         </div>
-                        <AlertDialogTitle className="text-lg font-semibold text-gray-900">
-                            Delete Student
-                        </AlertDialogTitle>
-                        <AlertDialogDescription className="text-sm text-gray-500 leading-relaxed">
-                            Are you sure you want to delete <span className="font-bold text-gray-800">{deleteId?.name}</span>? This action cannot be undone and will permanently delete the student from the system.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="flex justify-center gap-3 mt-4">
-                        <Button variant="outline" onClick={() => setDeleteId(null)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            onClick={handleDeleteStudent}
-                            disabled={deleteLoading}
-                            className="bg-red-600 hover:bg-red-700 text-white disabled:opacity-60"
-                        >
-                            {deleteLoading && <Loader2 className="animate-spin mr-2" size={16} />}
-                            Delete
-                        </Button>
-                    </AlertDialogFooter>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
+                                Delete Student?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm font-medium text-gray-400">
+                                Are you sure you want to delete <span className="text-red-500 font-bold">{deleteId?.name}</span>? This action cannot be undone and will permanently delete the student from the system.
+                            </AlertDialogDescription>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleDeleteStudent}
+                                disabled={deleteLoading}
+                                className="w-full py-4 bg-red-600 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200 disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                {deleteLoading ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={18} />}
+                                Confirm Delete
+                            </button>
+                            <button
+                                onClick={() => setDeleteId(null)}
+                                className="w-full py-4 text-gray-400 font-bold hover:text-gray-600 bg-transparent hover:bg-gray-50 rounded-2xl transition-all"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
                 </AlertDialogContent>
             </AlertDialog>
         </div>

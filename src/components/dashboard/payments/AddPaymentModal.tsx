@@ -149,45 +149,44 @@ export default function AddPaymentModal({ close }: any) {
         }
     };
 
-    /* ================= SUBMIT ================= */
-    const submit = async () => {
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
-        try {
-
-            /* ================= VALIDATION ================= */
-
-            if (!form.studentId) {
-                toast.error("Please select student ❌");
-                return;
-            }
-
-            if (!form.courseId) {
-                toast.error("Please select course ❌");
-                return;
-            }
-
-            if (!form.paidAmount) {
-                toast.error("Please enter paid amount ❌");
-                return;
-            }
-
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!form.studentId) newErrors.studentId = "Student selection is required";
+        if (!form.courseId) newErrors.courseId = "Course selection is required";
+        if (!form.paidAmount) {
+            newErrors.paidAmount = "Paid amount is required";
+        } else {
             const paid = Number(form.paidAmount);
             const total = Number(form.totalAmount);
+            if (paid <= 0) newErrors.paidAmount = "Amount must be greater than 0";
+            if (paid > total) newErrors.paidAmount = "Paid amount cannot exceed total fee";
+        }
 
-            if (paid <= 0) {
-                toast.error("Amount must be greater than 0 ❌");
-                return;
-            }
+        if (form.paymentMode === "Online" && !receiptFile) {
+            newErrors.receipt = "Payment receipt is required for online mode";
+        }
 
-            if (paid > total) {
-                toast.error("Paid amount cannot exceed total fee ❌");
-                return;
-            }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
-            if (form.paymentMode === "Online" && !receiptFile) {
-                toast.error("Please upload receipt for online payment ❌");
-                return;
-            }
+    /* ================= SUBMIT ================= */
+    const submit = async () => {
+        if (!validate()) {
+            toast.error("Please fix validation errors ❌");
+            return;
+        }
+
+        if (isDuplicate) {
+            toast.error("This course is already assigned to student ❌");
+            return;
+        }
+
+        try {
+            const paid = Number(form.paidAmount);
+            const total = Number(form.totalAmount);
 
             /* ================= DUPLICATE CHECK ================= */
 
@@ -279,13 +278,17 @@ export default function AddPaymentModal({ close }: any) {
                 </h2>
 
                 {/* STUDENT */}
-                <div>
-                    <label className="text-sm font-medium">Student</label>
+                <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Student*</label>
 
                     <select
-                        className="border p-2 w-full rounded mt-1"
+                        className={`w-full border rounded-md p-2 text-sm focus:ring-1 focus:ring-[#2C4276] outline-none transition-all ${errors.studentId ? "border-red-500 bg-red-50" : "border-gray-300"
+                            }`}
                         value={form.studentId}
-                        onChange={(e) => handleStudent(e.target.value)}
+                        onChange={(e) => {
+                            handleStudent(e.target.value);
+                            if (errors.studentId) setErrors({ ...errors, studentId: "" });
+                        }}
                     >
                         <option value="">Select Student</option>
 
@@ -295,40 +298,47 @@ export default function AddPaymentModal({ close }: any) {
                             </option>
                         ))}
                     </select>
+                    {errors.studentId && <p className="text-xs text-red-500">{errors.studentId}</p>}
                 </div>
 
-                {/* EMAIL */}
-                <div>
-                    <label className="text-sm font-medium">Email</label>
+                <div className="grid grid-cols-2 gap-4">
+                    {/* EMAIL */}
+                    <div className="space-y-1">
+                        <label className="text-sm font-semibold text-gray-700">Email</label>
 
-                    <input
-                        className="border p-2 w-full rounded mt-1"
-                        value={form.email}
-                        placeholder="Student email"
-                        readOnly
-                    />
-                </div>
+                        <input
+                            className="w-full border border-gray-200 bg-gray-50 p-2 rounded-md text-sm text-gray-500 cursor-not-allowed outline-none"
+                            value={form.email}
+                            placeholder="Student email"
+                            readOnly
+                        />
+                    </div>
 
-                {/* PHONE */}
-                <div>
-                    <label className="text-sm font-medium">Phone</label>
+                    {/* PHONE */}
+                    <div className="space-y-1">
+                        <label className="text-sm font-semibold text-gray-700">Phone</label>
 
-                    <input
-                        className="border p-2 w-full rounded mt-1"
-                        value={form.phone}
-                        placeholder="Student phone"
-                        readOnly
-                    />
+                        <input
+                            className="w-full border border-gray-200 bg-gray-50 p-2 rounded-md text-sm text-gray-500 cursor-not-allowed outline-none"
+                            value={form.phone}
+                            placeholder="Student phone"
+                            readOnly
+                        />
+                    </div>
                 </div>
 
                 {/* COURSE */}
-                <div>
-                    <label className="text-sm font-medium">Course</label>
+                <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700">Course*</label>
 
                     <select
-                        className="border p-2 w-full rounded mt-1"
+                        className={`w-full border rounded-md p-2 text-sm focus:ring-1 focus:ring-[#2C4276] outline-none transition-all ${errors.courseId ? "border-red-500 bg-red-50" : "border-gray-300"
+                            }`}
                         value={form.courseId}
-                        onChange={(e) => handleCourse(e.target.value)}
+                        onChange={(e) => {
+                            handleCourse(e.target.value);
+                            if (errors.courseId) setErrors({ ...errors, courseId: "" });
+                        }}
                     >
                         <option value="">Select Course</option>
 
@@ -338,68 +348,77 @@ export default function AddPaymentModal({ close }: any) {
                             </option>
                         ))}
                     </select>
+                    {errors.courseId && <p className="text-xs text-red-500">{errors.courseId}</p>}
                 </div>
 
-                {/* COURSE FEE */}
-                <div>
-                    <label className="text-sm font-medium">Course Fee</label>
+                <div className="grid grid-cols-2 gap-4">
+                    {/* COURSE FEE */}
+                    <div className="space-y-1">
+                        <label className="text-sm font-semibold text-gray-700">Course Fee</label>
 
-                    <input
-                        className="border p-2 w-full rounded mt-1"
-                        value={form.totalAmount}
-                        placeholder="Course fee"
-                        readOnly
-                    />
-                </div>
+                        <input
+                            className="w-full border border-gray-200 bg-gray-50 p-2 rounded-md text-sm text-gray-500 cursor-not-allowed outline-none"
+                            value={form.totalAmount}
+                            placeholder="Course fee"
+                            readOnly
+                        />
+                    </div>
 
-                {/* PAID AMOUNT */}
-                <div>
-                    <label className="text-sm font-medium">Paid Amount</label>
+                    {/* PAID AMOUNT */}
+                    <div className="space-y-1">
+                        <label className="text-sm font-semibold text-gray-700">Paid Amount*</label>
 
-                    <input
-                        type="number"
-                        className="border p-2 w-full rounded mt-1"
-                        value={form.paidAmount}
-                        placeholder="Enter paid amount"
-                        onChange={(e) =>
-                            setForm({ ...form, paidAmount: e.target.value })
-                        }
-                    />
+                        <input
+                            type="number"
+                            className={`w-full border rounded-md p-2 text-sm focus:ring-1 focus:ring-[#2C4276] outline-none transition-all ${errors.paidAmount ? "border-red-500 bg-red-50" : "border-gray-300"
+                                }`}
+                            value={form.paidAmount}
+                            placeholder="Enter paid amount"
+                            onChange={(e) => {
+                                setForm({ ...form, paidAmount: e.target.value });
+                                if (errors.paidAmount) setErrors({ ...errors, paidAmount: "" });
+                            }}
+                        />
+                        {errors.paidAmount && <p className="text-xs text-red-500">{errors.paidAmount}</p>}
+                    </div>
                 </div>
 
                 {/* PAYMENT MODE */}
-                <div>
-                    <label className="text-sm font-medium">Payment Mode</label>
+                <div className="grid grid-cols-2 gap-4 items-end">
+                    <div className="space-y-1">
+                        <label className="text-sm font-semibold text-gray-700">Payment Mode*</label>
 
-                    <select
-                        className="border p-2 w-full rounded mt-1"
-                        value={form.paymentMode}
-                        onChange={(e) =>
-                            setForm({ ...form, paymentMode: e.target.value })
-                        }
-                    >
-                        <option value="Cash">Cash</option>
-                        <option value="Online">Online</option>
-                    </select>
-                </div>
-
-                {/* RECEIPT */}
-                {form.paymentMode === "Online" && (
-                    <div>
-                        <label className="text-sm font-medium">
-                            Upload Payment Receipt
-                        </label>
-
-                        <input
-                            type="file"
-                            accept="image/*,application/pdf"
-                            className="border p-2 w-full rounded mt-1"
+                        <select
+                            className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-1 focus:ring-[#2C4276] outline-none"
+                            value={form.paymentMode}
                             onChange={(e) =>
-                                setReceiptFile(e.target.files?.[0] || null)
+                                setForm({ ...form, paymentMode: e.target.value })
                             }
-                        />
+                        >
+                            <option value="Cash">Cash</option>
+                            <option value="Online">Online</option>
+                        </select>
                     </div>
-                )}
+
+                    {/* RECEIPT */}
+                    {form.paymentMode === "Online" && (
+                        <div className="space-y-1">
+                            <label className="text-sm font-semibold text-gray-700">Receipt*</label>
+
+                            <input
+                                type="file"
+                                accept="image/*,application/pdf"
+                                className={`w-full border rounded-md p-1.5 text-xs focus:ring-1 focus:ring-[#2C4276] outline-none transition-all ${errors.receipt ? "border-red-500 bg-red-50" : "border-gray-300"
+                                    }`}
+                                onChange={(e) => {
+                                    setReceiptFile(e.target.files?.[0] || null);
+                                    if (errors.receipt) setErrors({ ...errors, receipt: "" });
+                                }}
+                            />
+                        </div>
+                    )}
+                </div>
+                {errors.receipt && <p className="text-xs text-red-500 -mt-2">{errors.receipt}</p>}
 
                 {/* SAVE */}
                 <button

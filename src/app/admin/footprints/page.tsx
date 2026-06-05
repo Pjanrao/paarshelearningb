@@ -3,6 +3,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Search, Loader2, Clock, MapPin, User as UserIcon, Calendar, ChevronDown, ChevronUp, Layers, Trash2, Trash } from "lucide-react";
 import { toast } from "sonner";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 interface Visit {
     _id: string;
@@ -37,6 +44,14 @@ export default function TrackTimePage() {
     const [groupsPerPage, setGroupsPerPage] = useState<number | "all">(10);
     const [expandedUsers, setExpandedUsers] = useState<Record<string, boolean>>({});
 
+    const [deleteState, setDeleteState] = useState<{
+        type: 'single' | 'bulk';
+        id: string | null;
+        name: string;
+        userId?: string | null;
+    } | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
+
     const toggleUser = (key: string) => {
         setExpandedUsers(prev => ({ ...prev, [key]: !prev[key] }));
     };
@@ -62,40 +77,31 @@ export default function TrackTimePage() {
         }
     };
 
-    const handleDeleteVisit = async (visitId: string) => {
-        if (!confirm("Are you sure you want to delete this specific visit record?")) return;
+    const handleDelete = async () => {
+        if (!deleteState) return;
+        setDeleteLoading(true);
 
         try {
-            const response = await fetch(`/api/admin/analytics/track-time?id=${visitId}`, {
-                method: "DELETE"
-            });
+            let url = "";
+            if (deleteState.type === 'single') {
+                url = `/api/admin/analytics/track-time?id=${deleteState.id}`;
+            } else {
+                const idParam = deleteState.userId || "guest";
+                url = `/api/admin/analytics/track-time?userId=${idParam}`;
+            }
+
+            const response = await fetch(url, { method: "DELETE" });
             if (response.ok) {
-                toast.success("Visit record deleted");
+                toast.success(deleteState.type === 'single' ? "Visit record deleted" : `History cleared for ${deleteState.name}`);
                 fetchVisits();
+                setDeleteState(null);
             } else {
                 toast.error("Failed to delete record");
             }
         } catch (error) {
             toast.error("Error deleting record");
-        }
-    };
-
-    const handleDeleteUserVisits = async (userId: string | null, userName: string) => {
-        const idParam = userId || "guest";
-        if (!confirm(`Are you sure you want to delete ALL activity logs for ${userName || "Guest"}?`)) return;
-
-        try {
-            const response = await fetch(`/api/admin/analytics/track-time?userId=${idParam}`, {
-                method: "DELETE"
-            });
-            if (response.ok) {
-                toast.success(`History cleared for ${userName || "Guest"}`);
-                fetchVisits();
-            } else {
-                toast.error("Failed to clear history");
-            }
-        } catch (error) {
-            toast.error("Error clearing history");
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -179,8 +185,8 @@ export default function TrackTimePage() {
                                         const key = group._id || "guest";
                                         return (
                                             <React.Fragment key={key}>
-                                                <tr 
-                                                    className="hover:bg-gray-50/50 transition-colors group cursor-pointer bg-white" 
+                                                <tr
+                                                    className="hover:bg-gray-50/50 transition-colors group cursor-pointer bg-white"
                                                     onClick={() => toggleUser(key)}
                                                 >
                                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -212,10 +218,10 @@ export default function TrackTimePage() {
                                                     </td>
                                                     <td className="px-6 py-4 text-right whitespace-nowrap">
                                                         <div className="flex items-center justify-end gap-2">
-                                                            <button 
+                                                            <button
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    handleDeleteUserVisits(group._id, group.user?.name || "Guest User");
+                                                                    setDeleteState({ type: 'bulk', id: null, name: group.user?.name || "Guest User", userId: group._id });
                                                                 }}
                                                                 className="p-2 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-lg transition-all"
                                                                 title="Clear User History"
@@ -267,8 +273,8 @@ export default function TrackTimePage() {
                                                                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-white text-gray-700 font-semibold text-xs border border-gray-200 shadow-sm">
                                                                                                 {formatDuration(visit.duration)}
                                                                                             </span>
-                                                                                            <button 
-                                                                                                onClick={() => handleDeleteVisit(visit._id)}
+                                                                                            <button
+                                                                                                onClick={() => setDeleteState({ type: 'single', id: visit._id, name: visit.title || "this visit" })}
                                                                                                 className="p-1.5 hover:bg-red-50 text-gray-300 hover:text-red-500 rounded transition-all"
                                                                                                 title="Delete Record"
                                                                                             >
@@ -338,6 +344,44 @@ export default function TrackTimePage() {
                     </>
                 )}
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!deleteState} onOpenChange={() => setDeleteState(null)}>
+                <AlertDialogContent className="max-w-md bg-white rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl text-center">
+                    <div className="p-8 space-y-6">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-red-50/50 text-red-600">
+                            <Trash2 size={40} />
+                        </div>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
+                                {deleteState?.type === 'bulk' ? "Clear History?" : "Delete Record?"}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm font-medium text-gray-400">
+                                {deleteState?.type === 'bulk'
+                                    ? `Are you sure you want to permanently clear all activity logs for ${deleteState.name}?`
+                                    : `Are you sure you want to delete the record for ${deleteState?.name}?`} This action cannot be reversed.
+                            </AlertDialogDescription>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleDelete}
+                                disabled={deleteLoading}
+                                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200 disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                {deleteLoading ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={18} />}
+                                {deleteState?.type === 'bulk' ? "Clear All" : "Delete Record"}
+                            </button>
+                            <button
+                                onClick={() => setDeleteState(null)}
+                                className="px-6 py-4 text-gray-400 font-bold hover:text-gray-600 transition-all rounded-2xl"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

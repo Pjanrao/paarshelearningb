@@ -13,6 +13,7 @@ import {
     Check,
     Filter
 } from "lucide-react";
+import { toast } from "sonner";
 import {
     AlertDialog,
     AlertDialogContent,
@@ -53,6 +54,17 @@ export default function AdmintestimonialPage() {
         message: "",
         rating: 5,
     });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!formData.name.trim()) newErrors.name = "Student name is required";
+        if (!formData.course.trim()) newErrors.course = "Course/Role is required";
+        if (!formData.message.trim()) newErrors.message = "Feedback message is required";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const fetchTestimonials = async () => {
         try {
@@ -84,6 +96,12 @@ export default function AdmintestimonialPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validate()) {
+            toast.error("Please fix validation errors ❌");
+            return;
+        }
+
         setFormLoading(true);
 
         try {
@@ -102,16 +120,17 @@ export default function AdmintestimonialPage() {
             });
 
             if (res.ok) {
+                toast.success(formData._id ? "Testimonial updated successfully ✅" : "Testimonial added successfully ✅");
                 setIsDialogOpen(false);
                 fetchTestimonials();
                 resetForm();
             } else {
                 const errorData = await res.json();
-                alert("Error: " + errorData.error);
+                toast.error("Error: " + (errorData.error || "Failed to save testimonial ❌"));
             }
         } catch (error) {
             console.error("Error saving testimonial:", error);
-            alert("Failed to save testimonial");
+            toast.error("Failed to save testimonial ❌");
         } finally {
             setFormLoading(false);
         }
@@ -125,11 +144,15 @@ export default function AdmintestimonialPage() {
                 method: "DELETE",
             });
             if (res.ok) {
+                toast.success("Testimonial deleted successfully ✅");
                 fetchTestimonials();
                 setDeleteId(null);
+            } else {
+                toast.error("Failed to delete testimonial ❌");
             }
         } catch (error) {
             console.error("Error deleting testimonial:", error);
+            toast.error("An error occurred while deleting testimonial ❌");
         } finally {
             setDeleteLoading(false);
         }
@@ -153,9 +176,15 @@ export default function AdmintestimonialPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status: newStatus }),
             });
-            if (res.ok) fetchTestimonials();
+            if (res.ok) {
+                toast.success(`Testimonial ${newStatus} successfully ✅`);
+                fetchTestimonials();
+            } else {
+                toast.error(`Failed to ${newStatus} testimonial ❌`);
+            }
         } catch (error) {
             console.error("Error updating status:", error);
+            toast.error("An error occurred while updating status ❌");
         }
     };
 
@@ -167,6 +196,7 @@ export default function AdmintestimonialPage() {
             message: "",
             rating: 5,
         });
+        setErrors({});
     };
 
     const openAddDialog = () => {
@@ -387,9 +417,14 @@ export default function AdmintestimonialPage() {
                                     required
                                     placeholder="e.g. Rahul Sharma"
                                     value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, name: e.target.value });
+                                        if (errors.name) setErrors({ ...errors, name: "" });
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.name ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
                                 />
+                                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
                             </div>
 
                             <div>
@@ -398,9 +433,14 @@ export default function AdmintestimonialPage() {
                                     required
                                     placeholder="e.g. MERN Stack Student"
                                     value={formData.course}
-                                    onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, course: e.target.value });
+                                        if (errors.course) setErrors({ ...errors, course: "" });
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.course ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
                                 />
+                                {errors.course && <p className="text-xs text-red-500 mt-1">{errors.course}</p>}
                             </div>
 
                             <div>
@@ -424,10 +464,15 @@ export default function AdmintestimonialPage() {
                                 <textarea
                                     required
                                     placeholder="Enter the student's feedback..."
-                                    className="w-full px-4 py-2 border rounded-lg min-h-[120px] focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none"
+                                    className={`w-full px-4 py-2 border rounded-lg min-h-[120px] focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none ${errors.message ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
                                     value={formData.message}
-                                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, message: e.target.value });
+                                        if (errors.message) setErrors({ ...errors, message: "" });
+                                    }}
                                 />
+                                {errors.message && <p className="text-xs text-red-500 mt-1">{errors.message}</p>}
                             </div>
 
                             <div className="flex justify-end gap-3 pt-4 border-t">

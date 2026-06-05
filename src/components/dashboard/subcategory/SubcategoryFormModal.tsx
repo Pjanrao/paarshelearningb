@@ -35,13 +35,19 @@ export default function SubcategoryFormModal({
     keywords: "",
   });
 
+  const [errors, setErrors] = useState({
+    category: "",
+    name: "",
+    description: "",
+  });
+
   useEffect(() => {
     if (editing) {
       setForm({
-        category: editing.category?._id,
+        category: editing.category?._id || "",
         name: editing.name,
         description: editing.description,
-        keywords: editing.keywords.join(", "),
+        keywords: (editing.keywords || []).join(", "),
       });
     } else {
       setForm({
@@ -51,13 +57,37 @@ export default function SubcategoryFormModal({
         keywords: "",
       });
     }
-  }, [editing]);
+    setErrors({ category: "", name: "", description: "" });
+  }, [editing, open]);
+
+  const validate = () => {
+    const newErrors = { category: "", name: "", description: "" };
+    let isValid = true;
+
+    if (!form.category) {
+      newErrors.category = "Please select a category";
+      isValid = false;
+    }
+    if (!form.name.trim()) {
+      newErrors.name = "Subcategory Name is required";
+      isValid = false;
+    }
+    if (!form.description.trim()) {
+      newErrors.description = "Description is required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleSubmit = async () => {
+    if (!validate()) return;
+
     try {
       const payload = {
         ...form,
-        keywords: form.keywords.split(",").map((k) => k.trim()),
+        keywords: form.keywords.split(",").map((k) => k.trim()).filter(k => k),
       };
 
       if (editing) {
@@ -79,58 +109,79 @@ export default function SubcategoryFormModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
             {editing ? "Edit Subcategory" : "Add Subcategory"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <select
-            className="w-full border rounded-md p-2 focus:ring-2 focus:ring-blue-900"
-            value={form.category}
-            onChange={(e) =>
-              setForm({ ...form, category: e.target.value })
-            }
-          >
-            <option value="">Select Category</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+        <div className="space-y-4 pt-2">
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Category*</label>
+            <select
+              className={`w-full border rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-900 transition-colors ${errors.category ? "border-red-500 bg-red-50" : "border-gray-200"
+                }`}
+              value={form.category}
+              onChange={(e) => {
+                setForm({ ...form, category: e.target.value });
+                if (errors.category) setErrors({ ...errors, category: "" });
+              }}
+            >
+              <option value="">Select Category</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            {errors.category && <p className="text-xs text-red-500">{errors.category}</p>}
+          </div>
 
-          <Input
-            placeholder="Subcategory Name"
-            value={form.name}
-            onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
-            }
-          />
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Subcategory Name*</label>
+            <Input
+              placeholder="Enter subcategory name"
+              value={form.name}
+              onChange={(e) => {
+                setForm({ ...form, name: e.target.value });
+                if (errors.name) setErrors({ ...errors, name: "" });
+              }}
+              className={errors.name ? "border-red-500 focus-visible:ring-red-500" : ""}
+            />
+            {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
+          </div>
 
-          <Textarea
-            placeholder="Description"
-            value={form.description}
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
-          />
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Description*</label>
+            <Textarea
+              placeholder="Enter description"
+              value={form.description}
+              onChange={(e) => {
+                setForm({ ...form, description: e.target.value });
+                if (errors.description) setErrors({ ...errors, description: "" });
+              }}
+              className={errors.description ? "border-red-500 focus-visible:ring-red-500" : ""}
+            />
+            {errors.description && <p className="text-xs text-red-500">{errors.description}</p>}
+          </div>
 
-          <Input
-            placeholder="Keywords (comma separated)"
-            value={form.keywords}
-            onChange={(e) =>
-              setForm({ ...form, keywords: e.target.value })
-            }
-          />
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-gray-700">Keywords (comma separated)</label>
+            <Input
+              placeholder="e.g. basics, advanced, tutorial"
+              value={form.keywords}
+              onChange={(e) =>
+                setForm({ ...form, keywords: e.target.value })
+              }
+            />
+          </div>
 
           <Button
             onClick={handleSubmit}
-            className="w-full bg-blue-900 hover:bg-blue-800 text-white"
+            className="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-6"
           >
-            {editing ? "Update" : "Create"}
+            {editing ? "Update Subcategory" : "Create Subcategory"}
           </Button>
         </div>
       </DialogContent>

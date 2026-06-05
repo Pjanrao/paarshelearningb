@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useGetCoursesQuery } from "@/redux/api/courseApi";
 import { useAddBatchMutation } from "@/redux/api/batchApi";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AddBatchModal({ close, refresh }: any) {
 
@@ -105,11 +106,24 @@ export default function AddBatchModal({ close, refresh }: any) {
         return `${prefix}-Batch-${random}`;
     };
 
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
     // ✅ SUBMIT
     const handleSubmit = async () => {
 
-        if (!name || !courseId || !startDate || !endDate) {
-            alert("Fill all fields");
+        const newErrors: Record<string, string> = {};
+        if (!name.trim()) newErrors.name = "Batch name is required";
+        if (!courseId) newErrors.courseId = "Please select a course";
+        if (!startDate) newErrors.startDate = "Start date is required";
+        if (!endDate) newErrors.endDate = "End date is required";
+
+        if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+            newErrors.endDate = "End date cannot be before start date";
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            toast.error("Please fill all required fields correctly");
             return;
         }
 
@@ -123,117 +137,189 @@ export default function AddBatchModal({ close, refresh }: any) {
                 students: selectedStudents
             }).unwrap();
 
+            toast.success("Batch created successfully");
             refresh?.();
             close();
 
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            alert("Failed to create batch");
+            toast.error(err?.data?.message || "Failed to create batch");
         }
     };
 
-    return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    const inputClasses = (field: string) =>
+        `border w-full p-2 rounded transition-all outline-none ${errors[field] ? "border-red-500 bg-red-50 focus:ring-1 focus:ring-red-500" : "focus:ring-1 focus:ring-[#2C4276]"
+        }`;
 
-            <div className="bg-white w-[500px] max-h-[90vh] overflow-y-auto p-6 rounded-xl space-y-4 relative">
+    return (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+
+            <div className="bg-white w-full max-w-[500px] max-h-[90vh] overflow-y-auto p-6 rounded-xl space-y-4 relative shadow-2xl">
 
                 {/* CLOSE */}
                 <button
                     onClick={close}
-                    className="absolute top-3 right-3 text-gray-400 hover:text-black"
+                    className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors"
                 >
                     <X size={20} />
                 </button>
 
-                <h2 className="text-xl font-semibold text-[#2C4276]">
+                <h2 className="text-xl font-bold text-[#2C4276] border-b pb-2">
                     Create Batch
                 </h2>
 
-                {/* NAME */}
-                <input
-                    placeholder={generateBatchName()}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="border w-full p-2 rounded"
-                />
+                <div className="space-y-4 pt-2">
+                    {/* NAME */}
+                    <div>
+                        <label className="text-sm font-semibold text-gray-700 block mb-1">Batch Name*</label>
+                        <input
+                            placeholder={generateBatchName()}
+                            value={name}
+                            onChange={(e) => {
+                                setName(e.target.value);
+                                if (errors.name) setErrors({ ...errors, name: "" });
+                            }}
+                            className={inputClasses("name")}
+                        />
+                        {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+                    </div>
 
-                {/* COURSE */}
-                <select
-                    value={courseId}
-                    onChange={(e) => setCourseId(e.target.value)}
-                    className="border w-full p-2 rounded"
-                >
-                    <option value="">
-                        {courseLoading ? "Loading courses..." : "Select Course"}
-                    </option>
+                    {/* COURSE */}
+                    <div>
+                        <label className="text-sm font-semibold text-gray-700 block mb-1">Select Course*</label>
+                        <select
+                            value={courseId}
+                            onChange={(e) => {
+                                setCourseId(e.target.value);
+                                if (errors.courseId) setErrors({ ...errors, courseId: "" });
+                            }}
+                            className={inputClasses("courseId")}
+                        >
+                            <option value="">
+                                {courseLoading ? "Loading courses..." : "Select Course"}
+                            </option>
 
-                    {courses.map((c: any) => (
-                        <option key={c._id} value={c._id}>
-                            {c.name}
-                        </option>
-                    ))}
-                </select>
+                            {courses.map((c: any) => (
+                                <option key={c._id} value={c._id}>
+                                    {c.name}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.courseId && <p className="text-xs text-red-500 mt-1">{errors.courseId}</p>}
+                    </div>
 
-                {/* DATES */}
-                <div className="grid grid-cols-2 gap-2">
-                    <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border p-2 rounded" />
-                    <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border p-2 rounded" />
+                    {/* DATES */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-sm font-semibold text-gray-700 block mb-1">Start Date*</label>
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => {
+                                    setStartDate(e.target.value);
+                                    if (errors.startDate) setErrors({ ...errors, startDate: "" });
+                                }}
+                                className={inputClasses("startDate")}
+                            />
+                            {errors.startDate && <p className="text-xs text-red-500 mt-1">{errors.startDate}</p>}
+                        </div>
+                        <div>
+                            <label className="text-sm font-semibold text-gray-700 block mb-1">End Date*</label>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => {
+                                    setEndDate(e.target.value);
+                                    if (errors.endDate) setErrors({ ...errors, endDate: "" });
+                                }}
+                                className={inputClasses("endDate")}
+                            />
+                            {errors.endDate && <p className="text-xs text-red-500 mt-1">{errors.endDate}</p>}
+                        </div>
+                    </div>
                 </div>
 
                 {/* STATUS */}
-                <p className="text-sm">
-                    Status: <span className="font-semibold text-blue-600">{getStatus()}</span>
-                </p>
-
-                {/* STUDENTS */}
-                <div className="border rounded p-2">
-
-                    {loadingStudents && (
-                        <p className="text-sm text-gray-400 p-2">Loading students...</p>
-                    )}
-
-                    {!loadingStudents && currentStudents.length === 0 && (
-                        <p className="text-sm text-gray-400 p-2">
-                            No students found
-                        </p>
-                    )}
-
-                    {currentStudents.map((s: any) => (
-                        <div key={s._id} className="flex justify-between p-2 border-b">
-
-                            <div>
-                                <p className="text-sm font-medium">{s.name}</p>
-                                <p className="text-xs text-gray-500">{s.email}</p>
-                            </div>
-
-                            <input
-                                type="checkbox"
-                                checked={selectedStudents.includes(s._id)}
-                                onChange={() => toggleStudent(s._id)}
-                            />
-
-                        </div>
-                    ))}
-
+                <div className="bg-blue-50 p-2 rounded-lg border border-blue-100 flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-600">Calculated Status:</span>
+                    <span className="text-sm font-bold text-blue-600">{getStatus()}</span>
                 </div>
 
-                {/* PAGINATION */}
-                <div className="flex justify-between text-sm">
-                    <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}>Prev</button>
-                    <span>{currentPage}/{totalPages}</span>
-                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}>Next</button>
+                {/* STUDENTS */}
+                <div className="border rounded-lg p-3 bg-gray-50">
+                    <label className="text-sm font-semibold text-gray-700 block mb-2">
+                        Assign Students ({selectedStudents.length}/{students.length})
+                    </label>
+
+                    <div className="bg-white border rounded shadow-sm max-h-[160px] overflow-y-auto">
+
+                        {loadingStudents && (
+                            <p className="text-sm text-gray-400 p-4 text-center animate-pulse">Loading students...</p>
+                        )}
+
+                        {!loadingStudents && currentStudents.length === 0 && (
+                            <p className="text-sm text-gray-400 p-4 text-center">
+                                No students found
+                            </p>
+                        )}
+
+                        {currentStudents.map((s: any) => (
+                            <div key={s._id} className="flex justify-between items-center p-3 border-b last:border-b-0 hover:bg-gray-50 transition-colors">
+
+                                <div>
+                                    <p className="text-sm font-bold text-gray-700">{s.name}</p>
+                                    <p className="text-[10px] text-gray-400 uppercase tracking-tighter">{s.email}</p>
+                                </div>
+
+                                <input
+                                    type="checkbox"
+                                    className="w-4 h-4 rounded text-[#2C4276] focus:ring-[#2C4276] cursor-pointer"
+                                    checked={selectedStudents.includes(s._id)}
+                                    onChange={() => toggleStudent(s._id)}
+                                />
+
+                            </div>
+                        ))}
+
+                    </div>
+
+                    {/* PAGINATION */}
+                    {students.length > studentsPerPage && (
+                        <div className="flex justify-between items-center mt-3 px-1">
+                            <button
+                                disabled={currentPage === 1}
+                                onClick={() => setCurrentPage(p => p - 1)}
+                                className="text-xs font-medium text-gray-500 hover:text-[#2C4276] disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                                ← Prev
+                            </button>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Page {currentPage} of {totalPages}</span>
+                            <button
+                                disabled={currentPage === totalPages}
+                                onClick={() => setCurrentPage(p => p + 1)}
+                                className="text-xs font-medium text-gray-500 hover:text-[#2C4276] disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                                Next →
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* BUTTONS */}
-                <div className="flex justify-end gap-2">
-                    <button onClick={close} className="bg-gray-200 px-3 py-1 rounded">Cancel</button>
+                <div className="flex justify-end gap-3 pt-2">
+                    <button
+                        onClick={close}
+                        className="px-6 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
+                        Cancel
+                    </button>
 
                     <button
                         onClick={handleSubmit}
                         disabled={isLoading}
-                        className="bg-[#2C4276] text-white px-3 py-1 rounded"
+                        className="bg-[#2C4276] hover:bg-[#1e2d50] text-white px-8 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-50"
                     >
-                        {isLoading ? "Creating..." : "Create"}
+                        {isLoading ? "Creating..." : "Create Batch"}
                     </button>
                 </div>
 

@@ -14,9 +14,17 @@ import {
     Mail,
     Phone,
     Calendar,
-    Filter
+    Filter,
+    Trash2
 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Participant {
     studentId: {
@@ -60,6 +68,9 @@ export default function GroupManagementPage() {
         studentIds: [] as string[],
         proposedSchedule: ""
     });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     useEffect(() => {
         fetchRequests();
@@ -126,14 +137,32 @@ export default function GroupManagementPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ teacherConsent: status })
             });
-            if (res.ok) fetchRequests();
+            if (res.ok) {
+                toast.success(`Teacher consent updated to ${status}`);
+                fetchRequests();
+            } else {
+                toast.error("Failed to update teacher consent");
+            }
         } catch (error) {
-            console.error("Update failed:", error);
+            toast.error("Error updating teacher consent");
         }
     };
 
     const handleAddRequest = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const newErrors: Record<string, string> = {};
+        if (!formData.course.trim()) newErrors.course = "Course name is required";
+        if (!formData.teacherId) newErrors.teacherId = "Teacher is required";
+        if (formData.studentIds.length === 0) newErrors.studentIds = "At least one student is required";
+        if (!formData.proposedSchedule.trim()) newErrors.proposedSchedule = "Schedule is required";
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            toast.error("Please fill all required fields");
+            return;
+        }
+
         setFormLoading(true);
         try {
             const payload = {
@@ -154,24 +183,37 @@ export default function GroupManagementPage() {
             });
 
             if (res.ok) {
+                toast.success("Group request sent successfully");
                 setIsAddModalOpen(false);
                 setFormData({ course: "", teacherId: "", studentIds: [], proposedSchedule: "" });
+                setErrors({});
                 fetchRequests();
+            } else {
+                toast.error("Failed to send group request");
             }
         } catch (error) {
-            console.error("Submit failed:", error);
+            toast.error("Error sending group request");
         } finally {
             setFormLoading(false);
         }
     };
 
-    const handleDeleteRequest = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this request?")) return;
+    const handleDeleteRequest = async () => {
+        if (!deleteId) return;
+        setDeleteLoading(true);
         try {
-            const res = await fetch(`/api/group-requests/${id}`, { method: 'DELETE' });
-            if (res.ok) fetchRequests();
+            const res = await fetch(`/api/group-requests/${deleteId}`, { method: 'DELETE' });
+            if (res.ok) {
+                toast.success("Request deleted successfully");
+                fetchRequests();
+                setDeleteId(null);
+            } else {
+                toast.error("Failed to delete request");
+            }
         } catch (error) {
-            console.error("Delete failed:", error);
+            toast.error("Error deleting request");
+        } finally {
+            setDeleteLoading(false);
         }
     };
 
@@ -344,10 +386,10 @@ export default function GroupManagementPage() {
                                         <span className="text-xs font-medium">Proposed: {request.proposedSchedule}</span>
                                     </div>
                                     <button
-                                        onClick={() => handleDeleteRequest(request._id)}
+                                        onClick={() => setDeleteId(request._id)}
                                         className="text-red-500 text-xs font-bold hover:underline"
                                     >
-                                        Delete
+                                        Delete Request
                                     </button>
                                 </div>
                             </div>
@@ -373,8 +415,9 @@ export default function GroupManagementPage() {
                                     placeholder="e.g. MERN Stack"
                                     value={formData.course}
                                     onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                                    className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className={`w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${errors.course ? 'border-red-500' : ''}`}
                                 />
+                                {errors.course && <p className="text-red-500 text-xs mt-1">{errors.course}</p>}
                             </div>
 
                             <div>
@@ -383,13 +426,14 @@ export default function GroupManagementPage() {
                                     required
                                     value={formData.teacherId}
                                     onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
-                                    className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className={`w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${errors.teacherId ? 'border-red-500' : ''}`}
                                 >
                                     <option value="">Choose a teacher</option>
                                     {teachers.map(t => (
                                         <option key={t._id} value={t._id}>{t.name} ({t.course})</option>
                                     ))}
                                 </select>
+                                {errors.teacherId && <p className="text-red-500 text-xs mt-1">{errors.teacherId}</p>}
                             </div>
 
                             <div>
@@ -402,12 +446,13 @@ export default function GroupManagementPage() {
                                         const values = Array.from(e.target.selectedOptions, option => option.value);
                                         setFormData({ ...formData, studentIds: values });
                                     }}
-                                    className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none h-32"
+                                    className={`w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none h-32 ${errors.studentIds ? 'border-red-500' : ''}`}
                                 >
                                     {students.map(s => (
                                         <option key={s._id} value={s._id}>{s.name} ({s.email})</option>
                                     ))}
                                 </select>
+                                {errors.studentIds && <p className="text-red-500 text-xs mt-1">{errors.studentIds}</p>}
                                 <p className="text-[10px] text-gray-400 mt-1">Hold Ctrl/Cmd to select multiple students</p>
                             </div>
 
@@ -419,8 +464,9 @@ export default function GroupManagementPage() {
                                     placeholder="e.g. Mon-Wed-Fri 4PM to 6PM"
                                     value={formData.proposedSchedule}
                                     onChange={(e) => setFormData({ ...formData, proposedSchedule: e.target.value })}
-                                    className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className={`w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${errors.proposedSchedule ? 'border-red-500' : ''}`}
                                 />
+                                {errors.proposedSchedule && <p className="text-red-500 text-xs mt-1">{errors.proposedSchedule}</p>}
                             </div>
 
                             <div className="flex justify-end gap-3 pt-4 border-t">
@@ -438,6 +484,41 @@ export default function GroupManagementPage() {
                     </div>
                 </div>
             )}
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+                <AlertDialogContent className="max-w-md bg-white rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl text-center">
+                    <div className="p-8 space-y-6">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-red-50/50 text-red-600">
+                            <Trash2 size={40} />
+                        </div>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
+                                Delete Request?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm font-medium text-gray-400">
+                                Are you sure you want to delete this group request? This action cannot be reversed and will notify all participants.
+                            </AlertDialogDescription>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleDeleteRequest}
+                                disabled={deleteLoading}
+                                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200 disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                {deleteLoading ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={18} />}
+                                Confirm Delete
+                            </button>
+                            <button
+                                onClick={() => setDeleteId(null)}
+                                className="w-full py-4 text-gray-400 font-bold hover:text-gray-600 bg-transparent hover:bg-gray-50 rounded-2xl transition-all"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

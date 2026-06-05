@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Search, Users, Calendar, Mail, Phone, Eye, Edit, Trash2, X } from "lucide-react";
+import { Search, Users, Calendar, Mail, Phone, Eye, Edit, Trash2, X, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
     Select,
@@ -11,6 +11,13 @@ import {
     SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function WorkshopRegistrationsPage() {
     const [registrations, setRegistrations] = useState<any[]>([]);
@@ -25,7 +32,7 @@ export default function WorkshopRegistrationsPage() {
     const [selectedReg, setSelectedReg] = useState<any>(null);
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
 
     // Form Loading State
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -50,20 +57,21 @@ export default function WorkshopRegistrationsPage() {
     }, []);
 
     const handleDelete = async () => {
-        if (!selectedReg) return;
+        if (!deleteId) return;
         setIsSubmitting(true);
         try {
-            const res = await fetch(`/api/workshops/registrations/${selectedReg._id}`, {
+            const res = await fetch(`/api/workshops/registrations/${deleteId}`, {
                 method: "DELETE",
             });
             if (res.ok) {
-                setDeleteModalOpen(false);
+                toast.success("Registration deleted successfully");
+                setDeleteId(null);
                 fetchRegistrations();
             } else {
-                alert("Failed to delete registration");
+                toast.error("Failed to delete registration");
             }
         } catch (error) {
-            console.error("Delete failed", error);
+            toast.error("Error deleting registration");
         } finally {
             setIsSubmitting(false);
         }
@@ -72,13 +80,22 @@ export default function WorkshopRegistrationsPage() {
     const handleEditSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedReg) return;
-        setIsSubmitting(true);
 
         const formData = new FormData(e.target as HTMLFormElement);
+        const name = formData.get("name")?.toString();
+        const email = formData.get("email")?.toString();
+        const phone = formData.get("phone")?.toString();
+
+        if (!name || !email || !phone) {
+            toast.error("Name, Email, and Phone are required");
+            return;
+        }
+
+        setIsSubmitting(true);
         const updates = {
-            name: formData.get("name"),
-            email: formData.get("email"),
-            phone: formData.get("phone"),
+            name,
+            email,
+            phone,
             currentStatus: formData.get("currentStatus"),
             status: formData.get("status"),
         };
@@ -89,21 +106,22 @@ export default function WorkshopRegistrationsPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(updates),
             });
-            
+
             if (res.ok) {
+                toast.success("Registration updated successfully");
                 setEditModalOpen(false);
                 fetchRegistrations();
             } else {
-                alert("Failed to update registration");
+                toast.error("Failed to update registration");
             }
         } catch (error) {
-            console.error("Update failed", error);
+            toast.error("Error updating registration");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const filtered = registrations.filter(r => 
+    const filtered = registrations.filter(r =>
         r.name.toLowerCase().includes(search.toLowerCase()) ||
         r.email.toLowerCase().includes(search.toLowerCase()) ||
         r.workshopId?.title.toLowerCase().includes(search.toLowerCase())
@@ -206,7 +224,7 @@ export default function WorkshopRegistrationsPage() {
                                             <button onClick={() => { setSelectedReg(reg); setEditModalOpen(true); }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit">
                                                 <Edit size={18} />
                                             </button>
-                                            <button onClick={() => { setSelectedReg(reg); setDeleteModalOpen(true); }} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
+                                            <button onClick={() => { setSelectedReg(reg); setDeleteId(reg._id); }} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
                                                 <Trash2 size={18} />
                                             </button>
                                         </div>
@@ -379,30 +397,41 @@ export default function WorkshopRegistrationsPage() {
                 </div>
             )}
 
-            {/* Delete Modal */}
-            {deleteModalOpen && selectedReg && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden text-center">
-                        <div className="p-6">
-                            <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Trash2 size={32} />
-                            </div>
-                            <h2 className="text-xl font-bold text-gray-900 mb-2">Delete Registration?</h2>
-                            <p className="text-gray-500 text-sm mb-6">
-                                Are you sure you want to delete <span className="font-bold text-gray-800">{selectedReg.name}</span>'s registration? This action cannot be undone.
-                            </p>
-                            <div className="flex gap-3">
-                                <button onClick={() => setDeleteModalOpen(false)} className="flex-1 px-4 py-2 font-bold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition" disabled={isSubmitting}>
-                                    Cancel
-                                </button>
-                                <button onClick={handleDelete} className="flex-1 px-4 py-2 font-bold text-white bg-red-600 rounded-xl hover:bg-red-700 transition" disabled={isSubmitting}>
-                                    {isSubmitting ? "Deleting..." : "Delete"}
-                                </button>
-                            </div>
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+                <AlertDialogContent className="max-w-md bg-white rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl text-center">
+                    <div className="p-8 space-y-6">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-red-50/50 text-red-600">
+                            <Trash2 size={40} />
+                        </div>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
+                                Delete Registration?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm font-medium text-gray-400">
+                                Are you sure you want to delete <span className="text-red-500 font-bold">{selectedReg?.name}</span>'s registration? This action cannot be reversed.
+                            </AlertDialogDescription>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleDelete}
+                                disabled={isSubmitting}
+                                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200 disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={18} />}
+                                Confirm Delete
+                            </button>
+                            <button
+                                onClick={() => setDeleteId(null)}
+                                className="w-full py-4 text-gray-400 font-bold hover:text-gray-600 bg-transparent hover:bg-gray-50 rounded-2xl transition-all"
+                            >
+                                Cancel
+                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

@@ -20,12 +20,12 @@ import {
     X
 } from "lucide-react";
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -34,10 +34,10 @@ import {
     useGetPlacementStatsQuery,
     useCreatePlacementMutation,
     useUpdatePlacementMutation,
-    useDeletePlacementMutation 
+    useDeletePlacementMutation
 } from "@/redux/api/placementApi";
 import { toast } from "sonner";
- 
+
 function StatCard({ stat }: { stat: any }) {
     return (
         <motion.div
@@ -80,6 +80,16 @@ export default function PlacementPage() {
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [placementsPerPage, setPlacementsPerPage] = useState<number | "all">(10);
 
+    const [form, setForm] = useState({
+        studentName: "",
+        course: "",
+        company: "",
+        package: "",
+        date: "",
+        status: "Placed"
+    });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
     // RTK Query hooks
     const { data: statsData, isLoading: statsLoading } = useGetPlacementStatsQuery();
     const { data, isLoading, isFetching } = useGetPlacementsQuery({
@@ -93,29 +103,53 @@ export default function PlacementPage() {
     const [updatePlacement, { isLoading: isUpdating }] = useUpdatePlacementMutation();
     const [deletePlacement] = useDeletePlacementMutation();
 
+    const validateForm = () => {
+        const newErrors: Record<string, string> = {};
+        if (!form.studentName.trim()) newErrors.studentName = "Student name is required";
+        if (!form.course.trim()) newErrors.course = "Course name is required";
+        if (!form.company.trim()) newErrors.company = "Company name is required";
+        if (!form.package.trim()) newErrors.package = "Salary package is required";
+        if (!form.date) newErrors.date = "Placement date is required";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
+
+        if (!validateForm()) {
+            toast.error("Please fix the errors in the form ❌");
+            return;
+        }
+
         const payload = {
-            studentName: formData.get("studentName"),
-            course: formData.get("course"),
-            company: formData.get("company"),
-            package: formData.get("package"),
-            date: formData.get("date"),
-            status: formData.get("status"),
-            logo: `https://ui-avatars.com/api/?name=${formData.get("company")}&background=random&color=fff`
+            ...form,
+            logo: `https://ui-avatars.com/api/?name=${form.company}&background=random&color=fff`
         };
 
         try {
             if (editingPlacement) {
                 await updatePlacement({ id: editingPlacement._id, data: payload }).unwrap();
+                toast.success("Placement updated successfully ✅");
             } else {
                 await createPlacement(payload).unwrap();
+                toast.success("Placement record created successfully ✅");
             }
             setIsModalOpen(false);
             setEditingPlacement(null);
+            setForm({
+                studentName: "",
+                course: "",
+                company: "",
+                package: "",
+                date: "",
+                status: "Placed"
+            });
+            setErrors({});
         } catch (err) {
-            alert("Error saving placement");
+            console.error("Error saving placement:", err);
+            toast.error("Failed to save placement record ❌");
         }
     };
 
@@ -123,10 +157,12 @@ export default function PlacementPage() {
         if (!deleteId) return;
         setDeleteLoading(true);
         try {
-            await deletePlacement(deleteId.id);
+            await deletePlacement(deleteId.id).unwrap();
+            toast.success("Placement record deleted successfully ✅");
             setDeleteId(null);
         } catch (error) {
             console.error("Error deleting placement:", error);
+            toast.error("Failed to delete placement record ❌");
         } finally {
             setDeleteLoading(false);
         }
@@ -161,7 +197,6 @@ export default function PlacementPage() {
     return (
         <>
             <div className="md:p-2 bg-gray-50/30 min-h-screen space-y-8 animate-in fade-in duration-500">
-
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold text-[#2C4276]">Placement Management</h1>
@@ -176,7 +211,19 @@ export default function PlacementPage() {
                             <span>Export CSV</span>
                         </button>
                         <button
-                            onClick={() => { setEditingPlacement(null); setIsModalOpen(true); }}
+                            onClick={() => {
+                                setEditingPlacement(null);
+                                setForm({
+                                    studentName: "",
+                                    course: "",
+                                    company: "",
+                                    package: "",
+                                    date: "",
+                                    status: "Placed"
+                                });
+                                setErrors({});
+                                setIsModalOpen(true);
+                            }}
                             className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-[#2C4276] text-white rounded-xl font-semibold hover:opacity-90 transition-all shadow-md active:scale-95 whitespace-nowrap"
                         >
                             <Plus size={18} />
@@ -196,7 +243,6 @@ export default function PlacementPage() {
                 </div>
 
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
-
                     <div className="p-4 sm:p-6 border-b flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white shrink-0">
                         <div className="flex items-center p-1 bg-gray-50 rounded-xl w-full xl:w-fit overflow-x-auto no-scrollbar">
                             {["all", "Placed", "Offered", "Interviewing", "Pending"].map((tab) => (
@@ -204,10 +250,10 @@ export default function PlacementPage() {
                                     key={tab}
                                     onClick={() => { setActiveTab(tab.toLowerCase()); setCurrentPage(1); }}
                                     className={`px-4 py-2 rounded-lg text-sm font-bold transition-all capitalize whitespace-nowrap flex-1 sm:flex-none
-                  ${(activeTab === tab.toLowerCase() || (activeTab === 'all' && tab === 'all'))
+                      ${(activeTab === tab.toLowerCase() || (activeTab === 'all' && tab === 'all'))
                                             ? "bg-white text-[#2C4276] shadow-sm"
                                             : "text-gray-500 hover:text-gray-900"}
-                `}
+                    `}
                                 >
                                     {tab}
                                 </button>
@@ -267,12 +313,12 @@ export default function PlacementPage() {
                                             </td>
                                             <td className="px-6 py-5">
                                                 <div className={`
-                        inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide
-                        ${row.status === 'Placed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : ''}
-                        ${row.status === 'Offered' ? 'bg-blue-50 text-blue-600 border border-blue-100' : ''}
-                        ${row.status === 'Interviewing' ? 'bg-amber-50 text-amber-600 border border-amber-100' : ''}
-                        ${row.status === 'Pending' ? 'bg-gray-50 text-gray-600 border border-gray-100' : ''}
-                      `}>
+                            inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide
+                            ${row.status === 'Placed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : ''}
+                            ${row.status === 'Offered' ? 'bg-blue-50 text-blue-600 border border-blue-100' : ''}
+                            ${row.status === 'Interviewing' ? 'bg-amber-50 text-amber-600 border border-amber-100' : ''}
+                            ${row.status === 'Pending' ? 'bg-gray-50 text-gray-600 border border-gray-100' : ''}
+                          `}>
                                                     {row.status === 'Placed' && <CheckCircle2 size={12} />}
                                                     {row.status === 'Offered' && <ExternalLink size={12} />}
                                                     {row.status === 'Interviewing' && <Clock size={12} />}
@@ -285,7 +331,19 @@ export default function PlacementPage() {
                                                         onClick={() => { setViewingPlacement(row); setIsViewModalOpen(true); }}
                                                         className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"><Eye size={18} /></button>
                                                     <button
-                                                        onClick={() => { setEditingPlacement(row); setIsModalOpen(true); }}
+                                                        onClick={() => {
+                                                            setEditingPlacement(row);
+                                                            setForm({
+                                                                studentName: row.studentName,
+                                                                course: row.course,
+                                                                company: row.company,
+                                                                package: row.package,
+                                                                date: row.date?.split('T')[0],
+                                                                status: row.status
+                                                            });
+                                                            setErrors({});
+                                                            setIsModalOpen(true);
+                                                        }}
                                                         className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"><Pencil size={18} /></button>
                                                     <button
                                                         onClick={() => setDeleteId({ id: row._id, name: row.studentName })}
@@ -374,37 +432,93 @@ export default function PlacementPage() {
                         className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
                         <div className="p-6 border-b flex justify-between items-center bg-gray-50">
                             <h2 className="text-xl font-bold text-[#2C4276]">{editingPlacement ? "Update Placement" : "Add New Placement"}</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={24} /></button>
+                            <button onClick={() => {
+                                setIsModalOpen(false);
+                                setForm({
+                                    studentName: "",
+                                    course: "",
+                                    company: "",
+                                    package: "",
+                                    date: "",
+                                    status: "Placed"
+                                });
+                                setErrors({});
+                            }} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={24} /></button>
                         </div>
                         <form onSubmit={handleSave} className="p-6 space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Student Name</label>
-                                    <input name="studentName" defaultValue={editingPlacement?.studentName} required className="w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/10" />
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Student Name <span className="text-red-500">*</span></label>
+                                    <input
+                                        value={form.studentName}
+                                        onChange={(e) => {
+                                            setForm({ ...form, studentName: e.target.value });
+                                            if (errors.studentName) setErrors({ ...errors, studentName: "" });
+                                        }}
+                                        className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/10 ${errors.studentName ? "border-red-500 bg-red-50" : "border-gray-200"}`}
+                                    />
+                                    {errors.studentName && <p className="text-[10px] text-red-500">{errors.studentName}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Course</label>
-                                    <input name="course" defaultValue={editingPlacement?.course} required className="w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/10" />
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Course <span className="text-red-500">*</span></label>
+                                    <input
+                                        value={form.course}
+                                        onChange={(e) => {
+                                            setForm({ ...form, course: e.target.value });
+                                            if (errors.course) setErrors({ ...errors, course: "" });
+                                        }}
+                                        className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/10 ${errors.course ? "border-red-500 bg-red-50" : "border-gray-200"}`}
+                                    />
+                                    {errors.course && <p className="text-[10px] text-red-500">{errors.course}</p>}
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Company</label>
-                                    <input name="company" defaultValue={editingPlacement?.company} required className="w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/50" />
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Company <span className="text-red-500">*</span></label>
+                                    <input
+                                        value={form.company}
+                                        onChange={(e) => {
+                                            setForm({ ...form, company: e.target.value });
+                                            if (errors.company) setErrors({ ...errors, company: "" });
+                                        }}
+                                        className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/50 ${errors.company ? "border-red-500 bg-red-50" : "border-gray-200"}`}
+                                    />
+                                    {errors.company && <p className="text-[10px] text-red-500">{errors.company}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Package (e.g. 5.5 LPA)</label>
-                                    <input name="package" defaultValue={editingPlacement?.package} required className="w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/50" />
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Package (e.g. 5.5 LPA) <span className="text-red-500">*</span></label>
+                                    <input
+                                        value={form.package}
+                                        onChange={(e) => {
+                                            setForm({ ...form, package: e.target.value });
+                                            if (errors.package) setErrors({ ...errors, package: "" });
+                                        }}
+                                        className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/50 ${errors.package ? "border-red-500 bg-red-50" : "border-gray-200"}`}
+                                    />
+                                    {errors.package && <p className="text-[10px] text-red-500">{errors.package}</p>}
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Date</label>
-                                    <input name="date" type="date" defaultValue={editingPlacement?.date?.split('T')[0]} required className="w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/10" />
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Date <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="date"
+                                        value={form.date}
+                                        onChange={(e) => {
+                                            setForm({ ...form, date: e.target.value });
+                                            if (errors.date) setErrors({ ...errors, date: "" });
+                                        }}
+                                        className={`w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/10 ${errors.date ? "border-red-500 bg-red-50" : "border-gray-200"}`}
+                                    />
+                                    {errors.date && <p className="text-[10px] text-red-500">{errors.date}</p>}
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Status</label>
-                                    <select name="status" defaultValue={editingPlacement?.status || "Pending"} className="w-full px-4 py-2.5 bg-gray-50 border rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/10">
+                                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Status <span className="text-red-500">*</span></label>
+                                    <select
+                                        value={form.status}
+                                        onChange={(e) => setForm({ ...form, status: e.target.value })}
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#2C4276]/10"
+                                    >
                                         <option>Placed</option>
                                         <option>Offered</option>
                                         <option>Interviewing</option>
@@ -471,12 +585,12 @@ export default function PlacementPage() {
                                 <div className="space-y-1">
                                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Current Status</p>
                                     <span className={`
-                                        inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
-                                        ${viewingPlacement.status === 'Placed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : ''}
-                                        ${viewingPlacement.status === 'Offered' ? 'bg-blue-50 text-blue-600 border border-blue-100' : ''}
-                                        ${viewingPlacement.status === 'Interviewing' ? 'bg-amber-50 text-amber-600 border border-amber-100' : ''}
-                                        ${viewingPlacement.status === 'Pending' ? 'bg-gray-50 text-gray-600 border border-gray-100' : ''}
-                                    `}>
+                                                inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide
+                                                ${viewingPlacement.status === 'Placed' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : ''}
+                                                ${viewingPlacement.status === 'Offered' ? 'bg-blue-50 text-blue-600 border border-blue-100' : ''}
+                                                ${viewingPlacement.status === 'Interviewing' ? 'bg-amber-50 text-amber-600 border border-amber-100' : ''}
+                                                ${viewingPlacement.status === 'Pending' ? 'bg-gray-50 text-gray-600 border border-gray-100' : ''}
+                                            `}>
                                         {viewingPlacement.status}
                                     </span>
                                 </div>

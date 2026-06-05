@@ -13,6 +13,14 @@ import {
     BookOpen,
     Filter,
 } from "lucide-react";
+import { toast } from "sonner";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
     generateCertificateCanvas,
     downloadCertificate,
@@ -50,6 +58,11 @@ export default function CertificatesPage() {
     const [previewCanvas, setPreviewCanvas] = useState<HTMLCanvasElement | null>(null);
     const [previewName, setPreviewName] = useState("");
     const [showPreview, setShowPreview] = useState(false);
+
+    // Bulk generation confirmation
+    const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+    const [pendingBulkStudents, setPendingBulkStudents] = useState<any[]>([]);
+
     const previewRef = useRef<HTMLDivElement>(null);
     const logoRef = useRef<HTMLImageElement | null>(null);
 
@@ -135,11 +148,11 @@ export default function CertificatesPage() {
                 showCertificatePreview(cert);
             } else {
                 const err = await res.json();
-                alert(err.error || "Failed to generate certificate");
+                toast.error(err.error || "Failed to generate certificate");
             }
         } catch (error) {
             console.error("Error generating certificate:", error);
-            alert("Failed to generate certificate");
+            toast.error("Failed to generate certificate");
         } finally {
             setGenerating(null);
         }
@@ -168,17 +181,23 @@ export default function CertificatesPage() {
 
     const handleBulkGenerate = async () => {
         if (!selectedBatch) return;
-        const students = filteredStudents.filter((s) => !getCertificateForStudent(s._id));
-        if (students.length === 0) {
-            alert("All certificates have already been generated!");
+        const studentsToGen = filteredStudents.filter((s) => !getCertificateForStudent(s._id));
+        if (studentsToGen.length === 0) {
+            toast.warning("All certificates have already been generated!");
             return;
         }
 
-        if (!confirm(`Generate certificates for ${students.length} students?`)) return;
+        setPendingBulkStudents(studentsToGen);
+        setShowBulkConfirm(true);
+    };
 
-        for (const student of students) {
+    const processBulkGeneration = async () => {
+        setShowBulkConfirm(false);
+        for (const student of pendingBulkStudents) {
             await handleGenerate(student);
         }
+        toast.success(`Successfully processed ${pendingBulkStudents.length} certificates`);
+        setPendingBulkStudents([]);
     };
 
     const students = selectedBatch?.students || [];
@@ -462,6 +481,40 @@ export default function CertificatesPage() {
                     </div>
                 </div>
             )}
+
+            {/* Bulk Generation Confirmation */}
+            <AlertDialog open={showBulkConfirm} onOpenChange={setShowBulkConfirm}>
+                <AlertDialogContent className="max-w-md bg-white rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
+                    <div className="p-8 text-center bg-white space-y-6">
+                        <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-blue-50/50">
+                            <Award className="text-blue-600" size={32} />
+                        </div>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
+                                Bulk Generate?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm font-medium text-gray-400">
+                                You are about to generate <span className="text-blue-600 font-black">{pendingBulkStudents.length} certificates</span> for the batch <span className="font-black text-gray-700">{selectedBatch?.name}</span>. This may take a few moments.
+                            </AlertDialogDescription>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={processBulkGeneration}
+                                className="w-full py-4 bg-[#2C4276] text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-200 active:scale-95 transition-all"
+                            >
+                                Start Generation
+                            </button>
+                            <button
+                                onClick={() => setShowBulkConfirm(false)}
+                                className="w-full py-4 text-gray-400 font-bold hover:text-gray-600 bg-transparent hover:bg-gray-50 rounded-2xl transition-all"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

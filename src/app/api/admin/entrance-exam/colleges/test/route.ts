@@ -3,8 +3,6 @@ import CollegeModel from "@/models/EntranceExam/College.model";
 import TestModel from "@/models/EntranceExam/Test.model";
 import _db from "@/utils/db";
 import { authMiddleware } from "@/middlewares/auth";
-import { generateTestLink } from "@/utils/EntranceExam/generateTestLink";
-import { BASE_URL } from "@/config/config";
 import TestSessionModel from "@/models/EntranceExam/TestSession.model";
 
 export const POST = authMiddleware(async (request: Request) => {
@@ -87,13 +85,14 @@ export const GET = authMiddleware(
             const query = (collegeId && collegeId !== "all") ? { college: collegeId } : {};
             const tests = await TestModel.find(query).lean().exec();
 
+            const origin = new URL(request.url).origin;
             return NextResponse.json({
                 success: true,
                 message: "Tests fetched successfully",
                 data: (tests as any[]).map((test) => {
                     const testData = {
                         ...test,
-                        testLink: `${BASE_URL}/entrance-exam?testId=${test.testId}&collegeId=${test.college}&batchName=${test.batchName}`,
+                        testLink: `${origin}/entrance-exam?testId=${test.testId}&collegeId=${test.college}&batchName=${test.batchName}`,
                         status: "active",
                     };
 

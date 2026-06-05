@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { Eye, Pencil, Trash2, Plus, Search, Loader2, X, FileText } from "lucide-react";
+import { toast } from "sonner";
 import DeleteCourseDialog from "@/components/dashboard/courses/DeleteCourseDialog";
 
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogFooter,
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
@@ -101,8 +102,25 @@ export default function BlogsPage() {
         return () => clearTimeout(debounceTimer);
     }, [searchQuery, currentPage, blogsPerPage]);
 
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!formData.title.trim()) newErrors.title = "Blog title is required";
+        if (!formData.content.trim()) newErrors.content = "Content is required";
+        if (!formData.author.name.trim()) newErrors.authorName = "Author name is required";
+        if (!formData.author.role.trim()) newErrors.authorRole = "Author role is required";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleAddBlog = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!validate()) {
+            toast.error("Please fix validation errors ❌");
+            return;
+        }
         setFormLoading(true);
 
         try {
@@ -111,21 +129,22 @@ export default function BlogsPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...formData,
-                    tags: formData.tags.split(",").map((tag) => tag.trim()),
+                    tags: formData.tags.split(",").map((tag) => tag.trim()).filter(t => t),
                     coverImage: formData.coverImage,
                 }),
             });
 
             if (response.ok) {
+                toast.success("Blog post created successfully ✅");
                 setIsAddModalOpen(false);
                 resetForm();
                 fetchBlogs();
             } else {
-                alert("Failed to create blog");
+                toast.error("Failed to create blog ❌");
             }
         } catch (error) {
             console.error("Error creating blog:", error);
-            alert("Failed to create blog");
+            toast.error("An error occurred ❌");
         } finally {
             setFormLoading(false);
         }
@@ -134,6 +153,10 @@ export default function BlogsPage() {
     const handleEditBlog = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedBlog) return;
+        if (!validate()) {
+            toast.error("Please fix validation errors ❌");
+            return;
+        }
 
         setFormLoading(true);
 
@@ -143,21 +166,22 @@ export default function BlogsPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...formData,
-                    tags: formData.tags.split(",").map((tag) => tag.trim()),
+                    tags: formData.tags.split(",").map((tag) => tag.trim()).filter(t => t),
                     coverImage: formData.coverImage,
                 }),
             });
 
             if (response.ok) {
+                toast.success("Blog post updated successfully ✅");
                 setIsEditModalOpen(false);
                 resetForm();
                 fetchBlogs();
             } else {
-                alert("Failed to update blog");
+                toast.error("Failed to update blog ❌");
             }
         } catch (error) {
             console.error("Error updating blog:", error);
-            alert("Failed to update blog");
+            toast.error("An error occurred ❌");
         } finally {
             setFormLoading(false);
         }
@@ -172,14 +196,15 @@ export default function BlogsPage() {
             });
 
             if (response.ok) {
+                toast.success("Blog post deleted successfully ✅");
                 fetchBlogs();
                 setDeleteId(null);
             } else {
-                alert("Failed to delete blog");
+                toast.error("Failed to delete blog ❌");
             }
         } catch (error) {
             console.error("Error deleting blog:", error);
-            alert("Failed to delete blog");
+            toast.error("An error occurred ❌");
         } finally {
             setDeleteLoading(false);
         }
@@ -227,11 +252,11 @@ export default function BlogsPage() {
             if (!res.ok) {
                 throw new Error(data.error || "Image upload failed");
             }
-
+            toast.success("Image uploaded successfully ✅");
             setFormData((prev) => ({ ...prev, coverImage: data.url }));
         } catch (error: any) {
             console.error("Image upload error:", error);
-            alert(error.message || "Failed to upload image");
+            toast.error(error.message || "Failed to upload image ❌");
         } finally {
             setUploadingImage(false);
         }
@@ -474,7 +499,19 @@ export default function BlogsPage() {
                         <form onSubmit={isAddModalOpen ? handleAddBlog : handleEditBlog} className="p-6 space-y-4 overflow-y-auto flex-1">
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Blog Title <span className="text-red-500">*</span></label>
-                                <input type="text" required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="Enter an engaging title" />
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.title}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, title: e.target.value });
+                                        if (errors.title) setErrors({ ...errors, title: "" });
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 ${errors.title ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
+                                    placeholder="Enter an engaging title"
+                                />
+                                {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title}</p>}
                             </div>
 
                             <div>
@@ -509,17 +546,53 @@ export default function BlogsPage() {
 
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Content <span className="text-red-500">*</span></label>
-                                <textarea required value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} rows={8} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 resize-none" placeholder="Write your blog post here..." />
+                                <textarea
+                                    required
+                                    value={formData.content}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, content: e.target.value });
+                                        if (errors.content) setErrors({ ...errors, content: "" });
+                                    }}
+                                    rows={8}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 resize-none ${errors.content ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
+                                    placeholder="Write your blog post here..."
+                                />
+                                {errors.content && <p className="text-xs text-red-500 mt-1">{errors.content}</p>}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Author Name <span className="text-red-500">*</span></label>
-                                    <input type="text" required value={formData.author.name} onChange={(e) => setFormData({ ...formData, author: { ...formData.author, name: e.target.value } })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="e.g. John Doe" />
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.author.name}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, author: { ...formData.author, name: e.target.value } });
+                                            if (errors.authorName) setErrors({ ...errors, authorName: "" });
+                                        }}
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 ${errors.authorName ? "border-red-500 bg-red-50" : "border-gray-200"
+                                            }`}
+                                        placeholder="e.g. John Doe"
+                                    />
+                                    {errors.authorName && <p className="text-xs text-red-500 mt-1">{errors.authorName}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-gray-700 mb-1">Author Role <span className="text-red-500">*</span></label>
-                                    <input type="text" required value={formData.author.role} onChange={(e) => setFormData({ ...formData, author: { ...formData.author, role: e.target.value } })} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400" placeholder="e.g. Senior Editor" />
+                                    <input
+                                        type="text"
+                                        required
+                                        value={formData.author.role}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, author: { ...formData.author, role: e.target.value } });
+                                            if (errors.authorRole) setErrors({ ...errors, authorRole: "" });
+                                        }}
+                                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-gray-400 ${errors.authorRole ? "border-red-500 bg-red-50" : "border-gray-200"
+                                            }`}
+                                        placeholder="e.g. Senior Editor"
+                                    />
+                                    {errors.authorRole && <p className="text-xs text-red-500 mt-1">{errors.authorRole}</p>}
                                 </div>
                             </div>
 
@@ -538,7 +611,7 @@ export default function BlogsPage() {
 
                         </form>
                         <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50 flex-shrink-0">
-                            <button type="button" onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); }} className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
+                            <button type="button" onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); setErrors({}); }} className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>
                             <button type="button" onClick={isAddModalOpen ? handleAddBlog : handleEditBlog} disabled={formLoading} className="px-6 py-2 bg-[#2C4276] text-white rounded-lg hover:bg-opacity-90 disabled:opacity-50 flex items-center gap-2 shadow-md transition-all font-semibold">
                                 {formLoading && <Loader2 className="animate-spin" size={16} />}
                                 {isAddModalOpen ? "Create Post" : "Update Post"}

@@ -20,6 +20,12 @@ import {
     useUpdateEntranceCollegeMutation,
     useDeleteEntranceCollegeMutation,
 } from "@/redux/api";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import DeleteCourseDialog from "@/components/dashboard/courses/DeleteCourseDialog";
 
 interface College {
@@ -78,35 +84,55 @@ export default function EntranceCollegesPage() {
         }
     };
 
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!formData.name) newErrors.name = "College name is required";
+        if (!formData.email) {
+            newErrors.email = "Contact email is required";
+        } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+            newErrors.email = "Invalid email format";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSave = async () => {
-        if (!formData.name || !formData.email) {
-            toast.error("Please fill all fields");
+        if (!validate()) {
+            toast.error("Please fix validation errors ❌");
             return;
         }
         try {
             if (selectedCollege) {
                 await updateCollege({ collegeId: selectedCollege._id, data: formData }).unwrap();
-                toast.success("College updated successfully");
+                toast.success("College updated successfully ✅");
             } else {
                 await createCollege(formData).unwrap();
-                toast.success("College added successfully");
+                toast.success("College added successfully ✅");
             }
             setIsDialogOpen(false);
             setFormData({ name: "", email: "" });
             setSelectedCollege(null);
+            setErrors({});
         } catch (err: any) {
-            toast.error(err?.data?.message || "Operation failed");
+            toast.error(err?.data?.message || "Operation failed ❌");
         }
     };
 
-    const handleDelete = async (id: string, name: string) => {
-        if (confirm(`Are you sure you want to delete ${name}?`)) {
-            try {
-                await deleteCollege({ collegeId: id }).unwrap();
-                toast.success("College removed");
-            } catch (err: any) {
-                toast.error(err?.data?.message || "Delete failed");
-            }
+    const handleDelete = async () => {
+        if (!deleteId) return;
+        setIsLoadingState(true);
+        try {
+            await deleteCollege({ collegeId: deleteId }).unwrap();
+            toast.success("College removed");
+            setDeleteId(null);
+            fetchColleges();
+        } catch (err: any) {
+            toast.error(err?.data?.message || "Delete failed");
+        } finally {
+            setIsLoadingState(false);
         }
     };
 
@@ -210,7 +236,7 @@ export default function EntranceCollegesPage() {
                                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                 <div className="flex items-center gap-2">
                                                     <button onClick={() => handleOpenEdit(c)} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit College"><Edit2 size={18} /></button>
-                                                    <button onClick={() => handleDelete(c._id, c.name)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete College"><Trash2 size={18} /></button>
+                                                    <button onClick={() => setDeleteId(c._id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete College"><Trash2 size={18} /></button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -300,9 +326,14 @@ export default function EntranceCollegesPage() {
                                     required
                                     placeholder="Enter college name"
                                     value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    onChange={e => {
+                                        setFormData({ ...formData, name: e.target.value });
+                                        if (errors.name) setErrors({ ...errors, name: "" });
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.name ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
                                 />
+                                {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-gray-700 mb-1">Contact Email <span className="text-red-500">*</span></label>
@@ -311,9 +342,14 @@ export default function EntranceCollegesPage() {
                                     required
                                     placeholder="official@college.edu"
                                     value={formData.email}
-                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                    onChange={e => {
+                                        setFormData({ ...formData, email: e.target.value });
+                                        if (errors.email) setErrors({ ...errors, email: "" });
+                                    }}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all ${errors.email ? "border-red-500 bg-red-50" : "border-gray-200"
+                                        }`}
                                 />
+                                {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
                             </div>
                         </div>
                         <div className="flex justify-end gap-3 p-6 pt-0">
@@ -330,6 +366,42 @@ export default function EntranceCollegesPage() {
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+                <AlertDialogContent className="max-w-md bg-white rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl text-center">
+                    <div className="p-8 space-y-6">
+                        <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto ring-8 ring-red-50/50 text-red-600">
+                            <Trash2 size={40} />
+                        </div>
+                        <div className="space-y-2">
+                            <AlertDialogTitle className="text-2xl font-black text-gray-900 tracking-tight">
+                                Delete College?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm font-medium text-gray-400">
+                                Are you sure you want to delete this college? This action cannot be reversed and will remove all associated data.
+                            </AlertDialogDescription>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            <button
+                                onClick={handleDelete}
+                                disabled={isLoadingState}
+                                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-red-200 disabled:opacity-50 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                {isLoadingState ? <Loader2 className="animate-spin" size={20} /> : <Trash2 size={18} />}
+                                Confirm Delete
+                            </button>
+                            <button
+                                onClick={() => setDeleteId(null)}
+                                className="w-full py-4 text-gray-400 font-bold hover:text-gray-600 bg-transparent hover:bg-gray-50 rounded-2xl transition-all"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </AlertDialogContent>
+            </AlertDialog>
 
             <EntranceExamGuide open={guideOpen} onOpenChange={setGuideOpen} />
         </div>
