@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -23,6 +23,11 @@ export default function TeacherDashboard() {
   const [batches, setBatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedBatchId, setSelectedBatchId] = useState<string>("");
+  const [logDate, setLogDate] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const [notes, setNotes] = useState("");
+  const [isSavingLog, setIsSavingLog] = useState(false);
+  const [logStatusMessage, setLogStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -59,6 +64,59 @@ export default function TeacherDashboard() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!selectedBatchId && batches.length > 0) {
+      setSelectedBatchId(String(batches[0]._id || batches[0]?.id || ""));
+    }
+  }, [batches, selectedBatchId]);
+
+  const handleSaveDailyLog = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLogStatusMessage(null);
+
+    if (!selectedBatchId) {
+      setLogStatusMessage({ type: "error", text: "Please select a batch." });
+      return;
+    }
+
+    if (!notes.trim()) {
+      setLogStatusMessage({ type: "error", text: "Please enter what you taught today." });
+      return;
+    }
+
+    if (!logDate) {
+      setLogStatusMessage({ type: "error", text: "Please select a date." });
+      return;
+    }
+
+    setIsSavingLog(true);
+
+    try {
+      const response = await fetch("/api/teacher/daily-logs", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          batchId: selectedBatchId,
+          logDate,
+          notes: notes.trim(),
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to save daily log.");
+      }
+
+      setLogStatusMessage({ type: "success", text: "Daily teaching log saved successfully." });
+      setNotes("");
+    } catch (err: any) {
+      setLogStatusMessage({ type: "error", text: err?.message || "Unable to save daily log." });
+    } finally {
+      setIsSavingLog(false);
+    }
+  };
 
   const assignedCourses = teacherProfile?.assignedCourses?.length
     ? teacherProfile.assignedCourses
@@ -204,6 +262,76 @@ export default function TeacherDashboard() {
             </Link>
           </motion.div>
         ))}
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <div>
+            <h3 className="text-lg font-bold text-[#1e293b]">Daily Teaching Log</h3>
+            <p className="text-sm text-gray-500">Record what you taught on a specific date for your assigned batch.</p>
+          </div>
+        </div>
+
+        {batches.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-sm text-gray-500">
+            You currently have no assigned batches. Once your batches are assigned, you can save daily teaching notes here.
+          </div>
+        ) : (
+          <form onSubmit={handleSaveDailyLog} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="block text-sm font-medium text-gray-700">
+                Batch
+                <select
+                  value={selectedBatchId}
+                  onChange={(event) => setSelectedBatchId(event.target.value)}
+                  className="mt-2 block w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                >
+                  {batches.map((batch) => (
+                    <option key={batch._id} value={String(batch._id)}>
+                      {batch.name}
+                      {batch.courseId?.name ? ` — ${batch.courseId.name}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block text-sm font-medium text-gray-700">
+                Date
+                <input
+                  type="date"
+                  value={logDate}
+                  onChange={(event) => setLogDate(event.target.value)}
+                  className="mt-2 block w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </label>
+            </div>
+
+            <label className="block text-sm font-medium text-gray-700">
+              Notes / Topics Taught
+              <textarea
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                rows={5}
+                className="mt-2 block w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                placeholder="Enter a summary of what you taught today, including topics or important points." 
+              />
+            </label>
+
+            {logStatusMessage && (
+              <p className={`text-sm ${logStatusMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                {logStatusMessage.text}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSavingLog}
+              className="inline-flex items-center justify-center rounded-full bg-[#2C4276] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1e2e54] disabled:cursor-not-allowed disabled:bg-gray-400"
+            >
+              {isSavingLog ? "Saving log..." : "Save Daily Log"}
+            </button>
+          </form>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

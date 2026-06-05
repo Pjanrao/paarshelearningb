@@ -141,6 +141,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     { name: "My Batches", path: "/teacher/batches", icon: Users },
     { name: "Meetings", path: "/teacher/meetings", icon: Video },
     { name: "Syllabus Progress", path: "/teacher/syllabus-progress", icon: BarChart3 },
+    { name: "Daily Logs", path: "/teacher/daily-logs", icon: Clock },
     { name: "Settings", path: "/teacher/settings", icon: Settings },
   ];
 
