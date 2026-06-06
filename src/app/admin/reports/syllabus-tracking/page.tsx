@@ -12,6 +12,7 @@ export default function AdminSyllabusTracking() {
   const [teacherProductivity, setTeacherProductivity] = useState<any[]>([]);
   const [courseSummaries, setCourseSummaries] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [dailyTeachingLogs, setDailyTeachingLogs] = useState<any[]>([]);
 
   const [activeTab, setActiveTab] = useState("batches");
   const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export default function AdminSyllabusTracking() {
       setBatchSummaries(data.batchSummaries || []);
       setTeacherProductivity(data.teacherProductivity || []);
       setCourseSummaries(data.courseSummaries || []);
+      setDailyTeachingLogs(data.dailyTeachingLogs || []);
       setRecentActivity(data.recentActivity || []);
       setSummary(data.summary || {});
 
@@ -99,6 +101,22 @@ export default function AdminSyllabusTracking() {
       return matchesCourse && matchesTeacher && matchesSearch;
     }),
     [batchSummaries, selectedCourse, selectedTeacher, searchQuery]
+  );
+
+  const filteredDailyTeachingLogs = useMemo(
+    () => dailyTeachingLogs.filter((log) => {
+      const matchesCourse = selectedCourse === "all" || log.course === selectedCourse;
+      const matchesTeacher = selectedTeacher === "all" || log.teacher === selectedTeacher;
+      const searchTerm = searchQuery.toLowerCase();
+      const matchesSearch =
+        searchTerm === "" ||
+        log.notes?.toLowerCase().includes(searchTerm) ||
+        log.batch?.toLowerCase().includes(searchTerm) ||
+        log.teacher?.toLowerCase().includes(searchTerm) ||
+        log.course?.toLowerCase().includes(searchTerm);
+      return matchesCourse && matchesTeacher && matchesSearch;
+    }),
+    [dailyTeachingLogs, selectedCourse, selectedTeacher, searchQuery]
   );
 
   const toggleBatchDetails = (batchId: string) => {
@@ -510,6 +528,41 @@ export default function AdminSyllabusTracking() {
 
       {/* Bottom Panels - Recent Activity */}
       <div className="grid grid-cols-1 gap-6">
+        {/* Daily Teaching Log */}
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-gray-50/50 p-4 border-b border-gray-100">
+            <h3 className="text-[#1e293b] font-bold text-base flex items-center gap-2">
+              <Clock size={18} className="text-[#2C4276]" />
+              Daily Teaching Log
+            </h3>
+            <p className="text-xs text-gray-500 mt-1">Latest daily notes submitted by instructors for tracked batches.</p>
+          </div>
+
+          <div className="p-4 space-y-4 max-h-[320px] overflow-y-auto">
+            {filteredDailyTeachingLogs.length === 0 ? (
+              <p className="text-sm text-gray-400 italic text-center py-4">No daily teaching logs found for the selected filters.</p>
+            ) : (
+              filteredDailyTeachingLogs.map((log, idx) => (
+                <div key={idx} className="flex gap-3.5 items-start p-3 rounded-xl border border-gray-50 hover:bg-gray-50/30 transition">
+                  <div className="bg-blue-50 text-[#2C4276] p-2.5 rounded-xl flex-shrink-0">
+                    <Clock size={18} />
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <div>
+                        <h4 className="font-bold text-[#1e293b] text-sm">{log.teacher}</h4>
+                        <p className="text-xs text-gray-500">{log.course} · {log.batch}</p>
+                      </div>
+                      <span className="text-[10px] text-gray-400 whitespace-nowrap font-bold uppercase tracking-wider">{log.logDate}</span>
+                    </div>
+                    <p className="text-xs text-gray-600 font-medium whitespace-pre-line">{log.notes}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
         {/* Recent Lecture Activity Log */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="bg-gray-50/50 p-4 border-b border-gray-100">

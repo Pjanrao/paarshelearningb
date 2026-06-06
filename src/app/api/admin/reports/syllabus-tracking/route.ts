@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Batch from "@/models/Batch";
 import LectureTracking from "@/models/LectureTracking";
+import TeacherDailyLog from "@/models/TeacherDailyLog";
 import User from "@/models/User";
 import Topic from "@/models/Topic";
 
@@ -206,6 +207,29 @@ export async function GET(req: Request) {
       duration: `${activity.durationHours || 0} hrs`,
     }));
 
+    const dailyLogData = await TeacherDailyLog.find()
+      .sort({ logDate: -1 })
+      .limit(20)
+      .populate("teacherId", "name")
+      .populate({
+        path: "batchId",
+        select: "name courseId",
+        populate: {
+          path: "courseId",
+          select: "name",
+        },
+      })
+      .lean();
+
+    const dailyTeachingLogs = dailyLogData.map((log: any) => ({
+      teacher: log.teacherId?.name || "Unknown",
+      batch: log.batchId?.name || "Unknown",
+      course: log.batchId?.courseId?.name || "Unknown",
+      logDate: log.logDate ? new Date(log.logDate).toLocaleDateString() : "Unknown",
+      notes: log.notes || "",
+      createdAt: log.createdAt ? new Date(log.createdAt).toISOString() : undefined,
+    }));
+
     const courseSummaries = Array.from(new Set(batchSummaries.map((batch) => batch.courseId?.toString()).filter(Boolean))).map((courseId) => {
       const courseBatches = batchSummaries.filter((batch) => batch.courseId?.toString() === courseId);
       const courseName = courseBatches[0]?.course || "Unknown Course";
@@ -229,6 +253,7 @@ export async function GET(req: Request) {
         batchSummaries,
         teacherProductivity,
         courseSummaries,
+        dailyTeachingLogs,
         recentActivity,
         summary: {
           totalBatches: batchSummaries.length,

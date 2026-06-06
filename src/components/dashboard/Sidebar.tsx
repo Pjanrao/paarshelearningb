@@ -98,7 +98,8 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
       icon: BarChart3,
       subItems: [
         { name: "Reports & Analytics", path: "/admin/reports" },
-        { name: "Syllabus Tracking", path: "/admin/reports/syllabus-tracking" }
+        { name: "Syllabus Tracking", path: "/admin/reports/syllabus-tracking" },
+        { name: "Daily Teaching Log", path: "/admin/reports/daily-teaching-log" },
       ]
     },
     // { name: "Payments", path: "/admin/payments", icon: CreditCard },

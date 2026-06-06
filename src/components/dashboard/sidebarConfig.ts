@@ -11,6 +11,7 @@ export const sidebarConfig = {
     { name: "Blogs", path: "/admin/blogs" },
     // { name: "Placement", path: "/admin/placement" },
     { name: "Reports", path: "/admin/reports" },
+    { name: "Daily Teaching Log", path: "/admin/reports/daily-teaching-log" },
     // { name: "Payments", path: "/admin/payments" },
     { name: "Testimonials", path: "/admin/testimonial" },
     { name: "Practice Tests", path: "/admin/practice-tests" },
