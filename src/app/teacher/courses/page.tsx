@@ -156,7 +156,7 @@ export default function TeacherCourses() {
 
               <div className="bg-gray-50 px-6 py-4 flex gap-4 border-t border-gray-100">
                 <Link
-                  href="/teacher/take-lecture"
+                  href="/teacher/daily-logs"
                   className="flex-1 text-center bg-[#2C4276] hover:bg-[#1e2e54] text-white py-2 rounded-xl text-xs font-bold transition shadow-sm"
                 >
                   Log Lecture

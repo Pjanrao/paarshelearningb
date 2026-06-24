@@ -636,21 +636,21 @@ const CourseDetails = ({ slug }: { slug: string }) => {
         <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 skew-x-12 transform translate-x-20"></div>
         <div className="container mx-auto max-w-7xl relative z-10 grid lg:grid-cols-12 gap-10 items-center">
           <div className="text-white lg:col-span-6">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-4" data-aos="fade-right">
               <span className="px-2.5 py-0.5 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-wider">
                 {course.level || 'Featured'}
               </span>
               <span className="text-white/60 text-xs">Course &gt; {course.level || 'Development'}</span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold mb-3 leading-tight">
+            <h1 className="text-2xl md:text-3xl font-extrabold mb-3 leading-tight" data-aos="fade-right" data-aos-delay="100">
               {course.name}
             </h1>
-            <p className="text-sm md:text-base text-blue-50 mb-5 max-w-lg opacity-90 leading-relaxed">
+            <p className="text-sm md:text-base text-blue-50 mb-5 max-w-lg opacity-90 leading-relaxed" data-aos="fade-right" data-aos-delay="200">
               {course.shortDescription}
             </p>
             {/* ✅ TAGS */}
             {course.popularTags && (
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap gap-2 mb-4" data-aos="fade-up" data-aos-delay="300">
                 {course.popularTags.map((tag: string, index: number) => (
                   <span
                     key={index}
@@ -661,7 +661,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                 ))}
               </div>
             )}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-3" data-aos="fade-up" data-aos-delay="400">
               <div className="flex items-center gap-2 bg-white/10 px-3 py-1.5 rounded-lg backdrop-blur-sm border border-white/10">
                 <Icon icon="solar:user-bold" className="text-yellow-400 w-4 h-4" />
                 <span className="text-xs font-bold">{course.reviews || '1.2k'} Students Enrolled</span>
@@ -669,7 +669,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             </div>
           </div>
 
-          <div className="relative group lg:col-span-6 w-full lg:-mt-12 flex justify-center lg:justify-end">
+          <div className="relative group lg:col-span-6 w-full lg:-mt-12 flex justify-center lg:justify-end" data-aos="fade-left">
             <div className="relative w-full max-w-[500px] h-[250px] lg:mt-15 mt-8">
               <div className="absolute inset-0 bg-blue-400 blur-3xl opacity-20 group-hover:opacity-30 transition-opacity rounded-full"></div>
               <div className="relative h-full rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10 bg-black">
@@ -688,7 +688,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
       </section>
 
       {/* Meta Info Bar */}
-      <div className="container mx-auto max-w-7xl px-4 -mt-6 relative z-20">
+      <div className="container mx-auto max-w-7xl px-4 -mt-6 relative z-20" data-aos="fade-up">
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-3 md:p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 md:gap-4 border border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center text-blue-600">
@@ -762,7 +762,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
 
             {/* Course Overview */}
-            <section className="space-y-3">
+            <section className="space-y-3" data-aos="fade-up">
               <h2 className="text-xl font-bold text-[#2B4278] dark:text-white">Course Overview</h2>
               <div className="prose prose-blue dark:prose-invert max-w-none">
                 <div
@@ -777,7 +777,10 @@ const CourseDetails = ({ slug }: { slug: string }) => {
               <h2 className="text-xl font-bold text-[#2B4278] dark:text-white">Course Curriculum</h2>
               <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
                 {(course.curriculum || (course.syllabus || [])).map((item: any, index: number) => (
-                  <div key={index} className={`group bg-white dark:bg-gray-900 border ${activeAccordion === index ? 'border-[#01A0E2] ring-1 ring-[#01A0E2]/20' : 'border-gray-100 dark:border-gray-800'} rounded-xl overflow-hidden transition-all duration-300 shadow-sm`}>
+                  <div key={index}
+                    data-aos="fade-up"
+                    data-aos-delay={index * 50}
+                    className={`group bg-white dark:bg-gray-900 border ${activeAccordion === index ? 'border-[#01A0E2] ring-1 ring-[#01A0E2]/20' : 'border-gray-100 dark:border-gray-800'} rounded-xl overflow-hidden transition-all duration-300 shadow-sm`}>
                     <div
                       className="p-3 md:p-4 flex items-center justify-between cursor-pointer"
                       onClick={() => toggleAccordion(index)}
@@ -827,9 +830,9 @@ const CourseDetails = ({ slug }: { slug: string }) => {
                     </div>
                   </h2>
 
-                  <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
+                  <div className="grid md:grid-cols-2 gap-x-12 gap-y-8" data-aos="fade-up">
                     {(course.whatYouLearn || course.benefits || []).map((item: any, idx: number) => (
-                      <div key={idx} className="flex items-start gap-4 group/item">
+                      <div key={idx} className="flex items-start gap-4 group/item" data-aos="fade-up" data-aos-delay={idx * 50}>
                         <div className="flex-shrink-0 w-8 h-8 rounded-xl bg-green-50 dark:bg-green-900/20 shadow-sm border border-green-100 dark:border-green-900/30 flex items-center justify-center group-hover/item:bg-[#01A0E2]/10 group-hover/item:border-[#01A0E2]/20 transition-all transform group-hover/item:scale-110">
                           <Icon icon="solar:check-circle-bold-duotone" className="text-green-600 dark:text-green-400 w-5 h-5 group-hover/item:text-[#01A0E2]" />
                         </div>
@@ -928,7 +931,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
               )} */}
 
               {/* Enrollment Card */}
-              <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 md:p-6 shadow-2xl border border-[#01A0E2]/10 dark:border-gray-800 ring-1 ring-[#01A0E2]/5 mt-4 md:mt-6">
+              <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 md:p-6 shadow-2xl border border-[#01A0E2]/10 dark:border-gray-800 ring-1 ring-[#01A0E2]/5 mt-4 md:mt-6" data-aos="fade-left">
                 {/* {course.fee && (
                   <div className="mb-4">
                     <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Course Fee</p>
@@ -974,7 +977,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
 
               {/* Certification Banner */}
-              <div className="bg-gradient-to-br from-[#2B4278] to-[#01A0E2] rounded-2xl p-5 md:p-6 text-white relative overflow-hidden mt-6 md:mt-8">
+              <div className="bg-gradient-to-br from-[#2B4278] to-[#01A0E2] rounded-2xl p-5 md:p-6 text-white relative overflow-hidden mt-6 md:mt-8" data-aos="fade-left" data-aos-delay="100">
                 <Icon icon="solar:medal-ribbon-bold" className="absolute bottom-[-15px] right-[-15px] w-32 h-32 text-white/5 -rotate-12" />
                 <div className="relative z-10 space-y-3">
                   <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
@@ -1007,7 +1010,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
               {/* Meet Your Trainer Sidebar Card */}
               {course.instructor && (
-                <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden group mt-8">
+                <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden group mt-8" data-aos="fade-left" data-aos-delay="200">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#01A0E2]/5 dark:bg-[#01A0E2]/5 rounded-full blur-2xl transform translate-x-10 -translate-y-10"></div>
                   <div className="relative z-10 space-y-4">
                     <h3 className="text-base font-bold text-[#2B4278] dark:text-white flex items-center gap-2">
@@ -1056,7 +1059,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
       </main>
 
-      <section className="container mx-auto max-w-6xl px-4 lg:-mt-24 mt-0 mb-0">
+      <section className="container mx-auto max-w-6xl px-4 lg:-mt-24 mt-0 mb-0" data-aos="zoom-in">
         <div className="bg-[#081738] rounded-[2rem] md:rounded-[3rem] p-2 md:p-8 text-left md:text-center text-white relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
             <div className="absolute top-[-50%] left-[-20%] w-[100%] h-[150%] bg-blue-500 rounded-full blur-[120px]"></div>
@@ -1100,7 +1103,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
         </div>
       </section>
       {/* ✅ Related Courses */}
-      <section className="container mx-auto max-w-7xl px-4 mb-16">
+      <section className="container mx-auto max-w-7xl px-4 mb-16" data-aos="fade-up">
         <div className="flex justify-center mb-5">
           <h2 className="text-xl md:text-2xl font-bold text-[#2B4278] dark:text-white">
             You May Also Like

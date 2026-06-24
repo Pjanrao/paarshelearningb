@@ -38,8 +38,8 @@ export default function TeacherBatches() {
         <Loader2 className="animate-spin text-blue-500" size={40} />
       </div>
     );
-  }
 
+  }
   return (
     <div className="space-y-6">
       <div>
@@ -61,8 +61,8 @@ export default function TeacherBatches() {
             const schedule = batch.startDate && batch.endDate
               ? `${new Date(batch.startDate).toLocaleDateString()} - ${new Date(batch.endDate).toLocaleDateString()}`
               : batch.status === "Active"
-              ? "Currently active"
-              : "Schedule not available";
+                ? "Currently active"
+                : "Schedule not available";
             const time = batch.startDate
               ? new Date(batch.startDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
               : "TBD";
@@ -121,7 +121,7 @@ export default function TeacherBatches() {
                   </div>
 
                   <div className="flex gap-3 w-full mt-2">
-                    <Link href="/teacher/take-lecture" className="flex-1 text-center bg-[#2C4276] hover:bg-[#1e2e54] text-white py-2 rounded-xl text-xs font-bold transition shadow-sm">
+                    <Link href="/teacher/meetings" className="flex-1 text-center bg-[#2C4276] hover:bg-[#1e2e54] text-white py-2 rounded-xl text-xs font-bold transition shadow-sm">
                       Take Lecture
                     </Link>
                     <Link href="/teacher/syllabus-progress" className="flex-1 text-center border border-gray-200 hover:border-gray-300 text-gray-700 bg-white py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1">

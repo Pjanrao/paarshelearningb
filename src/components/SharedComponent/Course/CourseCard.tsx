@@ -18,7 +18,7 @@ export interface Course {
   description?: string;
   shortDescription?: string;
   category?: any;
-  date?: string;  
+  date?: string;
   fee?: number;
   rating?: number;
   duration?: any;
@@ -46,8 +46,8 @@ const CourseCard = ({ course }: { course: Course }) => {
 
   return (
     <motion.div
-      whileHover={{ 
-        y: -10, 
+      whileHover={{
+        y: -10,
         boxShadow: "0 25px 50px -12px rgba(44,66,118,0.25)",
         transition: { duration: 0.3, ease: "easeOut" }
       }}

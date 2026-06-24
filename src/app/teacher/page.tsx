@@ -222,7 +222,7 @@ export default function TeacherDashboard() {
         </div>
 
         <Link
-          href="/teacher/take-lecture"
+          href="/teacher/meetings"
           className="flex items-center gap-2 bg-[#2C4276] hover:bg-[#1e2e54] text-white px-5 py-2.5 rounded-full shadow-md font-semibold transition active:scale-95 text-sm"
         >
           <PlusCircle size={18} />
@@ -313,7 +313,7 @@ export default function TeacherDashboard() {
                 onChange={(event) => setNotes(event.target.value)}
                 rows={5}
                 className="mt-2 block w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                placeholder="Enter a summary of what you taught today, including topics or important points." 
+                placeholder="Enter a summary of what you taught today, including topics or important points."
               />
             </label>
 
@@ -397,8 +397,8 @@ export default function TeacherDashboard() {
                       <p className="text-[10px] text-gray-500">{item.room}</p>
                     </div>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.status === "Completed"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800 animate-pulse"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800 animate-pulse"
                       }`}>
                       {item.status}
                     </span>
