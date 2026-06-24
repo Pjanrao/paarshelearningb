@@ -97,6 +97,57 @@ const AboutPage = () => {
       {/* ── Hero / Intro ───────────────────────────────────── */}
       <div className="w-full pt-20 pb-4 md:pt-32 text-center bg-white text-primary dark:bg-[#18181b] dark:text-white transition-colors duration-300 relative overflow-hidden">
 
+        {/* Floating background orbs — properly visible */}
+        <motion.div
+          className="absolute top-10 left-10 w-52 h-52 rounded-full blur-3xl pointer-events-none"
+          style={{ background: "rgba(59,130,246,0.12)" }}
+          animate={{ scale: [1, 1.35, 1], opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute bottom-10 right-10 w-64 h-64 rounded-full blur-3xl pointer-events-none"
+          style={{ background: "rgba(99,102,241,0.12)" }}
+          animate={{ scale: [1.2, 1, 1.2], opacity: [0.5, 0.9, 0.5] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl pointer-events-none"
+          style={{ background: "rgba(99,102,241,0.06)" }}
+          animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+          transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+        />
+
+        {/* Floating sparkle dots — visible with proper colours */}
+        {[...Array(10)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: `${6 + (i % 3) * 4}px`,
+              height: `${6 + (i % 3) * 4}px`,
+              left: `${8 + i * 8.5}%`,
+              top: `${18 + (i % 5) * 14}%`,
+              background: i % 2 === 0
+                ? "rgba(59,130,246,0.45)"
+                : "rgba(99,102,241,0.45)",
+              boxShadow: i % 2 === 0
+                ? "0 0 8px rgba(59,130,246,0.5)"
+                : "0 0 8px rgba(99,102,241,0.5)",
+            }}
+            animate={{
+              y: [0, -20, 0],
+              opacity: [0.5, 1, 0.5],
+              scale: [1, 1.4, 1],
+            }}
+            transition={{
+              duration: 3 + i * 0.4,
+              repeat: Infinity,
+              delay: i * 0.28,
+              ease: "easeInOut",
+            }}
+          />
+        ))}
+
         {/* Page title */}
         <motion.div
           className="text-center mb-16 md:mb-10"
@@ -113,6 +164,12 @@ const AboutPage = () => {
             animate={{ scaleX: 1 }}
             transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" as const }}
             style={{ originX: 0.5 }}
+          />
+          {/* Pulsing glow under underline */}
+          <motion.div
+            className="w-8 h-1 bg-blue-400/40 mx-auto rounded-full mt-1 blur-sm"
+            animate={{ scaleX: [1, 2, 1], opacity: [0.4, 0.8, 0.4] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
           />
         </motion.div>
 
@@ -142,23 +199,95 @@ const AboutPage = () => {
           </div>
 
           <div className="mt-[-25px] relative z-30 pb-10">
-            <motion.button
-              onClick={() => setIsAboutExpanded(!isAboutExpanded)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center justify-center gap-2 mx-auto px-8 py-3 rounded-full bg-white dark:bg-gray-800 border border-blue-500/30 text-primary font-bold shadow-xl shadow-blue-500/10 hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 group"
-            >
-              <span className="group-hover:text-secondary">{isAboutExpanded ? "Read Less" : "Read More"}</span>
-              <div className={`transition-transform duration-300 ${isAboutExpanded ? 'rotate-180' : ''}`}>
-                <ChevronDown size={20} className="text-primary" />
-              </div>
-            </motion.button>
+            {/* Pulse ring behind button */}
+            <div className="relative inline-block">
+              <motion.div
+                className="absolute inset-0 rounded-full border border-blue-400/30 pointer-events-none"
+                animate={{ scale: [1, 1.5, 1.8], opacity: [0.5, 0.2, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+              />
+              <motion.button
+                onClick={() => setIsAboutExpanded(!isAboutExpanded)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="flex items-center justify-center gap-2 mx-auto px-8 py-3 rounded-full bg-white dark:bg-gray-800 border border-blue-500/30 text-primary font-bold shadow-xl shadow-blue-500/10 hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 group"
+              >
+                <span className="group-hover:text-secondary">{isAboutExpanded ? "Read Less" : "Read More"}</span>
+                <div className={`transition-transform duration-300 ${isAboutExpanded ? 'rotate-180' : ''}`}>
+                  <ChevronDown size={20} className="text-primary" />
+                </div>
+              </motion.button>
+            </div>
           </div>
         </motion.div>
       </div>
 
+      {/* ── Animated Wave Divider between Hero & Mission/Vision ── */}
+      <div className="relative h-16 bg-white dark:bg-[#18181b] overflow-hidden">
+        <motion.svg
+          viewBox="0 0 1440 64"
+          className="absolute bottom-0 w-full"
+          preserveAspectRatio="none"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <motion.path
+            d="M0,32 C240,64 480,0 720,32 C960,64 1200,0 1440,32 L1440,64 L0,64 Z"
+            fill="rgba(249,251,255,1)"
+            className="dark:fill-[#1f1f27]"
+            animate={{ d: [
+              "M0,32 C240,64 480,0 720,32 C960,64 1200,0 1440,32 L1440,64 L0,64 Z",
+              "M0,16 C240,48 480,16 720,16 C960,16 1200,48 1440,16 L1440,64 L0,64 Z",
+              "M0,32 C240,64 480,0 720,32 C960,64 1200,0 1440,32 L1440,64 L0,64 Z",
+            ]}}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.svg>
+      </div>
+
       {/* ── Mission / Vision ──────────────────────────────── */}
       <section className="py-32 bg-[#f9fbff] dark:bg-[#1f1f27]">
+        {/* Animated section heading badge */}
+        <motion.div
+          className="flex justify-center mb-12"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <motion.div
+            className="inline-flex items-center gap-3 px-6 py-2 rounded-full border"
+            style={{
+              background: "linear-gradient(135deg, rgba(59,130,246,0.10) 0%, rgba(99,102,241,0.10) 100%)",
+              borderColor: "rgba(59,130,246,0.25)",
+            }}
+            animate={{
+              boxShadow: [
+                "0 0 0px rgba(59,130,246,0)",
+                "0 0 18px rgba(59,130,246,0.25)",
+                "0 0 0px rgba(59,130,246,0)",
+              ],
+            }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <motion.span
+              className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500"
+              animate={{ scale: [1, 1.5, 1], opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 1.4, repeat: Infinity }}
+            />
+            <span className="text-blue-700 dark:text-blue-300 font-bold text-sm tracking-wide uppercase">
+              Mission &amp; Vision
+            </span>
+            <motion.span
+              className="inline-block w-2.5 h-2.5 rounded-full bg-indigo-500"
+              animate={{ scale: [1, 1.5, 1], opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 1.4, repeat: Infinity, delay: 0.7 }}
+            />
+          </motion.div>
+        </motion.div>
+
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-4 items-stretch">
 
@@ -215,6 +344,50 @@ const AboutPage = () => {
                   </motion.div>
                 ))}
               </motion.div>
+
+              {/* Animated bottom accent bar */}
+              <motion.div
+                className="mt-6 h-1 rounded-full bg-gradient-to-r from-blue-600 via-indigo-400 to-blue-300 opacity-30"
+                initial={{ scaleX: 0, originX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
+              />
+
+              {/* NEW: Animated counter row at bottom of Mission card */}
+              <motion.div
+                className="mt-6 grid grid-cols-3 gap-2"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={staggerContainer}
+              >
+                {[
+                  { value: "5K+", label: "Students" },
+                  { value: "100%", label: "Placement" },
+                  { value: "2018", label: "Founded" },
+                ].map((stat, i) => (
+                  <motion.div
+                    key={i}
+                    variants={itemFadeUp}
+                    whileHover={{ scale: 1.08, y: -3 }}
+                    className="flex flex-col items-center bg-blue-50 dark:bg-blue-900/20 rounded-2xl py-3 px-2 border border-blue-100/60 dark:border-blue-800/20 cursor-default"
+                  >
+                    <motion.span
+                      className="text-lg font-black text-blue-700 dark:text-blue-300"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.2 + i * 0.12, type: "spring", stiffness: 200 }}
+                    >
+                      {stat.value}
+                    </motion.span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">
+                      {stat.label}
+                    </span>
+                  </motion.div>
+                ))}
+              </motion.div>
             </motion.div>
 
             {/* Our Vision — slides in from right */}
@@ -233,18 +406,37 @@ const AboutPage = () => {
               </h3>
 
               <div className="w-full flex-1 flex flex-col items-center justify-center py-2">
-                {/* Image with scale-in */}
+                {/* Image with scale-in + floating animation */}
                 <motion.div
-                  className="w-full max-w-[380px] mb-6 group/img mx-auto md:mx-0"
+                  className="w-full max-w-[380px] mb-6 group/img mx-auto md:mx-0 relative"
                   variants={scaleIn}
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.3 }}
                 >
-                  <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-2xl group-hover/img:scale-[1.02] transition-transform duration-700 ease-in-out">
-                    <div className="absolute inset-0 bg-blue-600/5 group-hover/img:bg-transparent transition-colors duration-500 z-10" />
-                    <Image src={getImageUrl("ABOUT_US_BANNER", "/images/contact-page/Working.png")} alt="Vision" fill className="object-contain p-2 relative z-0" />
-                  </div>
+                  {/* NEW: Animated glowing ring around image */}
+                  <motion.div
+                    className="absolute -inset-3 rounded-2xl pointer-events-none"
+                    style={{
+                      background: "linear-gradient(135deg, rgba(59,130,246,0.2), rgba(99,102,241,0.2), rgba(59,130,246,0.2))",
+                      backgroundSize: "200% 200%",
+                    }}
+                    animate={{
+                      backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
+                      opacity: [0.5, 0.9, 0.5],
+                    }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  {/* floating animation wrapper */}
+                  <motion.div
+                    animate={{ y: [0, -10, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-2xl group-hover/img:scale-[1.02] transition-transform duration-700 ease-in-out">
+                      <div className="absolute inset-0 bg-blue-600/5 group-hover/img:bg-transparent transition-colors duration-500 z-10" />
+                      <Image src={getImageUrl("ABOUT_US_BANNER", "/images/contact-page/Working.png")} alt="Vision" fill className="object-contain p-2 relative z-0" />
+                    </div>
+                  </motion.div>
                 </motion.div>
 
                 {/* Vision quote */}
@@ -283,20 +475,62 @@ const AboutPage = () => {
                     transition={{ type: "spring", stiffness: 350, damping: 18 }}
                     className="flex flex-col items-center gap-3 group/item cursor-pointer"
                   >
-                    <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 group-hover/item:bg-blue-600 group-hover/item:text-white transition-all duration-500 shadow-sm border border-blue-100/50 dark:border-blue-800/20">
+                    {/* rotating icon on mount */}
+                    <motion.div
+                      className="w-14 h-14 flex items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 group-hover/item:bg-blue-600 group-hover/item:text-white transition-all duration-500 shadow-sm border border-blue-100/50 dark:border-blue-800/20"
+                      initial={{ rotate: -15, opacity: 0 }}
+                      whileInView={{ rotate: 0, opacity: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.15 * i, duration: 0.5, type: "spring", stiffness: 200 }}
+                    >
                       {item.icon}
-                    </div>
+                    </motion.div>
                     <span className="text-[10px] font-black text-gray-400 group-hover/item:text-secondary transition-colors uppercase tracking-[0.2em] text-center leading-tight">
                       {item.label}
                     </span>
                   </motion.div>
                 ))}
               </motion.div>
+
+              {/* Animated bottom accent bar */}
+              <motion.div
+                className="mt-6 h-1 rounded-full bg-gradient-to-r from-indigo-300 via-blue-500 to-indigo-600 opacity-30 w-full"
+                initial={{ scaleX: 0, originX: 1 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, delay: 0.5, ease: "easeOut" }}
+              />
             </motion.div>
 
           </div>
         </div>
       </section>
+
+      {/* ── Animated Section Divider before Founder ── */}
+      <div className="relative overflow-hidden" style={{ height: "80px", background: "transparent" }}>
+        {/* Travelling dot trail */}
+        {[...Array(5)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full"
+            style={{ background: i % 2 === 0 ? "rgba(59,130,246,0.6)" : "rgba(99,102,241,0.6)" }}
+            animate={{ x: ["-10%", "110%"] }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              delay: i * 0.55,
+              ease: "linear",
+            }}
+          />
+        ))}
+        {/* Animated horizontal line */}
+        <motion.div
+          className="absolute top-1/2 left-4 right-4 h-px"
+          style={{ background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.3), transparent)" }}
+          animate={{ opacity: [0.3, 0.8, 0.3] }}
+          transition={{ duration: 2.5, repeat: Infinity }}
+        />
+      </div>
 
       {/* ── Founder Section ───────────────────────────────── */}
       <motion.div
@@ -328,7 +562,7 @@ const AboutPage = () => {
             Founder
           </motion.h3>
 
-          {/* Social icons — staggered */}
+          {/* Social icons — staggered + bounce entrance */}
           <motion.div
             className="social-icons-row"
             variants={staggerContainer}
@@ -343,7 +577,13 @@ const AboutPage = () => {
             ].map((s, i) => (
               <motion.a
                 key={i}
-                variants={itemFadeUp}
+                variants={{
+                  hidden: { opacity: 0, y: 30, scale: 0.7 },
+                  visible: {
+                    opacity: 1, y: 0, scale: 1,
+                    transition: { type: "spring", stiffness: 300, damping: 14, delay: i * 0.12 }
+                  }
+                }}
                 whileHover={{ scale: 1.18, rotate: 6 }}
                 whileTap={{ scale: 0.9 }}
                 transition={{ type: "spring", stiffness: 400, damping: 14 }}
@@ -364,6 +604,17 @@ const AboutPage = () => {
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
           >
+            {/* NEW: animated glowing top-border on founder bio card */}
+            <motion.div
+              className="absolute top-0 left-8 right-8 h-0.5 rounded-full"
+              style={{
+                background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.6), rgba(99,102,241,0.6), transparent)",
+                backgroundSize: "200% 100%",
+              }}
+              animate={{ backgroundPosition: ["200% 0%", "-200% 0%"] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            />
+
             <motion.h2
               className="text-xl md:text-2xl font-bold mb-6"
               variants={fadeDown}
@@ -397,17 +648,25 @@ const AboutPage = () => {
             </div>
 
             <div className="mt-[-20px] relative z-30">
-              <motion.button
-                onClick={() => setIsFounderExpanded(!isFounderExpanded)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center justify-center gap-2 mx-auto px-8 py-3 rounded-full bg-white dark:bg-gray-800 border border-blue-500/30 text-primary font-bold shadow-xl shadow-blue-500/10 hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 group"
-              >
-                <span className="group-hover:text-secondary">{isFounderExpanded ? "Read Less" : "Read More"}</span>
-                <div className={`transition-transform duration-300 ${isFounderExpanded ? 'rotate-180' : ''}`}>
-                  <ChevronDown size={20} className="text-primary" />
-                </div>
-              </motion.button>
+              {/* Pulse ring behind founder Read More button */}
+              <div className="relative inline-block">
+                <motion.div
+                  className="absolute inset-0 rounded-full border border-blue-400/30 pointer-events-none"
+                  animate={{ scale: [1, 1.5, 1.8], opacity: [0.5, 0.2, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
+                />
+                <motion.button
+                  onClick={() => setIsFounderExpanded(!isFounderExpanded)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center justify-center gap-2 mx-auto px-8 py-3 rounded-full bg-white dark:bg-gray-800 border border-blue-500/30 text-primary font-bold shadow-xl shadow-blue-500/10 hover:shadow-blue-500/20 hover:-translate-y-0.5 transition-all duration-300 active:scale-95 group"
+                >
+                  <span className="group-hover:text-secondary">{isFounderExpanded ? "Read Less" : "Read More"}</span>
+                  <div className={`transition-transform duration-300 ${isFounderExpanded ? 'rotate-180' : ''}`}>
+                    <ChevronDown size={20} className="text-primary" />
+                  </div>
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         </div>
