@@ -284,7 +284,7 @@ export const sendConsentFormEmail = async (
               <p>You can review and accept the consent form by clicking the button below. You will be asked to sign in to your account if you are not already logged in.</p>
 
               <div class="actions">
-                <a href="${dashboardLink}" class="btn">Review Consent Form</a>
+                <a style="color:#ffffff !important; text-decoration:none;" href="${dashboardLink}" class="btn">Review Consent Form</a>
               </div>
 
               <p style="margin-top: 30px; font-size: 13px; color: #777;">

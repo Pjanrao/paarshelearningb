@@ -58,7 +58,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
         // Send email notification to the student with live domain URL
         const liveDomain = "https://paarshelearning.com";
-        const sharedLink = `${liveDomain}/consent-forms/accept?token=${token}`;
+        const sharedLink = `${liveDomain}/student/my-consent?token=${token}`;
 
         const emailResult = await sendConsentFormEmail(
             student.email,
