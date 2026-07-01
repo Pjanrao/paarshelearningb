@@ -7,7 +7,7 @@ import { getAuthUser } from "@/lib/api-auth";
 export async function GET() {
     try {
         await connectDB();
-        
+
         const authUser = await getAuthUser();
 
         if (authUser?.id) {
@@ -28,7 +28,7 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         await connectDB();
-        
+
         const authUser = await getAuthUser();
 
         if (!authUser) {
@@ -46,9 +46,19 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
+        let emailChanged = false;
+        let passwordChanged = false;
+
         // Handle Profile Update
         if (name) user.name = name;
-        if (email) user.email = email;
+        if (email && email !== user.email) {
+            const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+            if (existingUser) {
+                return NextResponse.json({ error: "Email is already in use" }, { status: 400 });
+            }
+            user.email = email;
+            emailChanged = true;
+        }
         if (contact) {
             if (!/^\d{10}$/.test(contact)) {
                 return NextResponse.json({ error: "Invalid phone number format (10 digits required)" }, { status: 400 });
@@ -65,6 +75,11 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: "Incorrect current password" }, { status: 400 });
             }
             user.password = await bcrypt.hash(newPassword, 10);
+            passwordChanged = true;
+        }
+
+        if (emailChanged || passwordChanged) {
+            user.loginToken = crypto.randomUUID();
         }
 
         await user.save();
@@ -72,7 +87,11 @@ export async function POST(request: Request) {
         const userObj = user.toObject();
         const { password, ...responseUser } = userObj;
 
-        return NextResponse.json(responseUser);
+        return NextResponse.json({
+            ...responseUser,
+            emailChanged,
+            passwordChanged
+        });
     } catch (error: any) {
         console.error("Profile Update Error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });

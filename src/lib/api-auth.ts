@@ -69,8 +69,14 @@ export async function getUserFromAuth(req: Request) {
     if (authUser?.id) {
         const user = await User.findById(authUser.id);
         if (user) {
-            if (user.role !== "admin" && authUser.decoded?.loginToken && user.loginToken !== authUser.decoded.loginToken) {
-                return null;
+            if (user.role === "admin") {
+                if (user.loginToken && user.loginToken !== authUser.decoded?.loginToken) {
+                    return null;
+                }
+            } else {
+                if (authUser.decoded?.loginToken && user.loginToken !== authUser.decoded.loginToken) {
+                    return null;
+                }
             }
             return user;
         }

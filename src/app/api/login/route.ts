@@ -86,7 +86,11 @@ export async function POST(req: Request) {
             await user.save();
         } else {
             // Keep existing loginToken for admin (no single-session restriction)
-            loginToken = user.loginToken || null;
+            if (!user.loginToken) {
+                user.loginToken = crypto.randomUUID();
+                await user.save();
+            }
+            loginToken = user.loginToken;
         }
 
         // 3. Generate JWT

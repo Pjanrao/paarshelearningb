@@ -74,7 +74,9 @@ export function middleware(req: NextRequest) {
         path.startsWith("/uploads") ||
         path.startsWith("/promo") ||
         path.startsWith("/favicon.ico") ||
-        path.startsWith("/teacher/register")
+        path.startsWith("/course-registration") ||
+        path.startsWith("/teacher/register") ||
+        path.startsWith("/teacher/signin")
     ) {
         return NextResponse.next();
     }
@@ -86,9 +88,9 @@ export function middleware(req: NextRequest) {
         }
     } else {
         // Teacher paths
-        if (path.startsWith("/teacher") && !path.startsWith("/teacher/register")) {
+        if (path.startsWith("/teacher") && !path.startsWith("/teacher/register") && !path.startsWith("/teacher/signin")) {
             if (!activeTeacherToken || activeTeacherToken === "undefined" || activeTeacherToken === "null" || activeTeacherToken.length < 10 || activeTeacherRole !== "teacher") {
-                return NextResponse.redirect(new URL("/signin", req.url));
+                return NextResponse.redirect(new URL("/teacher/signin", req.url));
             }
         }
         // Student paths

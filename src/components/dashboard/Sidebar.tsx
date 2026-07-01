@@ -65,6 +65,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
 
       ]
     },
+    { name: "Course Registration", path: "/admin/course-registrations", icon: ClipboardCheck },
 
     {
       name: "Meetings",
@@ -91,6 +92,7 @@ export default function Sidebar({ role, collapsed, onToggle }: SidebarProps) {
     { name: "Batches", path: "/admin/batches", icon: Users },
     { name: "Certificates", path: "/admin/certificates", icon: Award },
     // { name: "Group Consent", path: "/admin/group-management", icon: ClipboardCheck },
+    { name: "Consent Forms", path: "/admin/consent-forms", icon: FileText },
     { name: "Blogs", path: "/admin/blogs", icon: FileText },
     // { name: "Placement", path: "/admin/placement", icon: Briefcase },
     {

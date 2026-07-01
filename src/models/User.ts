@@ -20,6 +20,15 @@ export interface IUser extends mongoose.Document {
     loginToken?: string | null;
     resetOtp?: string | null;
     resetOtpExpires?: Date | null;
+    sharedConsentForms: {
+        formId: mongoose.Schema.Types.ObjectId;
+        sharedAt: Date;
+    }[];
+    acceptedConsentForms: {
+        formId: mongoose.Schema.Types.ObjectId;
+        acceptedAt: Date;
+        signature?: string;
+    }[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -115,6 +124,34 @@ const userSchema = new mongoose.Schema<IUser>(
             type: Date,
             default: null,
         },
+        sharedConsentForms: [
+            {
+                formId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "ConsentForm",
+                },
+                sharedAt: {
+                    type: Date,
+                    default: Date.now,
+                },
+            },
+        ],
+        acceptedConsentForms: [
+            {
+                formId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "ConsentForm",
+                },
+                acceptedAt: {
+                    type: Date,
+                    default: Date.now,
+                },
+                signature: {
+                    type: String,
+                    default: "",
+                },
+            },
+        ],
 
     },
     { timestamps: true }

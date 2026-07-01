@@ -82,6 +82,8 @@ export default function TeachersPage() {
     const [formErrors, setFormErrors] = useState<FormErrors>({});
     const [deleteId, setDeleteId] = useState<{ id: string, name: string } | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [viewBatches, setViewBatches] = useState<any[]>([]);
+    const [isLoadingViewBatches, setIsLoadingViewBatches] = useState(false);
 
     const [formData, setFormData] = useState<TeacherFormData>({
         name: "",
@@ -280,6 +282,7 @@ export default function TeachersPage() {
         resetForm();
         setFormErrors({});
         setIsAddModalOpen(true);
+        fetchCourses();
     };
 
     const openEditModal = (teacher: Teacher) => {
@@ -300,11 +303,27 @@ export default function TeachersPage() {
         });
         setFormErrors({});
         setIsEditModalOpen(true);
+        fetchCourses();
     };
 
-    const openViewModal = (teacher: Teacher) => {
+    const openViewModal = async (teacher: Teacher) => {
         setSelectedTeacher(teacher);
         setIsViewModalOpen(true);
+        setViewBatches([]);
+        if (teacher.userId) {
+            setIsLoadingViewBatches(true);
+            try {
+                const res = await fetch(`/api/batches?assignedTeacher=${teacher.userId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setViewBatches(data.batches || data || []);
+                }
+            } catch (err) {
+                console.error("Failed to fetch teacher batches:", err);
+            } finally {
+                setIsLoadingViewBatches(false);
+            }
+        }
     };
 
     const resetForm = () => {
@@ -1033,6 +1052,33 @@ export default function TeachersPage() {
                                         <span key={idx} className="bg-white px-2 py-0.5 border border-gray-200 rounded-lg text-[10px] font-bold text-gray-700 shadow-sm">{course}</span>
                                     )) || <span className="text-gray-400 italic text-xs">No courses assigned</span>}
                                 </div>
+                            </div>
+
+                            {/* Assigned Batches */}
+                            <div className="bg-gray-50 px-3 py-2 rounded-xl border border-gray-100">
+                                <span className="text-gray-400 text-[9px] font-bold uppercase block mb-1.5 tracking-widest">Assigned Batches</span>
+                                {isLoadingViewBatches ? (
+                                    <div className="flex items-center gap-2 text-gray-400 text-xs py-1">
+                                        <Loader2 size={12} className="animate-spin" /> Loading batches...
+                                    </div>
+                                ) : viewBatches.length === 0 ? (
+                                    <span className="text-gray-400 italic text-xs">No batches assigned</span>
+                                ) : (
+                                    <div className="space-y-1.5">
+                                        {viewBatches.map((batch: any) => (
+                                            <div key={batch._id} className="bg-white px-3 py-2 border border-gray-200 rounded-lg shadow-sm flex items-center justify-between gap-2">
+                                                <div className="min-w-0">
+                                                    <p className="text-[11px] font-bold text-gray-900 truncate">{batch.name}</p>
+                                                    <p className="text-[10px] text-gray-500 truncate">{batch.courseId?.name || "—"}</p>
+                                                </div>
+                                                <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded-full flex-shrink-0 ${batch.status === "Active" ? "bg-green-50 text-green-700 border border-green-100" :
+                                                        batch.status === "Completed" ? "bg-blue-50 text-blue-700 border border-blue-100" :
+                                                            "bg-yellow-50 text-yellow-700 border border-yellow-100"
+                                                    }`}>{batch.status || "Active"}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Buttons */}

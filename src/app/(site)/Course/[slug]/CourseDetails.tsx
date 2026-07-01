@@ -372,7 +372,9 @@ const CourseDetails = ({ slug }: { slug: string }) => {
 
   // Redux state
   const adminUser = useSelector((state: RootState) => state.auth.adminUser);
-  const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser || state.auth.adminUser);
+  // IMPORTANT: Only read studentUser here — admin should never be used as the "active user"
+  // for enrollment checks, modal prefilling, or inquiry submissions.
+  const user = useSelector((state: RootState) => state.auth.studentUser || state.auth.user);
   const dispatch = useDispatch();
 
   // 🔥 SESSION HYDRATION: If Redux is empty on refresh, restore from localStorage

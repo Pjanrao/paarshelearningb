@@ -2,12 +2,13 @@ export const sidebarConfig = {
   admin: [
     { name: "Dashboard", path: "/admin" },
     { name: "Courses", path: "/admin/courses" },
+    { name: "Course Registration", path: "/admin/course-registrations" },
     { name: "Inquiries", path: "/admin/inquiries" },
     { name: "Entrance Exam", path: "/admin/entrance" },
     { name: "Students", path: "/admin/students" },
     { name: "Teachers", path: "/admin/teachers" },
     { name: "Batches", path: "/admin/batches" },
-    // { name: "Consent", path: "/admin/concent" },
+    { name: "Consent Forms", path: "/admin/consent-forms" },
     { name: "Blogs", path: "/admin/blogs" },
     // { name: "Placement", path: "/admin/placement" },
     { name: "Reports", path: "/admin/reports" },
@@ -37,5 +38,6 @@ export const sidebarConfig = {
     { name: "My Courses", path: "/student/courses" },
     { name: "Practice Tests", path: "/student/tests" },
     { name: "Results", path: "/student/results" },
+    { name: "My Consent", path: "/student/my-consent" },
   ],
 };

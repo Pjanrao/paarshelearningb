@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { logout, logoutAdmin, logoutStudent } from "@/redux/authSlice";
+import { logout, logoutAdmin, logoutStudent, logoutTeacher } from "@/redux/authSlice";
 import toast from "react-hot-toast";
 import axios from "axios";
 
@@ -30,35 +30,29 @@ export default function SessionValidator() {
             isChecking.current = true;
 
             try {
-                // We'll read the token manually from cookie or localStorage
-                const cookieToken = document.cookie
-                    .split("; ")
-                    .find(row => row.startsWith("token="))
-                    ?.split("=")[1];
+                const isTeacherRoute = pathname.startsWith("/teacher");
+                const isStudentRoute = pathname.startsWith("/student");
 
-                const adminCookieToken = document.cookie
-                    .split("; ")
-                    .find(row => row.startsWith("adminToken="))
-                    ?.split("=")[1];
+                // Read only the token relevant to the current route
+                const cookieMap = document.cookie.split("; ").reduce((acc: Record<string, string>, cur) => {
+                    const [k, v] = cur.split("=");
+                    acc[k] = v;
+                    return acc;
+                }, {});
 
-                const studentCookieToken = document.cookie
-                    .split("; ")
-                    .find(row => row.startsWith("studentToken="))
-                    ?.split("=")[1];
+                let activeToken: string | undefined;
+                let routeType: "teacher" | "student" | null = null;
 
-                const localToken = localStorage.getItem("token");
-                const localAdminToken = localStorage.getItem("adminToken");
-                const localStudentToken = localStorage.getItem("studentToken");
-
-                const baseToken = cookieToken || localToken;
-
-                let activeToken = baseToken;
-                let isAdminRoute = pathname.startsWith("/admin");
-
-                if (isAdminRoute) {
-                    activeToken = adminCookieToken || localAdminToken || baseToken;
+                if (isTeacherRoute) {
+                    activeToken = cookieMap["teacherToken"] || localStorage.getItem("teacherToken") || undefined;
+                    routeType = "teacher";
+                } else if (isStudentRoute) {
+                    activeToken = cookieMap["studentToken"] || localStorage.getItem("studentToken") || undefined;
+                    routeType = "student";
                 } else {
-                    activeToken = studentCookieToken || localStudentToken || baseToken;
+                    // Default: safe fallback — check student token for legacy paths
+                    activeToken = cookieMap["studentToken"] || localStorage.getItem("studentToken") || cookieMap["token"] || localStorage.getItem("token") || undefined;
+                    routeType = "student";
                 }
 
                 if (!activeToken || activeToken === "undefined") {
@@ -67,30 +61,20 @@ export default function SessionValidator() {
                 }
 
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-                const res = await axios.post(`${apiUrl}/api/auth/verify-session`, 
+                const res = await axios.post(`${apiUrl}/api/auth/verify-session`,
                     { token: activeToken },
                     { validateStatus: (status) => status < 500 }
                 );
 
                 if (res.status === 401) {
-                    // Session is invalid
-                    if (isAdminRoute) {
-                        dispatch(logoutAdmin());
-                        localStorage.removeItem("adminToken");
-                        localStorage.removeItem("adminRole");
-                        localStorage.removeItem("adminUser");
-                        document.cookie = "adminToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                        document.cookie = "adminRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-
-                        // Clean legacy if on admin
-                        if (!localAdminToken) {
-                            dispatch(logout());
-                            localStorage.removeItem("token");
-                            localStorage.removeItem("role");
-                            localStorage.removeItem("user");
-                            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                            document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                        }
+                    // Session is invalid — clear only the relevant session
+                    if (routeType === "teacher") {
+                        dispatch(logoutTeacher());
+                        localStorage.removeItem("teacherToken");
+                        localStorage.removeItem("teacherRole");
+                        localStorage.removeItem("teacherUser");
+                        document.cookie = "teacherToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                        document.cookie = "teacherRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                     } else {
                         dispatch(logoutStudent());
                         localStorage.removeItem("studentToken");
@@ -99,8 +83,9 @@ export default function SessionValidator() {
                         document.cookie = "studentToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                         document.cookie = "studentRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 
-                        // Clean legacy on student side
-                        if (!localStudentToken) {
+                        // Clean legacy keys only if they were set for a student
+                        const legacyRole = localStorage.getItem("role");
+                        if (legacyRole === "student" || !legacyRole) {
                             dispatch(logout());
                             localStorage.removeItem("token");
                             localStorage.removeItem("role");
@@ -110,9 +95,8 @@ export default function SessionValidator() {
                         }
                     }
 
-                    const redirectTarget = isAdminRoute ? "/admin/signin" : "/signin";
+                    const redirectTarget = isTeacherRoute ? "/signin" : "/signin";
 
-                    // Show warning BEFORE redirecting so user can read it
                     toast(
                         "⚠️ Your account was signed in on another device. You have been logged out here.",
                         {
@@ -128,7 +112,6 @@ export default function SessionValidator() {
                         }
                     );
 
-                    // Wait 4 seconds so the user can read the warning, then redirect
                     setTimeout(() => {
                         router.push(redirectTarget);
                     }, 4000);

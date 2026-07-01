@@ -13,7 +13,16 @@ import { useRouter } from "next/navigation";
 export default function ProfileDropdown({ role = "student" }: { role?: "student" | "teacher" | "admin" }) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
-    const user = useSelector((state: RootState) => state.auth.user || state.auth.studentUser || state.auth.teacherUser || state.auth.adminUser);
+
+    // CRITICAL: Read ONLY the role-specific user slice from Redux.
+    // Never use a generic OR-chain — it causes cross-role contamination when
+    // multiple roles are logged in concurrently in the same browser.
+    const user = useSelector((state: RootState) => {
+        if (role === "admin") return state.auth.adminUser;
+        if (role === "teacher") return state.auth.teacherUser;
+        return state.auth.studentUser; // default: student
+    });
+
     const dispatch = useDispatch();
     const router = useRouter();
 
@@ -113,7 +122,7 @@ export default function ProfileDropdown({ role = "student" }: { role?: "student"
 
                     <div className="px-2">
                         <Link
-                            href={role === "teacher" ? "/teacher/settings" : `/${role}/profile`}
+                            href={role === "admin" ? "/admin/settings" : role === "teacher" ? "/teacher/settings" : `/${role}/profile`}
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#2C4276] rounded-xl transition-all group"
                         >
@@ -124,7 +133,7 @@ export default function ProfileDropdown({ role = "student" }: { role?: "student"
                         </Link>
 
                         <Link
-                            href={role === "teacher" ? "/teacher/settings?tab=security" : `/${role}/profile?tab=security`}
+                            href={role === "admin" ? "/admin/settings?tab=security" : role === "teacher" ? "/teacher/settings?tab=security" : `/${role}/profile?tab=security`}
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#2C4276] rounded-xl transition-all group"
                         >

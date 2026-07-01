@@ -66,7 +66,38 @@ export async function POST(req: Request) {
       body.avatar = relativePath;
     }
 
+    // Hash password and create User record
+    if (!body.password) {
+      return NextResponse.json({ message: "Password is required" }, { status: 400 });
+    }
+
+    const { default: bcrypt } = await import("bcryptjs");
+    const { default: User } = await import("@/models/User");
+
+    // Check if user exists
+    const userExists = await User.findOne({ email: body.email.toLowerCase() });
+    if (userExists) {
+      return NextResponse.json(
+        { message: "An account with this email already exists." },
+        { status: 400 }
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(body.password, 10);
+
+    const newUser = await User.create({
+      name: body.name.trim(),
+      email: body.email.trim().toLowerCase(),
+      contact: body.contact,
+      password: hashedPassword,
+      role: "teacher",
+      approvalStatus: body.approvalStatus || "approved",
+      referralCode: body.name.slice(0, 3).toUpperCase() + Date.now().toString().slice(-4),
+    });
+
+    body.userId = newUser._id;
     const teacher = await Teachers.create(body);
+
     return NextResponse.json(teacher, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

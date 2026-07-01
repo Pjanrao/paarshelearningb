@@ -7,7 +7,7 @@ export default function TeacherLayout({ children }: { children: React.ReactNode 
   const pathname = usePathname();
 
   // Bypass DashboardLayout (and its auth redirect) for public teacher pages
-  if (pathname.startsWith("/teacher/register")) {
+  if (pathname.startsWith("/teacher/register") || pathname.startsWith("/teacher/signin")) {
     return <>{children}</>;
   }
 

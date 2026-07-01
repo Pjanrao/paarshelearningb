@@ -10,12 +10,18 @@ export async function GET(req: Request) {
 
         const { searchParams } = new URL(req.url);
         const courseId = searchParams.get("courseId");
+        const assignedTeacher = searchParams.get("assignedTeacher");
 
         const query: any = {};
 
         // ✅ FILTER BY COURSE
         if (courseId) {
             query.courseId = courseId;
+        }
+
+        // ✅ FILTER BY ASSIGNED TEACHER
+        if (assignedTeacher) {
+            query.assignedTeacher = assignedTeacher;
         }
 
         const batches = await Batch.find(query);

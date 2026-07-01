@@ -21,14 +21,79 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSearchParams } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { logout as logoutAction, logoutAdmin as logoutAdminAction, logoutStudent, logoutTeacher } from "@/redux/authSlice";
 import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
 
 export default function SettingsPage() {
     const { toast } = useToast();
     const { theme, setTheme } = useTheme();
+    const searchParams = useSearchParams();
+    const dispatch = useDispatch();
+    const activeTab = searchParams.get("tab") === "security" ? "security" : "profile";
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
+
+    const handleLogoutAdmin = async () => {
+        try {
+            await fetch("/api/auth/logout", { method: "POST" });
+            try {
+                const { signOut } = await import("next-auth/react");
+                await signOut({ redirect: false });
+            } catch (e) {
+                console.warn("signOut error or not importable:", e);
+            }
+
+            const Cookies = (await import("js-cookie")).default;
+            Cookies.remove("token", { path: '/' });
+            Cookies.remove("role", { path: '/' });
+            Cookies.remove("adminToken", { path: '/' });
+            Cookies.remove("adminRole", { path: '/' });
+            Cookies.remove("studentToken", { path: '/' });
+            Cookies.remove("studentRole", { path: '/' });
+            Cookies.remove("teacherToken", { path: '/' });
+            Cookies.remove("teacherRole", { path: '/' });
+
+            const pastDate = "Thu, 01 Jan 1970 00:00:00 GMT";
+            document.cookie = `token=; path=/; expires=${pastDate}`;
+            document.cookie = `role=; path=/; expires=${pastDate}`;
+            document.cookie = `adminToken=; path=/; expires=${pastDate}`;
+            document.cookie = `adminRole=; path=/; expires=${pastDate}`;
+            document.cookie = `studentToken=; path=/; expires=${pastDate}`;
+            document.cookie = `studentRole=; path=/; expires=${pastDate}`;
+            document.cookie = `teacherToken=; path=/; expires=${pastDate}`;
+            document.cookie = `teacherRole=; path=/; expires=${pastDate}`;
+
+            localStorage.removeItem("token");
+            localStorage.removeItem("role");
+            localStorage.removeItem("user");
+            localStorage.removeItem("adminToken");
+            localStorage.removeItem("adminRole");
+            localStorage.removeItem("adminUser");
+            localStorage.removeItem("studentToken");
+            localStorage.removeItem("studentRole");
+            localStorage.removeItem("studentUser");
+            localStorage.removeItem("teacherToken");
+            localStorage.removeItem("teacherRole");
+            localStorage.removeItem("teacherUser");
+
+            try {
+                dispatch(logoutAction());
+                dispatch(logoutAdminAction());
+                dispatch(logoutStudent());
+                dispatch(logoutTeacher());
+            } catch (reduxError) {
+                console.warn("Redux dispatch failed:", reduxError);
+            }
+
+            window.location.href = "/admin/signin";
+        } catch (error) {
+            console.error("Local logout error:", error);
+            window.location.href = "/admin/signin";
+        }
+    };
 
     // Profile State
     const [profile, setProfile] = useState({
@@ -126,10 +191,20 @@ export default function SettingsPage() {
             if (res.ok) {
                 const data = await res.json();
                 setProfile(data);
-                toast({
-                    title: "Profile Updated",
-                    description: "Your personal information has been saved successfully.",
-                });
+                if (data.emailChanged) {
+                    toast({
+                        title: "Profile Updated",
+                        description: "Profile updated successfully. Your email address has been changed. Please log in again.",
+                    });
+                    setTimeout(() => {
+                        handleLogoutAdmin();
+                    }, 2000);
+                } else {
+                    toast({
+                        title: "Profile Updated",
+                        description: "Profile updated successfully.",
+                    });
+                }
             } else {
                 const err = await res.json();
                 throw new Error(err.error || "Failed to update");
@@ -189,9 +264,12 @@ export default function SettingsPage() {
             if (res.ok) {
                 toast({
                     title: "Password Updated",
-                    description: "Your password has been changed successfully.",
+                    description: "Password changed successfully. Please log in again. You have been logged out from all devices for security reasons.",
                 });
                 setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                setTimeout(() => {
+                    handleLogoutAdmin();
+                }, 2000);
             } else {
                 const err = await res.json();
                 throw new Error(err.error || "Failed to update password");
@@ -265,7 +343,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                <Tabs defaultValue="profile" className="space-y-6">
+                <Tabs defaultValue={activeTab} key={activeTab} className="space-y-6">
                     <TabsList className="bg-white dark:bg-slate-900 p-1.5 rounded-xl shadow-sm border border-gray-100 dark:border-slate-800 w-full lg:w-fit h-auto flex flex-col sm:flex-row gap-1 shadow-md">
                         <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-[#2C4276] data-[state=active]:text-white data-[state=inactive]:text-gray-500 py-3 px-6 font-bold transition-all flex-1 text-sm sm:text-base">
                             <User className="h-4 w-4 mr-2" />

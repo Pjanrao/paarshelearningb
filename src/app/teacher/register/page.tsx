@@ -89,7 +89,7 @@ export default function TeacherRegister() {
 
             if (res.ok) {
                 toast.success(data.message || "Registration successful");
-                router.push("/signin");
+                router.push("/teacher/signin");
             } else {
                 toast.error(data.message || "Registration failed");
                 setErrors({ submit: data.message || "Registration failed" });
@@ -346,7 +346,7 @@ export default function TeacherRegister() {
 
                         <div className="flex items-center justify-between">
                             <div className="text-sm">
-                                <Link href="/signin" className="font-medium text-blue-600 hover:text-blue-500">
+                                <Link href="/teacher/signin" className="font-medium text-blue-600 hover:text-blue-500">
                                     Already have an account? Sign in
                                 </Link>
                             </div>

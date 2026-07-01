@@ -15,6 +15,7 @@ import {
     Gift,
     Wallet,
     ClipboardCheck,
+    FileText,
     PanelLeftOpen,
     PanelLeftClose
 } from "lucide-react";
@@ -106,6 +107,7 @@ export default function StudentLayout({
         { icon: Gift, label: "Refer & Earn", href: "/student/refer-earn" },
         { icon: Wallet, label: "Wallet", href: "/student/wallet" },
         { icon: HelpCircle, label: "FAQ", href: "/student/faq" },
+        { icon: FileText, label: "My Consent", href: "/student/my-consent" },
     ];
 
     return (

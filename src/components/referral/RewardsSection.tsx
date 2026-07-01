@@ -6,8 +6,8 @@ export default function RewardsSection() {
     const rewards = [
         {
             icon: Gift,
-            title: "10% Discount",
-            desc: "Your friend gets 10% off their first course purchase",
+            title: "1000 Rs Cashback",
+            desc: "Get ₹1,000 Cashback on Your First Successful Referral!",
         },
         {
             icon: BadgeCheck,

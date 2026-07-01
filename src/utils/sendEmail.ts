@@ -4,36 +4,36 @@ const user = (process.env.EMAIL_USER || "").replace(/"/g, "");
 const pass = (process.env.EMAIL_PASSWORD || "").replace(/"/g, "");
 
 const createTransporter = () => {
-    return nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: {
-            user,
-            pass,
-        },
-        tls: {
-            rejectUnauthorized: false,
-        },
-    });
+  return nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user,
+      pass,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+  });
 };
 
 export const sendConfirmationEmail = async (email: string, name: string, type: string) => {
-    console.log(`[Email] Attempting to send ${type} confirmation email to: ${email}`);
+  console.log(`[Email] Attempting to send ${type} confirmation email to: ${email}`);
 
-    if (!user || !pass) {
-        console.error("[Email] EMAIL_USER or EMAIL_PASSWORD is missing!");
-        return { success: false, error: "Credentials missing" };
-    }
+  if (!user || !pass) {
+    console.error("[Email] EMAIL_USER or EMAIL_PASSWORD is missing!");
+    return { success: false, error: "Credentials missing" };
+  }
 
-    const transporter = createTransporter();
+  const transporter = createTransporter();
 
-    try {
-        let subject = type === "Inquiry Form"
-            ? "Inquiry Received - Paarsh Infotech"
-            : "Thank you for contacting Paarsh Infotech";
+  try {
+    let subject = type === "Inquiry Form"
+      ? "Inquiry Received - Paarsh Infotech"
+      : "Thank you for contacting Paarsh Infotech";
 
-        let messageBody = `
+    let messageBody = `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <h2 style="color: #007bff;">Hello ${name},</h2>
           <p>Thank you for reaching out to <strong>Paarsh Infotech</strong>!</p>
@@ -47,9 +47,9 @@ export const sendConfirmationEmail = async (email: string, name: string, type: s
         </div>
       `;
 
-        if (type === "Course Inquiry") {
-            subject = "Course Inquiry Received";
-            messageBody = `
+    if (type === "Course Inquiry") {
+      subject = "Course Inquiry Received";
+      messageBody = `
             <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
               <h2 style="color: #007bff;">Hello ${name},</h2>
               <p>Thank you for your interest in this course.</p>
@@ -62,43 +62,43 @@ export const sendConfirmationEmail = async (email: string, name: string, type: s
               </p>
             </div>
             `;
-        }
-
-        const mailOptions = {
-            from: `"Paarsh Infotech" <${user}>`,
-            to: email,
-            subject: subject,
-            replyTo: user,
-            html: messageBody,
-        };
-
-        console.log(`[Email] Sending confirmation mail via Gmail SMTP...`);
-        const info = await transporter.sendMail(mailOptions);
-        console.log("[Email] Confirmation sent successfully:", info.messageId);
-        return { success: true, data: info };
-    } catch (error) {
-        console.error("[Email] Nodemailer confirmation error:", error);
-        return { success: false, error };
     }
+
+    const mailOptions = {
+      from: `"Paarsh Infotech" <${user}>`,
+      to: email,
+      subject: subject,
+      replyTo: user,
+      html: messageBody,
+    };
+
+    console.log(`[Email] Sending confirmation mail via Gmail SMTP...`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("[Email] Confirmation sent successfully:", info.messageId);
+    return { success: true, data: info };
+  } catch (error) {
+    console.error("[Email] Nodemailer confirmation error:", error);
+    return { success: false, error };
+  }
 };
 
 export const sendAdminNotificationEmail = async (data: any) => {
-    const { name, email, phone, message, course, type } = data;
-    console.log(`[Email] Attempting to send Admin Notification for ${type} from: ${email}`);
+  const { name, email, phone, message, course, type } = data;
+  console.log(`[Email] Attempting to send Admin Notification for ${type} from: ${email}`);
 
-    if (!user || !pass) {
-        console.error("[Email] EMAIL_USER or EMAIL_PASSWORD is missing!");
-        return { success: false, error: "Credentials missing" };
-    }
+  if (!user || !pass) {
+    console.error("[Email] EMAIL_USER or EMAIL_PASSWORD is missing!");
+    return { success: false, error: "Credentials missing" };
+  }
 
-    const transporter = createTransporter();
+  const transporter = createTransporter();
 
-    try {
-        const mailOptions = {
-            from: `"Website Notification" <${user}>`,
-            to: user, // Send to yourself
-            subject: `New ${type}: ${name}`,
-            html: `
+  try {
+    const mailOptions = {
+      from: `"Website Notification" <${user}>`,
+      to: user, // Send to yourself
+      subject: `New ${type}: ${name}`,
+      html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
           <h2 style="color: #2B4278; border-bottom: 2px solid #01A0E2; padding-bottom: 10px;">New ${type} Received</h2>
           <p><strong>Name:</strong> ${name}</p>
@@ -113,47 +113,47 @@ export const sendAdminNotificationEmail = async (data: any) => {
           <p style="font-size: 0.8em; color: #999;">Sent from Paarsh E-learning Website</p>
         </div>
       `,
-        };
+    };
 
-        console.log(`[Email] Sending admin notification via Gmail SMTP...`);
-        const info = await transporter.sendMail(mailOptions);
-        console.log("[Email] Admin notification sent successfully:", info.messageId);
-        return { success: true, data: info };
-    } catch (error) {
-        console.error("[Email] Nodemailer admin error:", error);
-        return { success: false, error };
-    }
+    console.log(`[Email] Sending admin notification via Gmail SMTP...`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("[Email] Admin notification sent successfully:", info.messageId);
+    return { success: true, data: info };
+  } catch (error) {
+    console.error("[Email] Nodemailer admin error:", error);
+    return { success: false, error };
+  }
 };
 
 export const sendWorkshopRegistrationEmail = async (email: string, name: string, workshopData: any) => {
-    const { title, date, time, mode, location, meetingLink } = workshopData;
-    const whatsappGroupLink = workshopData.whatsappGroupLink || "https://chat.whatsapp.com/KTnpNJVt2MUIaGz6wzXn65?mode=gi_t";
+  const { title, date, time, mode, location, meetingLink } = workshopData;
+  const whatsappGroupLink = workshopData.whatsappGroupLink || "https://chat.whatsapp.com/KTnpNJVt2MUIaGz6wzXn65?mode=gi_t";
 
-    console.log(`[Email] Attempting to send Workshop Confirmation for "${title}" to: ${email}`);
+  console.log(`[Email] Attempting to send Workshop Confirmation for "${title}" to: ${email}`);
 
-    if (!user || !pass) {
-        console.error("[Email] EMAIL_USER or EMAIL_PASSWORD is missing!");
-        return { success: false, error: "Credentials missing" };
-    }
+  if (!user || !pass) {
+    console.error("[Email] EMAIL_USER or EMAIL_PASSWORD is missing!");
+    return { success: false, error: "Credentials missing" };
+  }
 
-    const transporter = createTransporter();
+  const transporter = createTransporter();
 
-    // Pre-compute conditional strings to avoid nested template literals
-    const isOffline = mode === "offline";
-    const meetingLinkHtml = (!isOffline && meetingLink)
-        ? '<a href="' + meetingLink + '" class="btn">Join Meeting Link</a>'
-        : '';
-    
-    const venueHtml = (isOffline && location)
-        ? '<div class="detail-item"><span class="detail-label">Venue:</span> ' + location + '</div>'
-        : '';
+  // Pre-compute conditional strings to avoid nested template literals
+  const isOffline = mode === "offline";
+  const meetingLinkHtml = (!isOffline && meetingLink)
+    ? '<a href="' + meetingLink + '" class="btn">Join Meeting Link</a>'
+    : '';
 
-    try {
-        const mailOptions = {
-            from: `"Paarsh Infotech" <${user}>`,
-            to: email,
-            subject: `Registration Confirmed: ${title} - Paarsh Infotech`,
-            html: `
+  const venueHtml = (isOffline && location)
+    ? '<div class="detail-item"><span class="detail-label">Venue:</span> ' + location + '</div>'
+    : '';
+
+  try {
+    const mailOptions = {
+      from: `"Paarsh Infotech" <${user}>`,
+      to: email,
+      subject: `Registration Confirmed: ${title} - Paarsh Infotech`,
+      html: `
         <!DOCTYPE html>
         <html>
         <head>
@@ -201,9 +201,9 @@ export const sendWorkshopRegistrationEmail = async (email: string, name: string,
 
               <p style="margin-top: 30px;"><strong>Instructions:</strong></p>
               <ul style="padding-left: 20px;">
-                ${mode === 'offline' 
-                  ? '<li>Reach the venue 15 minutes before the scheduled time.</li><li>Carry your registration details (this email) for entry.</li>'
-                  : '<li>Join the session 10 minutes before the scheduled time.</li><li>Ensure you have a stable internet connection.</li>'}
+                ${mode === 'offline'
+          ? '<li>Reach the venue 15 minutes before the scheduled time.</li><li>Carry your registration details (this email) for entry.</li>'
+          : '<li>Join the session 10 minutes before the scheduled time.</li><li>Ensure you have a stable internet connection.</li>'}
               </ul>
             </div>
             <div class="footer">
@@ -214,14 +214,101 @@ export const sendWorkshopRegistrationEmail = async (email: string, name: string,
         </body>
         </html>
       `,
-        };
+    };
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log("[Email] Workshop Registration email sent successfully:", info.messageId);
-        return { success: true, data: info };
-    } catch (error) {
-        console.error("[Email] Nodemailer workshop registration error:", error);
-        return { success: false, error };
-    }
+    const info = await transporter.sendMail(mailOptions);
+    console.log("[Email] Workshop Registration email sent successfully:", info.messageId);
+    return { success: true, data: info };
+  } catch (error) {
+    console.error("[Email] Nodemailer workshop registration error:", error);
+    return { success: false, error };
+  }
 };
-
+
+export const sendConsentFormEmail = async (
+  email: string,
+  name: string,
+  formTitle: string,
+  dashboardLink: string
+) => {
+  console.log(`[Email] Attempting to send Consent Form notification for "${formTitle}" to: ${email}`);
+
+  if (!user || !pass) {
+    console.error("[Email] EMAIL_USER or EMAIL_PASSWORD is missing!");
+    return { success: false, error: "Credentials missing" };
+  }
+
+  const transporter = createTransporter();
+
+  try {
+    const mailOptions = {
+      from: `"Paarsh Infotech" <${user}>`,
+      to: email,
+      subject: `Action Required: Consent Form - ${formTitle}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 20px auto; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+            .header { background: #2B4278; color: #ffffff; padding: 40px 20px; text-align: center; }
+            .header h1 { margin: 0; font-size: 24px; letter-spacing: 0.5px; }
+            .header p { margin: 8px 0 0; font-size: 14px; color: #a8b8d8; }
+            .content { padding: 30px; background: #ffffff; }
+            .content h2 { color: #2B4278; margin-top: 0; }
+            .consent-card { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 20px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+            .consent-title { font-size: 18px; font-weight: bold; color: #92400e; margin-bottom: 5px; }
+            .consent-subtitle { font-size: 13px; color: #b45309; }
+            .actions { text-align: center; margin-top: 30px; }
+            .btn { display: inline-block; padding: 14px 40px; background: linear-gradient(135deg, #2B4278 0%, #1f3159 100%); color: #ffffff; text-decoration: none; border-radius: 50px; font-weight: 600; box-shadow: 0 4px 12px rgba(43, 66, 120, 0.3); text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px; }
+            .footer { background: #f1f3f5; padding: 20px; text-align: center; font-size: 0.85em; color: #777; }
+            .footer a { color: #01A0E2; text-decoration: none; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Consent Form Available</h1>
+              <p>Please review and accept the document below</p>
+            </div>
+            <div class="content">
+              <h2>Hello ${name},</h2>
+              <p>A consent form has been shared with you and requires your attention. Please review the document and accept it at your earliest convenience.</p>
+              
+              <div class="consent-card">
+                <div class="consent-title">${formTitle}</div>
+                <div class="consent-subtitle">Action Required — Please review and accept</div>
+              </div>
+
+              <p>You can review and accept the consent form by clicking the button below. You will be asked to sign in to your account if you are not already logged in.</p>
+
+              <div class="actions">
+                <a href="${dashboardLink}" class="btn">Review Consent Form</a>
+              </div>
+
+              <p style="margin-top: 30px; font-size: 13px; color: #777;">
+                Or copy and paste this link into your browser:
+              </p>
+              <p style="word-break: break-all; color: #2B4278; font-size: 13px;">${dashboardLink}</p>
+            </div>
+            <div class="footer">
+              <p>&copy; ${new Date().getFullYear()} Paarsh Infotech. All rights reserved.</p>
+              <p>Need help? Contact us at <a href="mailto:${user}">${user}</a></p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    };
+
+    console.log(`[Email] Sending consent form notification via Gmail SMTP...`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("[Email] Consent form email sent successfully:", info.messageId);
+    return { success: true, data: info };
+  } catch (error) {
+    console.error("[Email] Nodemailer consent form error:", error);
+    return { success: false, error };
+  }
+};
+

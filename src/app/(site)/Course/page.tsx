@@ -65,7 +65,7 @@ const CoursePage = () => {
   return (
     <div className="bg-gray-50 dark:bg-darkmode min-h-screen pb-20 pt-20 md:pt-24 -mt-6 transition-colors duration-300">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-indigo-200 to-white py-24 px-4 overflow-hidden border-b border-gray-100 dark:border-none">
+      <section className="relative bg-gradient-to-br from-blue-900 via-indigo-200 to-white py-16 px-4 overflow-hidden border-b border-gray-100 dark:border-none">
 
         {/* Background Decorations — High Visibility */}
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
@@ -257,8 +257,8 @@ const CoursePage = () => {
         </motion.div>
       </section>
 
-      {/* Categories & Filter Tabs — Modern Glassmorphism */}
-      <section className="container mx-auto max-w-7xl px-4 -mt-12 relative z-30">
+      {/* Categories & Filter Tabs — Static All Courses + Slow Marquee */}
+      <section className="container mx-auto max-w-7xl px-4 -mt-20 relative z-30">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -266,14 +266,9 @@ const CoursePage = () => {
           transition={{ duration: 0.7, type: "spring", stiffness: 100 }}
           className="bg-white/70 dark:bg-gray-900/70 p-3 rounded-2xl md:rounded-3xl shadow-xl border border-white/50 dark:border-gray-800/50 backdrop-blur-xl"
         >
-          <motion.div
-            variants={staggerContainer}
-            initial="initial"
-            animate="animate"
-            className="flex items-center gap-3 overflow-x-auto py-1 px-1 no-scrollbar justify-start"
-          >
+          <div className="flex items-center gap-3">
+            {/* Pinned "All Courses" button */}
             <motion.button
-              variants={fadeInUp}
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
@@ -281,56 +276,88 @@ const CoursePage = () => {
                 setPage(1);
               }}
               className={`
-                  relative whitespace-nowrap px-8 py-3.5 rounded-xl md:rounded-2xl font-black transition-all duration-300 uppercase tracking-wider text-sm
-                  ${activeCategory === "all"
+                relative whitespace-nowrap px-8 py-3.5 rounded-xl md:rounded-2xl font-black transition-all duration-300 uppercase tracking-wider text-sm flex-shrink-0
+                ${activeCategory === "all"
                   ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/30'
                   : 'text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-blue-600 hover:shadow-md'}
-                `}
+              `}
             >
               All Courses
             </motion.button>
-            {categories.map((cat: any, idx: number) => (
-              <motion.button
-                key={cat._id}
-                initial={{ opacity: 0, x: -30 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + (idx * 0.05), type: "spring", stiffness: 150 }}
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => {
-                  setActiveCategory(cat._id);
-                  setPage(1);
-                }}
-                className={`
-                    relative overflow-hidden whitespace-nowrap px-8 py-3.5 rounded-xl md:rounded-2xl font-black transition-all duration-300 uppercase tracking-wider text-sm
-                    ${activeCategory === cat._id
-                    ? "text-white"
-                    : "text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-blue-600 hover:shadow-md"
-                  }
-                `}
-              >
-                {activeCategory === cat._id && (
-                  <motion.div
-                    layoutId="activeTabGlow"
-                    className="absolute inset-0 bg-blue-600 rounded-xl md:rounded-2xl"
-                    transition={{
-                      type: "spring",
-                      stiffness: 350,
-                      damping: 25,
-                    }}
-                  />
-                )}
-                <span className="relative z-10">
-                  {cat.name}
-                </span>
-              </motion.button>
-            ))}
-          </motion.div>
+
+            {/* Divider */}
+            <div className="w-px h-8 bg-gray-200 dark:bg-gray-700 flex-shrink-0"></div>
+
+            {/* Scrolling marquee of category names */}
+            <div className="overflow-hidden flex-1 relative">
+              {/* Fade edges */}
+              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white/70 dark:from-gray-900/70 to-transparent z-10 pointer-events-none"></div>
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white/70 dark:from-gray-900/70 to-transparent z-10 pointer-events-none"></div>
+
+              <div className="marquee-track flex items-center gap-3 py-1">
+                <div className="marquee-content flex items-center gap-3 flex-shrink-0">
+                  {categories.map((cat: any) => (
+                    <button
+                      key={cat._id}
+                      onClick={() => {
+                        setActiveCategory(cat._id);
+                        setPage(1);
+                      }}
+                      className={`
+                        relative overflow-hidden whitespace-nowrap px-8 py-3.5 rounded-xl md:rounded-2xl font-black transition-all duration-300 uppercase tracking-wider text-sm flex-shrink-0
+                        ${activeCategory === cat._id
+                          ? "bg-blue-600 text-white shadow-xl shadow-blue-600/30"
+                          : "text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-blue-600 hover:shadow-md"}
+                      `}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+                {/* Duplicate for seamless loop — hidden from screen readers */}
+                <div className="marquee-content flex items-center gap-3 flex-shrink-0" aria-hidden="true">
+                  {categories.map((cat: any) => (
+                    <button
+                      key={`${cat._id}-dup`}
+                      onClick={() => {
+                        setActiveCategory(cat._id);
+                        setPage(1);
+                      }}
+                      className={`
+                        relative overflow-hidden whitespace-nowrap px-8 py-3.5 rounded-xl md:rounded-2xl font-black transition-all duration-300 uppercase tracking-wider text-sm flex-shrink-0
+                        ${activeCategory === cat._id
+                          ? "bg-blue-600 text-white shadow-xl shadow-blue-600/30"
+                          : "text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:text-blue-600 hover:shadow-md"}
+                      `}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </motion.div>
+
+        {/* Marquee CSS */}
+        <style jsx>{`
+          .marquee-track {
+            display: flex;
+            width: max-content;
+            animation: marquee-scroll 120s linear infinite;
+          }
+          .marquee-track:hover {
+            animation-play-state: paused;
+          }
+          @keyframes marquee-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
       </section>
 
       {/* Courses Grid — Higher Visual Impact */}
-      <section className="container mx-auto max-w-7xl px-4 pt-20 pb-20">
+      <section className="container mx-auto max-w-7xl px-4 pt-8 pb-20">
         <AnimatePresence mode="wait">
           {isLoading ? (
             <motion.div
