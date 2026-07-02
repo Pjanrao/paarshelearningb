@@ -29,6 +29,7 @@ import Cookies from "js-cookie";
 import { signOut } from "next-auth/react";
 import ProfileDropdown from "@/components/dashboard/ProfileDropdown";
 import { motion, AnimatePresence } from "framer-motion";
+import { useGetMyCoursesQuery } from "@/redux/api/courseApi";
 
 export default function StudentLayout({
     children,
@@ -97,6 +98,9 @@ export default function StudentLayout({
         }
     };
 
+    const { data: myCourses } = useGetMyCoursesQuery();
+    const hasPurchasedCourses = myCourses && myCourses.length > 0;
+
     const menuItems = [
         { icon: LayoutDashboard, label: "Dashboard", href: "/student" },
         { icon: Home, label: "Home", href: "/" },
@@ -107,7 +111,7 @@ export default function StudentLayout({
         { icon: Gift, label: "Refer & Earn", href: "/student/refer-earn" },
         { icon: Wallet, label: "Wallet", href: "/student/wallet" },
         { icon: HelpCircle, label: "FAQ", href: "/student/faq" },
-        { icon: FileText, label: "My Consent", href: "/student/my-consent" },
+        ...(hasPurchasedCourses ? [{ icon: FileText, label: "My Consent", href: "/student/my-consent" }] : []),
     ];
 
     return (

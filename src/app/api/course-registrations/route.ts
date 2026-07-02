@@ -98,6 +98,11 @@ export async function POST(req: Request) {
         if (!preferredJoiningDate) errors.push("Preferred joining date is required.");
         if (hasLaptop === null || hasLaptop === undefined || hasLaptop === "") errors.push("Laptop availability is required.");
 
+        const allowedLocations = ["Nashik", "Pune", "Ahmedabad", "Hyderabad", "Mumbai", "Surat", "Bengaluru", ""];
+        if (preferredLocation && !allowedLocations.includes(preferredLocation)) {
+            errors.push("Preferred location must be one of: Nashik, Pune, Ahmedabad, Hyderabad, Mumbai, Surat, Bengaluru.");
+        }
+
         if (errors.length > 0) {
             return NextResponse.json({ error: errors.join(" ") }, { status: 400 });
         }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import ConsentForm from "@/models/ConsentForm";
+import Payment from "@/models/Payment";
 import jwt from "jsonwebtoken";
 
 // GET /api/consent-forms/accept?token=...
@@ -33,6 +34,18 @@ export async function GET(req: Request) {
         const student = await User.findById(studentId).select("name email acceptedConsentForms");
         if (!student) {
             return NextResponse.json({ success: false, error: "Student not found" }, { status: 404 });
+        }
+
+        // Verify student is enrolled (has at least one payment record)
+        const paymentCount = await Payment.countDocuments({
+            $or: [
+                { studentId: student._id },
+                { student: student._id },
+            ],
+        });
+
+        if (paymentCount === 0) {
+            return NextResponse.json({ success: false, error: "Student is not enrolled (has not purchased a course)" }, { status: 400 });
         }
 
         const form = await ConsentForm.findById(formId);
@@ -94,6 +107,18 @@ export async function POST(req: Request) {
         const student = await User.findById(studentId);
         if (!student) {
             return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
+        }
+
+        // Verify student is enrolled (has at least one payment record)
+        const paymentCount = await Payment.countDocuments({
+            $or: [
+                { studentId: student._id },
+                { student: student._id },
+            ],
+        });
+
+        if (paymentCount === 0) {
+            return NextResponse.json({ success: false, error: "Student is not enrolled (has not purchased a course)" }, { status: 400 });
         }
 
         // Check if already accepted

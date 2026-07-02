@@ -35,7 +35,11 @@ const courseRegistrationSchema = new mongoose.Schema<ICourseRegistration>(
         preferredJoiningDate: { type: Date, required: [true, "Preferred joining date is required"] },
         hasLaptop: { type: Boolean, required: [true, "Laptop availability is required"] },
         referralName: { type: String, default: "" },
-        preferredLocation: { type: String, default: "" },
+        preferredLocation: {
+            type: String,
+            enum: ["Nashik", "Pune", "Ahmedabad", "Hyderabad", "Mumbai", "Surat", "Bengaluru", ""],
+            default: ""
+        },
         note: { type: String, default: "" },
         resumeUrl: { type: String, default: "" },
         paymentScreenshotUrl: { type: String, default: "" },

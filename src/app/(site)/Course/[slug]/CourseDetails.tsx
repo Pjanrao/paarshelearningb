@@ -348,7 +348,7 @@ const CourseDetails = ({ slug }: { slug: string }) => {
       .slice(0, 6);
   }, [allCourses, course]);
 
-  const [activeAccordion, setActiveAccordion] = useState<number | null>(0);
+  const [openModules, setOpenModules] = useState<Set<number>>(new Set());
   const router = useRouter();
   const downloadPDF = (url: string) => {
     // Use Cloudinary fl_attachment to force download; avoids CORS & browser-blocking issues in production
@@ -590,8 +590,25 @@ const CourseDetails = ({ slug }: { slug: string }) => {
   };
 
   const toggleAccordion = (index: number) => {
-    setActiveAccordion(activeAccordion === index ? null : index);
+    setOpenModules((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
   };
+
+  // Open all modules by default when course loads
+  const curriculum = course?.curriculum || course?.syllabus || [];
+  React.useEffect(() => {
+    if (curriculum.length > 0) {
+      setOpenModules(new Set(curriculum.map((_: any, i: number) => i)));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [course?._id]);
 
   if (isLoading) {
     return (
@@ -777,45 +794,45 @@ const CourseDetails = ({ slug }: { slug: string }) => {
             {/* Curriculum */}
             <section className="space-y-4 lg:-mt-24 mt-0">
               <h2 className="text-xl font-bold text-[#2B4278] dark:text-white">Course Curriculum</h2>
-              <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
-                {(course.curriculum || (course.syllabus || [])).map((item: any, index: number) => (
-                  <div key={index}
-                    data-aos="fade-up"
-                    data-aos-delay={index * 50}
-                    className={`group bg-white dark:bg-gray-900 border ${activeAccordion === index ? 'border-[#01A0E2] ring-1 ring-[#01A0E2]/20' : 'border-gray-100 dark:border-gray-800'} rounded-xl overflow-hidden transition-all duration-300 shadow-sm`}>
-                    <div
-                      className="p-3 md:p-4 flex items-center justify-between cursor-pointer"
-                      onClick={() => toggleAccordion(index)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 ${activeAccordion === index ? 'bg-[#01A0E2] text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'} rounded-full flex items-center justify-center text-sm font-bold group-hover:bg-[#01A0E2] group-hover:text-white transition-all`}>
-                          {index + 1}
-                        </div>
-                        <div>
-                          <p className="text-[9px] uppercase font-bold tracking-widest text-[#01A0E2] mb-0.5">Module {index + 1}</p>
-                          <h3 className={`text-sm font-bold dark:text-white ${activeAccordion === index ? 'text-[#01A0E2]' : 'group-hover:text-[#2B4278]'} transition-colors`}>{item.title || item.name}</h3>
-                          {activeAccordion !== index && (
-                            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{item.topics || item.description}</p>
-                          )}
-                        </div>
-                      </div>
-                      <Icon
-                        icon="solar:alt-arrow-down-linear"
-                        className={`text-gray-400 w-4 h-4 ${activeAccordion === index ? 'text-[#01A0E2] rotate-180' : 'group-hover:text-[#01A0E2]'} transition-transform`}
-                      />
-                    </div>
+              <div className="max-h-[1000px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-3">
 
-                    {/* Accordion Content */}
-                    <div className={`transition-all duration-300 ease-in-out ${activeAccordion === index ? 'max-h-[500px] opacity-100 border-t border-gray-100 dark:border-gray-800' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-                      <div className="p-3 md:p-5 bg-[#01A0E2]/5 dark:bg-[#01A0E2]/10">
-                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                          {item.topics || item.description}
-                        </p>
+                  {(course.curriculum || (course.syllabus || [])).map((item: any, index: number) => (
+                    <div key={index}
+                      className={`group bg-white dark:bg-gray-900 border ${openModules.has(index) ? 'border-[#01A0E2] ring-1 ring-[#01A0E2]/20' : 'border-gray-100 dark:border-gray-800'} rounded-xl overflow-hidden transition-all duration-300 shadow-sm`}>
+                      <div
+                        className="p-3 md:p-4 flex items-center justify-between cursor-pointer"
+                        onClick={() => toggleAccordion(index)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className={`w-8 h-8 ${openModules.has(index) ? 'bg-[#01A0E2] text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'} rounded-full flex items-center justify-center text-sm font-bold group-hover:bg-[#01A0E2] group-hover:text-white transition-all`}>
+                            {index + 1}
+                          </div>
+                          <div>
+                            <p className="text-[9px] uppercase font-bold tracking-widest text-[#01A0E2] mb-0.5">Module {index + 1}</p>
+                            <h3 className={`text-sm font-bold dark:text-white ${openModules.has(index) ? 'text-[#01A0E2]' : 'group-hover:text-[#2B4278]'} transition-colors`}>{item.title || item.name}</h3>
+                            {!openModules.has(index) && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">{item.topics || item.description}</p>
+                            )}
+                          </div>
+                        </div>
+                        <Icon
+                          icon="solar:alt-arrow-down-linear"
+                          className={`text-gray-400 w-4 h-4 ${openModules.has(index) ? 'text-[#01A0E2] rotate-180' : 'group-hover:text-[#01A0E2]'} transition-transform`}
+                        />
+                      </div>
+
+                      {/* Accordion Content */}
+                      <div className={`transition-all duration-300 ease-in-out ${openModules.has(index) ? 'max-h-[500px] opacity-100 border-t border-gray-100 dark:border-gray-800' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                        <div className="p-3 md:p-5 bg-[#01A0E2]/5 dark:bg-[#01A0E2]/10">
+                          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                            {item.topics || item.description}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div></div>
             </section>
 
             {/* What You'll Learn */}

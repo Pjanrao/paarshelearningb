@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, AlertCircle, Upload } from "lucide-react";
+import {
+    Loader2,
+    AlertCircle,
+    Upload,
+    Eye,
+    EyeOff,
+} from "lucide-react";
+
 import Link from "next/link";
 import toast from "react-hot-toast";
 
@@ -11,6 +18,10 @@ interface FormErrors {
 }
 
 export default function TeacherRegister() {
+
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [courses, setCourses] = useState<any[]>([]);
@@ -63,7 +74,11 @@ export default function TeacherRegister() {
         if (!formData.course.trim()) newErrors.course = "Course domain is required";
         if (!formData.experience.trim()) newErrors.experience = "Experience is required";
         if (!formData.dateOfJoining) newErrors.dateOfJoining = "Date of joining is required";
-
+        if (!confirmPassword.trim()) {
+            newErrors.confirmPassword = "Confirm Password is required";
+        } else if (formData.password !== confirmPassword) {
+            newErrors.confirmPassword = "Passwords do not match";
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -210,17 +225,98 @@ export default function TeacherRegister() {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700">Password <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-medium text-gray-700">Experience (Years) <span className="text-red-500">*</span></label>
                                 <input
-                                    type="password"
-                                    name="password"
+                                    type="text"
+                                    name="experience"
                                     required
-                                    value={formData.password}
+                                    value={formData.experience}
                                     onChange={handleInputChange}
-                                    className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.password ? "border-red-300 bg-red-50" : "border-gray-300"}`}
-                                    placeholder="Minimum 6 characters"
+                                    className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.experience ? "border-red-300 bg-red-50" : "border-gray-300"}`}
+                                    placeholder="e.g., 5+"
                                 />
-                                {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+                                {errors.experience && <p className="mt-1 text-sm text-red-600">{errors.experience}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Password <span className="text-red-500">*</span>
+                                </label>
+
+                                <div className="relative mt-1">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        name="password"
+                                        required
+                                        value={formData.password}
+                                        onChange={handleInputChange}
+                                        className={`block w-full border rounded-md shadow-sm py-2 px-3 pr-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.password
+                                            ? "border-red-300 bg-red-50"
+                                            : "border-gray-300"
+                                            }`}
+                                        placeholder="Minimum 6 characters"
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                </div>
+
+                                {errors.password && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Confirm Password <span className="text-red-500">*</span>
+                                </label>
+
+                                <div className="relative mt-1">
+                                    <input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        value={confirmPassword}
+                                        onChange={(e) => {
+                                            setConfirmPassword(e.target.value);
+
+                                            if (errors.confirmPassword) {
+                                                setErrors((prev) => ({
+                                                    ...prev,
+                                                    confirmPassword: "",
+                                                }));
+                                            }
+                                        }}
+                                        className={`block w-full border rounded-md shadow-sm py-2 px-3 pr-10 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.confirmPassword
+                                            ? "border-red-300 bg-red-50"
+                                            : "border-gray-300"
+                                            }`}
+                                        placeholder="Confirm your password"
+                                    />
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setShowConfirmPassword(!showConfirmPassword)
+                                        }
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                                    >
+                                        {showConfirmPassword ? (
+                                            <EyeOff size={18} />
+                                        ) : (
+                                            <Eye size={18} />
+                                        )}
+                                    </button>
+                                </div>
+
+                                {errors.confirmPassword && (
+                                    <p className="mt-1 text-sm text-red-600">
+                                        {errors.confirmPassword}
+                                    </p>
+                                )}
                             </div>
 
                             <div>
@@ -265,19 +361,7 @@ export default function TeacherRegister() {
                                 )}
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Experience (Years) <span className="text-red-500">*</span></label>
-                                <input
-                                    type="text"
-                                    name="experience"
-                                    required
-                                    value={formData.experience}
-                                    onChange={handleInputChange}
-                                    className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${errors.experience ? "border-red-300 bg-red-50" : "border-gray-300"}`}
-                                    placeholder="e.g., 5+"
-                                />
-                                {errors.experience && <p className="mt-1 text-sm text-red-600">{errors.experience}</p>}
-                            </div>
+
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Available from (Date of Joining) <span className="text-red-500">*</span></label>

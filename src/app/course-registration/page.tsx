@@ -310,8 +310,8 @@ export default function CourseRegistrationPage() {
                                                 if (errors.attendMode) setErrors((p) => ({ ...p, attendMode: "" }));
                                             }}
                                             className={`px-5 py-2.5 rounded-xl text-sm font-bold border transition-all ${form.attendMode === mode
-                                                    ? "bg-[#01A0E2] text-white border-[#01A0E2] shadow-lg shadow-[#01A0E2]/20"
-                                                    : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-[#01A0E2]/50"
+                                                ? "bg-[#01A0E2] text-white border-[#01A0E2] shadow-lg shadow-[#01A0E2]/20"
+                                                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-[#01A0E2]/50"
                                                 }`}
                                         >
                                             {mode}
@@ -347,8 +347,8 @@ export default function CourseRegistrationPage() {
                                                 if (errors.hasLaptop) setErrors((p) => ({ ...p, hasLaptop: "" }));
                                             }}
                                             className={`px-6 py-2.5 rounded-xl text-sm font-bold border transition-all ${form.hasLaptop === opt
-                                                    ? "bg-[#2B4278] text-white border-[#2B4278] shadow-lg shadow-[#2B4278]/20"
-                                                    : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-[#2B4278]/50"
+                                                ? "bg-[#2B4278] text-white border-[#2B4278] shadow-lg shadow-[#2B4278]/20"
+                                                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-[#2B4278]/50"
                                                 }`}
                                         >
                                             <Laptop size={14} className="inline mr-1.5" />
@@ -377,13 +377,21 @@ export default function CourseRegistrationPage() {
                             </div>
                             <div>
                                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">Preferred Location</label>
-                                <input
+                                <select
                                     name="preferredLocation"
                                     value={form.preferredLocation}
                                     onChange={handleChange}
-                                    placeholder="e.g., Pune, Nashik"
                                     className={inputClass("preferredLocation")}
-                                />
+                                >
+                                    <option value="">Select preferred location</option>
+                                    <option value="Nashik">Nashik</option>
+                                    <option value="Pune">Pune</option>
+                                    <option value="Ahmedabad">Ahmedabad</option>
+                                    <option value="Hyderabad">Hyderabad</option>
+                                    <option value="Mumbai">Mumbai</option>
+                                    <option value="Surat">Surat</option>
+                                    <option value="Bengaluru">Bengaluru</option>
+                                </select>
                             </div>
                             <div className="md:col-span-2">
                                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">Note / Remarks</label>
@@ -408,9 +416,9 @@ export default function CourseRegistrationPage() {
                             <h2 className="text-lg md:text-xl font-black text-[#2B4278] dark:text-white">Required Documents</h2>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-6">
+                        <div className="flex justify-center">
                             {/* Resume Upload */}
-                            <div>
+                            <div className="w-full max-w-md">
                                 <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">Resume</label>
                                 <div
                                     className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all hover:border-[#01A0E2]/50 hover:bg-[#01A0E2]/5 ${resumeFile ? "border-green-400 bg-green-50/50 dark:bg-green-900/10" : "border-slate-200 dark:border-slate-700"
@@ -451,50 +459,6 @@ export default function CourseRegistrationPage() {
                                     )}
                                 </div>
                                 {errors.resume && <p className="text-red-500 text-xs mt-1 ml-1">{errors.resume}</p>}
-                            </div>
-
-                            {/* Payment Screenshot Upload */}
-                            <div>
-                                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 block ml-1">Payment Screenshot</label>
-                                <div
-                                    className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all hover:border-[#01A0E2]/50 hover:bg-[#01A0E2]/5 ${paymentFile ? "border-green-400 bg-green-50/50 dark:bg-green-900/10" : "border-slate-200 dark:border-slate-700"
-                                        }`}
-                                    onClick={() => document.getElementById("paymentInput")?.click()}
-                                >
-                                    <input
-                                        id="paymentInput"
-                                        type="file"
-                                        accept=".jpg,.jpeg,.png,.webp,.pdf"
-                                        className="hidden"
-                                        onChange={(e) => {
-                                            setPaymentFile(e.target.files?.[0] || null);
-                                            if (errors.paymentScreenshot) setErrors((p) => ({ ...p, paymentScreenshot: "" }));
-                                        }}
-                                    />
-                                    {paymentFile ? (
-                                        <div className="flex items-center justify-center gap-2">
-                                            <CreditCard size={18} className="text-green-500" />
-                                            <span className="text-sm font-medium text-green-700 dark:text-green-400 truncate max-w-[180px]">{paymentFile.name}</span>
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    setPaymentFile(null);
-                                                }}
-                                                className="ml-1 text-red-400 hover:text-red-600"
-                                            >
-                                                <X size={16} />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <Upload size={24} className="mx-auto text-slate-400 mb-2" />
-                                            <p className="text-sm text-slate-500">Click to upload screenshot</p>
-                                            <p className="text-xs text-slate-400 mt-1">JPG, PNG, WEBP, PDF (max 5MB)</p>
-                                        </>
-                                    )}
-                                </div>
-                                {errors.paymentScreenshot && <p className="text-red-500 text-xs mt-1 ml-1">{errors.paymentScreenshot}</p>}
                             </div>
                         </div>
                     </div>

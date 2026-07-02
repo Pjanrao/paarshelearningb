@@ -9,7 +9,8 @@ export async function GET(req: Request) {
     const categoryId = searchParams.get("category") || "";
     const query: any = {};
     if (categoryId) query.category = categoryId;
-    const subcategories = await Subcategory.find(query).populate("category", "name").sort({ name: 1 }).lean();
+    // const subcategories = await Subcategory.find(query).populate("category", "name").sort({ name: 1 }).lean();
+    const subcategories = await Subcategory.find(query).populate("category", "name").sort({ createdAt: -1 }).lean();
     return NextResponse.json(subcategories);
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

@@ -433,31 +433,6 @@ export default function CourseRegistrationsAdmin() {
                                                 </div>
                                             )}
 
-                                            {selectedRegistration.paymentScreenshotUrl ? (
-                                                <div className="flex items-center justify-between p-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                                                            <FileText size={20} />
-                                                        </div>
-                                                        <div>
-                                                            <p className="text-sm font-semibold text-gray-800">Payment Screenshot</p>
-                                                            <p className="text-xs text-gray-500">Uploaded Image/PDF</p>
-                                                        </div>
-                                                    </div>
-                                                    <Link
-                                                        href={selectedRegistration.paymentScreenshotUrl}
-                                                        target="_blank"
-                                                        download
-                                                        className="px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 text-gray-700 rounded-lg shadow-sm hover:bg-gray-50 transition"
-                                                    >
-                                                        View / Download
-                                                    </Link>
-                                                </div>
-                                            ) : (
-                                                <div className="p-3 border border-dashed border-gray-200 rounded-xl text-center">
-                                                    <p className="text-sm text-gray-500">No payment screenshot uploaded</p>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
 

@@ -1,18 +1,25 @@
 "use client";
 
 import { Gift, BadgeCheck, Users, Zap } from "lucide-react";
+import {
+    useGetReferralSettingsQuery,
+    useUpdateReferralSettingsMutation,
+} from "@/redux/api/referralAdminApi";
 
 export default function RewardsSection() {
+
+    const { data: settings, isLoading } = useGetReferralSettingsQuery();
+
     const rewards = [
         {
             icon: Gift,
-            title: "1000 Rs Cashback",
-            desc: "Get ₹1,000 Cashback on Your First Successful Referral!",
+            title: `₹${settings?.cashbackAmount ?? 0} Cashback`,
+            desc: `Get ₹${settings?.cashbackAmount ?? 0} Cashback on your first successful referral!`,
         },
         {
             icon: BadgeCheck,
-            title: "₹50 Cashback",
-            desc: "You earn ₹50 when your friend completes their first course",
+            title: `₹${settings?.newUserReward ?? 0} Cashback`,
+            desc: `Your friend receives ₹${settings?.newUserReward ?? 0} after completing their first course.`,
         },
         {
             icon: Users,

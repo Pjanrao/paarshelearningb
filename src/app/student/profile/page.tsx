@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { User as UserIcon, Camera, Save, ArrowLeft, Mail, Shield, Trash2, Phone, Key, Lock, Eye, EyeOff } from "lucide-react";
@@ -11,6 +11,7 @@ import { toast } from "react-hot-toast";
 export default function EditProfilePage() {
     const dispatch = useDispatch();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [contact, setContact] = useState("");
@@ -34,13 +35,16 @@ export default function EditProfilePage() {
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get("tab") === "security") {
-                setActiveTab("security");
-            }
+        const tab = searchParams.get("tab");
+
+        if (tab === "security") {
+            setActiveTab("security");
+        } else if (tab === "delete") {
+            setActiveTab("delete");
+        } else {
+            setActiveTab("profile");
         }
-    }, []);
+    }, [searchParams]);
 
     useEffect(() => {
         const fetchProfile = async () => {

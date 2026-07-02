@@ -23,8 +23,9 @@ export async function GET(req: Request) {
             ],
         });
 
-        // Not enrolled, but they might have explicitly shared forms!
-        // We will no longer short-circuit early based on paymentCount alone.
+        if (paymentCount === 0) {
+            return NextResponse.json({ success: true, pendingForms: [], acceptedForms: [] }, { status: 200 });
+        }
 
         const student = await User.findById(user._id).populate({
             path: "acceptedConsentForms.formId",
@@ -59,12 +60,7 @@ export async function GET(req: Request) {
         // 2. If not enrolled, they only see forms explicitly shared with them.
 
         let query = {};
-        if (paymentCount === 0 && explicitFormIds.length > 0) {
-            query = { _id: { $in: explicitFormIds } };
-        } else if (paymentCount === 0) {
-            // Not enrolled and no shared forms
-            return NextResponse.json({ success: true, pendingForms: [], acceptedForms: acceptedForms }, { status: 200 });
-        }
+
 
         const applicableForms = await ConsentForm.find(query).sort({ createdAt: -1 }).lean();
 
