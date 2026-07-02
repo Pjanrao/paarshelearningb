@@ -25,8 +25,16 @@ export async function GET(req: Request) {
     const category = searchParams.get("category") || "";
     const sort = searchParams.get("sort") || "";
     const featured = searchParams.get("featured");
+    const statusParam = searchParams.get("status");
+    const includeInactive = searchParams.get("includeInactive") === "true";
 
     const query: any = {};
+
+    if (statusParam && statusParam !== "all") {
+      query.status = statusParam;
+    } else if (!includeInactive) {
+      query.status = { $ne: "inactive" };
+    }
 
     // 🔍 Search by course name
     if (search) {

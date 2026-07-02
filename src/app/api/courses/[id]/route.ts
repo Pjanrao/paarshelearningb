@@ -22,14 +22,16 @@ export async function GET(
 
     let course;
 
-
     const isObjectId = /^[0-9a-fA-F]{24}$/.test(id);
+    const courseQuery: any = { status: { $ne: "inactive" } };
 
     if (isObjectId) {
-      course = await Course.findById(id);
+      courseQuery._id = id;
     } else {
-      course = await Course.findOne({ slug: id });
+      courseQuery.slug = id;
     }
+
+    course = await Course.findOne(courseQuery);
 
 
     if (!course) {

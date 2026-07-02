@@ -35,6 +35,7 @@ interface GetCoursesParams {
   sort?: string;
   status?: string;
   featured?: boolean;
+  includeInactive?: boolean;
 }
 
 export const courseApi = api.injectEndpoints({
@@ -50,9 +51,10 @@ export const courseApi = api.injectEndpoints({
         category = "",
         sort = "",
         featured,
+        includeInactive,
       }) => ({
         url: "/courses",
-        params: { page, limit, search, category, sort, featured },
+        params: { page, limit, search, category, sort, featured, includeInactive },
       }),
       providesTags: ["Courses"],
     }),

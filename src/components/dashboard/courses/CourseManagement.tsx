@@ -43,6 +43,7 @@ export default function CourseManagement() {
     search,
     category,
     sort,
+    includeInactive: true,
   });
 
   const courses = Array.isArray(data?.courses) ? data.courses : [];
