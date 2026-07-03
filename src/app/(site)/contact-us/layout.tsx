@@ -25,7 +25,7 @@ export const metadata: Metadata = {
         description:
             "Have questions about our IT courses and career programs? Connect with Paarsh E-Learning for personalized 1:1 learning, practical training, live projects, internships, and placement assistance.",
 
-        url: "https://paarshelearning.com/contact",
+        url: "https://paarshelearning.com/contact-us",
 
         siteName: "Paarsh E-Learning",
 
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     },
 
     alternates: {
-        canonical: "https://paarshelearning.com/contact",
+        canonical: "https://paarshelearning.com/contact-us",
     },
 };
 
