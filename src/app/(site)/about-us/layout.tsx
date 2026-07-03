@@ -26,7 +26,7 @@ export const metadata: Metadata = {
         description:
             "Discover Paarsh E-Learning's mission to empower learners with practical IT skills, personalized learning, real-world projects, expert guidance, and career-focused placement assistance.",
 
-        url: "https://paarshelearning.com/about",
+        url: "https://paarshelearning.com/about-us",
 
         siteName: "Paarsh E-Learning",
 
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     },
 
     alternates: {
-        canonical: "https://paarshelearning.com/about",
+        canonical: "https://paarshelearning.com/about-us",
     },
 };
 

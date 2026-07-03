@@ -33,7 +33,7 @@ export const metadata: Metadata = {
         description:
             "Build job-ready skills with courses in Cyber Security, Programming, Web Development, Data Science, Data Analytics, AI, UI/UX Design, Digital Marketing, Project Management, and more. Learn with personalized 1:1 training, practical projects, and placement assistance.",
 
-        url: "https://paarshelearning.com/courses",
+        url: "https://paarshelearning.com/course",
 
         siteName: "Paarsh E-Learning",
 
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     },
 
     alternates: {
-        canonical: "https://paarshelearning.com/courses",
+        canonical: "https://paarshelearning.com/course",
     },
 };
 
