@@ -24,11 +24,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { logout as logoutAction, logoutAdmin as logoutAdminAction, logoutStudent, logoutTeacher } from "@/redux/authSlice";
-import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@/hooks/use-toast";
 import { useTheme } from "next-themes";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
-    const { toast } = useToast();
+    // const { toast } = useToast();
     const { theme, setTheme } = useTheme();
     const searchParams = useSearchParams();
     const dispatch = useDispatch();
@@ -130,9 +131,8 @@ export default function SettingsPage() {
     });
 
     const showSuccessAndLogout = (message: string) => {
-        toast({
-            title: "Success",
-            description: message,
+        toast.success(message, {
+            duration: 2000,
         });
         setTimeout(() => {
             handleLogoutAdmin();
@@ -182,11 +182,7 @@ export default function SettingsPage() {
         e.preventDefault();
 
         if (profile.contact && !validatePhone(profile.contact)) {
-            toast({
-                title: "Invalid Phone",
-                description: "Please enter a valid 10-digit phone number.",
-                variant: "destructive"
-            });
+            toast.error("Please enter a valid 10-digit phone number.");
             return;
         }
 
@@ -204,8 +200,7 @@ export default function SettingsPage() {
                 if (data.emailChanged) {
                     showSuccessAndLogout("Email changed successfully. You will be logged out to continue with your new email.");
                 } else {
-                    toast({
-                        title: "Profile Updated",
+                    toast.success("Profile Updated", {
                         description: "Profile updated successfully.",
                     });
                 }
@@ -214,11 +209,7 @@ export default function SettingsPage() {
                 throw new Error(err.error || "Failed to update");
             }
         } catch (error: any) {
-            toast({
-                title: "Error",
-                description: error.message,
-                variant: "destructive"
-            });
+            toast.error("Failed to update profile");
         } finally {
             setLoading(false);
         }
@@ -227,29 +218,17 @@ export default function SettingsPage() {
     const handleSecuritySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!security.newPassword) {
-            toast({
-                title: "Error",
-                description: "New password cannot be empty.",
-                variant: "destructive"
-            });
+            toast.error("New password cannot be empty.");
             return;
         }
 
         if (security.newPassword.length < 6) {
-            toast({
-                title: "Error",
-                description: "New password must be at least 6 characters.",
-                variant: "destructive"
-            });
+            toast.error("New password must be at least 6 characters.");
             return;
         }
 
         if (security.newPassword !== security.confirmPassword) {
-            toast({
-                title: "Error",
-                description: "New passwords do not match.",
-                variant: "destructive"
-            });
+            toast.error("New passwords do not match.");
             return;
         }
 
@@ -266,18 +245,30 @@ export default function SettingsPage() {
             });
 
             if (res.ok) {
-                setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
-                showSuccessAndLogout("Password changed successfully. You will be logged out to continue with your new password.");
+                toast.success(
+                    "Password changed successfully. You will be logged out to continue with your new password.",
+                    {
+                        duration: 3000,
+                    }
+                );
+
+                setSecurity({
+                    currentPassword: "",
+                    newPassword: "",
+                    confirmPassword: "",
+                });
+
+                setTimeout(() => {
+                    handleLogoutAdmin();
+                }, 3000);
+
+                return;
             } else {
                 const err = await res.json();
                 throw new Error(err.error || "Failed to update password");
             }
         } catch (error: any) {
-            toast({
-                title: "Error",
-                description: error.message,
-                variant: "destructive"
-            });
+            toast.error("Failed to update password");
         } finally {
             setLoading(false);
         }
@@ -303,19 +294,14 @@ export default function SettingsPage() {
                 body: JSON.stringify(settings)
             });
             if (res.ok) {
-                toast({
-                    title: "Settings Saved",
+                toast.success("Settings Saved", {
                     description: "Application preferences have been updated.",
                 });
             } else {
                 throw new Error("Failed to save");
             }
         } catch (error) {
-            toast({
-                title: "Error",
-                description: "Could not save settings. Please try again.",
-                variant: "destructive"
-            });
+            toast.error("Failed to save settings");
         } finally {
             setLoading(false);
         }
