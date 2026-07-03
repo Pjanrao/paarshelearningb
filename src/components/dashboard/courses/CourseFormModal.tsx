@@ -404,8 +404,12 @@ export default function CourseFormModal({
   };
 
   return (<Dialog open={open} onOpenChange={setOpen}>
-    <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-
+    <DialogContent
+      className="max-w-5xl max-h-[90vh] overflow-y-auto"
+      onInteractOutside={(e) => {
+        e.preventDefault();
+      }}
+    >
       <DialogHeader>
         <DialogTitle className="text-2xl font-semibold">
           {editing ? "Edit Course" : "Add New Course"}

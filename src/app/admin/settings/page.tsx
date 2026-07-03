@@ -129,6 +129,16 @@ export default function SettingsPage() {
         confirm: false
     });
 
+    const showSuccessAndLogout = (message: string) => {
+        toast({
+            title: "Success",
+            description: message,
+        });
+        setTimeout(() => {
+            handleLogoutAdmin();
+        }, 2000);
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -192,13 +202,7 @@ export default function SettingsPage() {
                 const data = await res.json();
                 setProfile(data);
                 if (data.emailChanged) {
-                    toast({
-                        title: "Profile Updated",
-                        description: "Profile updated successfully. Your email address has been changed. Please log in again.",
-                    });
-                    setTimeout(() => {
-                        handleLogoutAdmin();
-                    }, 2000);
+                    showSuccessAndLogout("Email changed successfully. You will be logged out to continue with your new email.");
                 } else {
                     toast({
                         title: "Profile Updated",
@@ -262,14 +266,8 @@ export default function SettingsPage() {
             });
 
             if (res.ok) {
-                toast({
-                    title: "Password Updated",
-                    description: "Password changed successfully. Please log in again. You have been logged out from all devices for security reasons.",
-                });
                 setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
-                setTimeout(() => {
-                    handleLogoutAdmin();
-                }, 2000);
+                showSuccessAndLogout("Password changed successfully. You will be logged out to continue with your new password.");
             } else {
                 const err = await res.json();
                 throw new Error(err.error || "Failed to update password");

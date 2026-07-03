@@ -50,6 +50,15 @@ export const jobApi = api.injectEndpoints({
             invalidatesTags: ["Applications"],
         }),
 
+        updateApplication: builder.mutation<any, { id: string; applicationStatus: string }>({
+            query: ({ id, ...data }) => ({
+                url: `/applications/${id}`,
+                method: "PATCH",
+                body: data,
+            }),
+            invalidatesTags: ["Applications"],
+        }),
+
         getApplications: builder.query<any[], void>({
             query: () => "/applications",
             providesTags: ["Applications"],
@@ -65,5 +74,6 @@ export const {
     useUpdateJobMutation,
     useDeleteJobMutation,
     useApplyJobMutation,
+    useUpdateApplicationMutation,
     useGetApplicationsQuery,
 } = jobApi;

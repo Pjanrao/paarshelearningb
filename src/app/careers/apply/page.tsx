@@ -20,6 +20,7 @@ function ApplyForm() {
         email: "",
         phone: "",
         jobId: jobId || "",
+        applicationStatus: "Applied",
     });
     const [resumeFile, setResumeFile] = useState<File | null>(null);
 
@@ -51,6 +52,7 @@ function ApplyForm() {
             await applyJob({
                 ...form,
                 resumeUrl: resumeUrl,
+                applicationStatus: "Applied",
             }).unwrap();
 
             setIsSuccess(true);

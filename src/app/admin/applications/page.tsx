@@ -1,7 +1,7 @@
 "use client";
 
-import { useGetApplicationsQuery } from "@/redux/api/jobApi";
-import { useState, useMemo } from "react";
+import { useGetApplicationsQuery, useUpdateApplicationMutation } from "@/redux/api/jobApi";
+import { useState, useMemo, useEffect } from "react";
 import Pagination from "@/components/Common/Pagination";
 import {
     Eye,
@@ -28,6 +28,40 @@ import { Button } from "@/components/ui/button";
  * ResumePreviewModal Component
  * Displays a professional header with candidate details and an iframe for resume preview.
  */
+const APPLICATION_STATUS_OPTIONS = [
+    "Applied",
+    "Under Review",
+    "Shortlisted",
+    "Interview Scheduled",
+    "Interview Completed",
+    "Selected",
+    "Rejected",
+    "On Hold",
+] as const;
+
+const getStatusBadgeClasses = (status: string) => {
+    switch (status) {
+        case "Applied":
+            return "bg-blue-50 text-blue-700 border-blue-100";
+        case "Under Review":
+            return "bg-sky-50 text-sky-700 border-sky-100";
+        case "Shortlisted":
+            return "bg-emerald-50 text-emerald-700 border-emerald-100";
+        case "Interview Scheduled":
+            return "bg-indigo-50 text-indigo-700 border-indigo-100";
+        case "Interview Completed":
+            return "bg-violet-50 text-violet-700 border-violet-100";
+        case "Selected":
+            return "bg-emerald-50 text-emerald-700 border-emerald-100";
+        case "Rejected":
+            return "bg-red-50 text-red-700 border-red-100";
+        case "On Hold":
+            return "bg-yellow-50 text-amber-700 border-amber-100";
+        default:
+            return "bg-gray-50 text-gray-700 border-gray-100";
+    }
+};
+
 function ResumePreviewModal({ data, onClose }: { data: any; onClose: () => void }) {
     const resumeUrl = data.resumeUrl || data.resume;
 
@@ -148,10 +182,24 @@ function ResumePreviewModal({ data, onClose }: { data: any; onClose: () => void 
  * Main entry point for the Job Applications management interface.
  */
 export default function Applications() {
-    const { data: applications, isLoading, refetch } = useGetApplicationsQuery();
+    const {
+        data: applications,
+        isLoading,
+        isError,
+        error,
+        refetch,
+    } = useGetApplicationsQuery();
+    const [updateApplication] = useUpdateApplicationMutation();
+    const [fallbackApplications, setFallbackApplications] = useState<any[] | null>(null);
+    const [fetchError, setFetchError] = useState<string | null>(null);
+    const [fallbackLoading, setFallbackLoading] = useState(false);
+    const [requestError, setRequestError] = useState<string | null>(null);
+
+    const applicationList = applications ?? fallbackApplications ?? [];
 
     // State for Modal Management
     const [selectedApplication, setSelectedApplication] = useState<any>(null);
+    const [statusLoading, setStatusLoading] = useState<Record<string, boolean>>({});
     const [isResumeOpen, setIsResumeOpen] = useState(false);
 
     // Search and Pagination State
@@ -161,6 +209,52 @@ export default function Applications() {
 
     const [deleteId, setDeleteId] = useState<{ id: string; name: string } | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
+
+    useEffect(() => {
+        if (isError) {
+            const message =
+                typeof error === "string"
+                    ? error
+                    : (error as any)?.data?.error || (error as any)?.message || "Failed to load applications";
+            setRequestError(message);
+
+            if (!fallbackApplications && !fallbackLoading) {
+                fetchFallbackApplications();
+            }
+        }
+    }, [isError, error, fallbackApplications, fallbackLoading]);
+
+    useEffect(() => {
+        if (!applications && !fallbackApplications && !fallbackLoading && !isLoading && !isError) {
+            fetchFallbackApplications();
+        }
+    }, [applications, fallbackApplications, fallbackLoading, isLoading, isError]);
+
+    useEffect(() => {
+        if (!applications && !isLoading && !isError) {
+            refetch();
+        }
+    }, [applications, isLoading, isError, refetch]);
+
+    useEffect(() => {
+        if (applications && (requestError || fetchError)) {
+            setRequestError(null);
+            setFetchError(null);
+        }
+    }, [applications, requestError, fetchError]);
+
+    const handleStatusChange = async (id: string, status: string) => {
+        if (!APPLICATION_STATUS_OPTIONS.includes(status as any)) return;
+        setStatusLoading((prev) => ({ ...prev, [id]: true }));
+        try {
+            await updateApplication({ id, applicationStatus: status }).unwrap();
+            refetch();
+        } catch (error) {
+            console.error("Failed to update application status:", error);
+        } finally {
+            setStatusLoading((prev) => ({ ...prev, [id]: false }));
+        }
+    };
 
     /**
      * Delete an application
@@ -182,14 +276,31 @@ export default function Applications() {
         }
     };
 
+    const fetchFallbackApplications = async () => {
+        if (applications || fallbackLoading) return;
+        setFallbackLoading(true);
+        try {
+            const res = await fetch("/api/applications");
+            if (!res.ok) throw new Error("Failed to fetch applications fallback");
+            const data = await res.json();
+            setFallbackApplications(data);
+            setFetchError(null);
+        } catch (err: any) {
+            setFetchError(err.message || "Failed to fetch applications");
+            console.error("Fallback fetch error:", err);
+        } finally {
+            setFallbackLoading(false);
+        }
+    };
+
     /**
      * Filter applications by candidate name
      */
     const filteredApps = useMemo(() => {
-        return (applications || []).filter((app: any) =>
+        return (applicationList || []).filter((app: any) =>
             app.name?.toLowerCase().includes(search.toLowerCase())
         );
-    }, [applications, search]);
+    }, [applicationList, search]);
 
     /**
      * Calculate paginated subset
@@ -258,6 +369,7 @@ export default function Applications() {
                                         <th className="px-6 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Candidate</th>
                                         <th className="px-6 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Professional Contact</th>
                                         <th className="px-6 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Applied Role</th>
+                                        <th className="px-6 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
                                         <th className="px-6 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Submission Date</th>
                                         <th className="px-6 py-5 text-right text-xs font-bold text-gray-400 uppercase tracking-widest">Actions</th>
                                     </tr>
@@ -299,6 +411,27 @@ export default function Applications() {
                                                     <span className="bg-[#2C4276]/5 text-[#2C4276] px-3 py-1.5 rounded-lg text-[11px] font-black border border-[#2C4276]/10 uppercase tracking-widest group-hover:bg-[#2C4276] group-hover:text-white transition-all duration-300">
                                                         {app.jobId?.title || "—"}
                                                     </span>
+                                                </td>
+
+                                                {/* Status Column */}
+                                                <td className="px-6 py-6 whitespace-nowrap">
+                                                    <div className="flex flex-col gap-2">
+                                                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider border ${getStatusBadgeClasses(app.applicationStatus || "Applied")}`}>
+                                                            {app.applicationStatus || "Applied"}
+                                                        </span>
+                                                        <select
+                                                            value={app.applicationStatus || "Applied"}
+                                                            onChange={(e) => handleStatusChange(app._id, e.target.value)}
+                                                            disabled={!!statusLoading[app._id]}
+                                                            className="w-full rounded-xl border border-gray-200 bg-white text-sm text-gray-700 px-3 py-2 outline-none transition-all focus:border-blue-300"
+                                                        >
+                                                            {APPLICATION_STATUS_OPTIONS.map((status) => (
+                                                                <option key={status} value={status}>
+                                                                    {status}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    </div>
                                                 </td>
 
                                                 {/* Submission Timestamp */}

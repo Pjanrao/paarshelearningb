@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
+
 import {
     Search,
     Download,
@@ -16,7 +17,7 @@ import {
     Mail,
     ChevronLeft,
     ChevronRight,
-    Users
+    Users, Copy,
 } from "lucide-react";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
@@ -108,12 +109,27 @@ export default function CourseRegistrationsAdmin() {
         }
     };
 
+    const handleCopyFormUrl = async () => {
+        try {
+            const formUrl = `${window.location.origin}/course-registration/`;
+
+            await navigator.clipboard.writeText(formUrl);
+
+            toast.success("Course registration form URL copied!");
+        } catch (error) {
+            console.error("Failed to copy URL:", error);
+            toast.error("Failed to copy form URL");
+        }
+    };
+
     const StatusBadge = ({ attendMode }: { attendMode: string }) => {
         const styles: Record<string, string> = {
             Online: "bg-blue-50 text-blue-700 border-blue-200",
             Offline: "bg-emerald-50 text-emerald-700 border-emerald-200",
             Hybrid: "bg-purple-50 text-purple-700 border-purple-200"
         };
+
+
         const activeStyle = styles[attendMode] || "bg-gray-50 text-gray-700 border-gray-200";
         return (
             <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${activeStyle}`}>
@@ -136,6 +152,14 @@ export default function CourseRegistrationsAdmin() {
 
                     <div className="flex flex-wrap gap-3">
                         <button
+                            onClick={handleCopyFormUrl}
+                            className="bg-[#2C4276] text-white hover:bg-[#1f3159] px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition shadow-sm text-sm"
+                        >
+                            <Copy size={16} />
+                            Copy Form URL
+                        </button>
+
+                        <button
                             onClick={handleExport}
                             className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition shadow-sm text-sm"
                         >
@@ -143,6 +167,8 @@ export default function CourseRegistrationsAdmin() {
                             Export CSV
                         </button>
                     </div>
+
+
                 </div>
 
                 {/* Filters */}
