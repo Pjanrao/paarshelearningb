@@ -19,43 +19,84 @@ import PageTracker from "@/components/Common/PageTracker";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Paarsh E-Learning | Placement-Oriented IT & Software Training Institute in Nashik",
-  description: "Join Paarsh E-Learning in Nashik for IT and software training with practical learning, internship, and placement support.",
+  metadataBase: new URL("https://paarshelearning.com"),
+
+  title:
+    "Paarsh E-Learning | IT Training, 1:1 Learning & Placement Assistance",
+
+  description:
+    "Build job-ready IT skills with Paarsh E-Learning. Get personalized 1:1 learning, practical training, live project experience, internship opportunities, and placement assistance across in-demand technology fields.",
+
+  keywords: [
+    "Paarsh E-Learning",
+    "IT training institute",
+    "IT courses in Nashik",
+    "software training institute",
+    "1 to 1 IT learning",
+    "placement assistance",
+    "internship training",
+    "practical IT training",
+    "programming courses",
+    "web development course",
+    "AI course",
+    "data science course",
+    "cyber security course",
+    "data analytics course",
+    "UI UX course",
+    "digital marketing course",
+  ],
+
   icons: {
     icon: [
       { url: "/favicon.ico" },
-      { url: "/images/logo/logo.jpeg", sizes: "192x192", type: "image/jpeg" },
+      {
+        url: "/images/logo/logo.jpeg",
+        sizes: "192x192",
+        type: "image/jpeg",
+      },
     ],
     shortcut: "/images/logo/logo.jpeg",
     apple: "/images/logo/logo.jpeg",
-    other: [
-      {
-        rel: "apple-touch-icon-precomposed",
-        url: "/images/logo/logo.jpeg",
-      },
-    ],
   },
+
   openGraph: {
-    title: "Paarsh E-Learning | Placement-Oriented IT & Software Training Institute in Nashik",
-    description: "Join Paarsh E-Learning in Nashik for IT and software training with practical learning, internship, and placement support.",
+    title:
+      "Build Your Career in Tech | Paarsh E-Learning",
+
+    description:
+      "Learn in-demand technology skills with personalized 1:1 learning, practical training, live projects, internship opportunities, and placement assistance.",
+
     url: "https://paarshelearning.com",
+
     siteName: "Paarsh E-Learning",
+
     images: [
       {
-        url: "/images/logo/logo.jpeg",
-        width: 800,
-        height: 800,
-        alt: "Paarsh E-Learning Logo",
+        url: "/images/home-og.png",
+        width: 1200,
+        height: 630,
+        alt: "Paarsh E-Learning - Build Your Career in Tech",
       },
     ],
+
     locale: "en_US",
     type: "website",
   },
+
   twitter: {
     card: "summary_large_image",
-    title: "Paarsh E-Learning | Placement-Oriented IT & Software Training Institute in Nashik",
-    description: "Join Paarsh E-Learning in Nashik for IT and software training with practical learning, internship, and placement support.",
-    images: ["/images/logo/logo.jpeg"],
+
+    title:
+      "Build Your Career in Tech | Paarsh E-Learning",
+
+    description:
+      "Personalized 1:1 learning, practical IT training, live projects, internship opportunities, and placement assistance.",
+
+    images: ["/images/home-og.png"],
+  },
+
+  alternates: {
+    canonical: "https://paarshelearning.com",
   },
 };
 
